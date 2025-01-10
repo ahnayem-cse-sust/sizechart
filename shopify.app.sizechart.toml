@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "e5ce850a5c52e1c105a77f6e02ce7964"
-application_url = "https://acid-investigated-endorsed-spam.trycloudflare.com"
+application_url = "https://losses-weak-risk-exempt.trycloudflare.com"
 embedded = true
 name = "sizechart"
 handle = "sizechart-17"
@@ -20,9 +20,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://acid-investigated-endorsed-spam.trycloudflare.com/auth/callback",
-  "https://acid-investigated-endorsed-spam.trycloudflare.com/auth/shopify/callback",
-  "https://acid-investigated-endorsed-spam.trycloudflare.com/api/auth/callback"
+  "https://losses-weak-risk-exempt.trycloudflare.com/auth/callback",
+  "https://losses-weak-risk-exempt.trycloudflare.com/auth/shopify/callback",
+  "https://losses-weak-risk-exempt.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

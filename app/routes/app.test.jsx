@@ -46,7 +46,7 @@ export async function loader({ request }) {
 
 const Test = () => {
     const user = useLoaderData();
-    // console.log(user);
+    console.log(user);
     return (
 
         <Layout>

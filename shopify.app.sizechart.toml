@@ -1,14 +1,14 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "e5ce850a5c52e1c105a77f6e02ce7964"
-application_url = "https://losses-weak-risk-exempt.trycloudflare.com"
+client_id = "e7a784a36ed1426c8ebdf10e329f3e16"
+application_url = "https://omaha-buddy-blowing-should.trycloudflare.com"
 embedded = true
-name = "sizechart"
-handle = "sizechart-17"
+name = "SizeChart"
+handle = "sizechart-18"
 
 [build]
 include_config_on_deploy = true
-dev_store_url = "boostskill.myshopify.com"
+dev_store_url = "sizecharttesting.myshopify.com"
 automatically_update_urls_on_dev = true
 
 [webhooks]
@@ -20,9 +20,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://losses-weak-risk-exempt.trycloudflare.com/auth/callback",
-  "https://losses-weak-risk-exempt.trycloudflare.com/auth/shopify/callback",
-  "https://losses-weak-risk-exempt.trycloudflare.com/api/auth/callback"
+  "https://omaha-buddy-blowing-should.trycloudflare.com/auth/callback",
+  "https://omaha-buddy-blowing-should.trycloudflare.com/auth/shopify/callback",
+  "https://omaha-buddy-blowing-should.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

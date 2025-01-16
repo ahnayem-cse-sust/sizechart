@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "e7a784a36ed1426c8ebdf10e329f3e16"
-application_url = "https://omaha-buddy-blowing-should.trycloudflare.com"
+application_url = "https://recommended-sending-grant-results.trycloudflare.com"
 embedded = true
 name = "SizeChart"
 handle = "sizechart-18"
@@ -16,13 +16,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_products,write_products"
+scopes = "read_products,write_products,read_product_listings"
 
 [auth]
 redirect_urls = [
-  "https://omaha-buddy-blowing-should.trycloudflare.com/auth/callback",
-  "https://omaha-buddy-blowing-should.trycloudflare.com/auth/shopify/callback",
-  "https://omaha-buddy-blowing-should.trycloudflare.com/api/auth/callback"
+  "https://recommended-sending-grant-results.trycloudflare.com/auth/callback",
+  "https://recommended-sending-grant-results.trycloudflare.com/auth/shopify/callback",
+  "https://recommended-sending-grant-results.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

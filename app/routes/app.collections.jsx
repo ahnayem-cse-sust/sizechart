@@ -1,14 +1,14 @@
 import React from 'react';
-import {Card, Text} from '@shopify/polaris';
+import { Card, Layout, Text } from '@shopify/polaris';
 import { useLoaderData } from "@remix-run/react";
 import { authenticate } from '../shopify.server';
 
-export async function loader({request}) {
-    
-    const { admin } = await authenticate.admin(request);
+export async function loader({ request }) {
 
-    const response = await admin.graphql(
-        `#graphql
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
         query {
           collections(first: 5) {
             edges {
@@ -22,24 +22,40 @@ export async function loader({request}) {
             }
           }
         }`,
-      );
+  );
 
-const data = await response.json();
+  const data = await response.json();
 
-return data;
-  }
+  return data;
+}
 
 
 const collections = () => {
-    const collectionList = useLoaderData();
-    console.log(collectionList);
+  const loaderData = useLoaderData();
+  const collectionList = loaderData.data.collections.edges;
+
+  console.log(collectionList);
+
   return (
-    <Card>
-      <Text as="h2" variant="bodyMd">
-        Content inside a card
-      </Text>
-    </Card>
+    
+  <Layout>
+    <div style={{margin:"100px"}}> 
+    <br />
+    {
+      collectionList.map((collection) => {
+        return (
+          <Card key={collection.node.id}>
+            <Text as="h2" variant="bodyMd">
+              {collection.node.title}
+            </Text>
+          </Card>
+        );
+      })
+    }
+    </div>
+    </Layout>
   )
+
 }
 
 export default collections;

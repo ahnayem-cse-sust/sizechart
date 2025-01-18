@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "e7a784a36ed1426c8ebdf10e329f3e16"
-application_url = "https://reception-hard-networks-compressed.trycloudflare.com"
+application_url = "https://soon-bugs-dairy-chapel.trycloudflare.com"
 embedded = true
 name = "SizeChart"
 handle = "sizechart-18"
@@ -20,9 +20,9 @@ scopes = "read_products,write_products,read_product_listings"
 
 [auth]
 redirect_urls = [
-  "https://reception-hard-networks-compressed.trycloudflare.com/auth/callback",
-  "https://reception-hard-networks-compressed.trycloudflare.com/auth/shopify/callback",
-  "https://reception-hard-networks-compressed.trycloudflare.com/api/auth/callback"
+  "https://soon-bugs-dairy-chapel.trycloudflare.com/auth/callback",
+  "https://soon-bugs-dairy-chapel.trycloudflare.com/auth/shopify/callback",
+  "https://soon-bugs-dairy-chapel.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

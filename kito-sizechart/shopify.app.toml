@@ -3,11 +3,12 @@
 client_id = "a1bc1bd37c50e2b5dfb17cba64cf58e2"
 name = "kito-sizechart"
 handle = "kito-sizechart"
-application_url = "https://example.com/"
+application_url = "https://beat-noticed-ix-secretariat.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -25,7 +26,11 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://beat-noticed-ix-secretariat.trycloudflare.com/auth/callback",
+  "https://beat-noticed-ix-secretariat.trycloudflare.com/auth/shopify/callback",
+  "https://beat-noticed-ix-secretariat.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

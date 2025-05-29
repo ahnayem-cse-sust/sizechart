@@ -1,11 +1,39 @@
-let sizeCharts = [
-  { id: "1", title: "Men's Shirts", body: "S: 36-38\nM: 39-41\nL: 42-44" },
-];
+import { authenticate } from "../shopify.server";
 
-export async function getCharts() {
-  return sizeCharts;
+
+export async function getCharts({ request}) {
+  
+    const { admin } = await authenticate.admin(request);
+  
+    const queryRequest = await admin.graphql(
+      `#graphql
+      query getProducts {
+        products (first: 3) {
+          edges {
+            node {
+              id
+              title
+              handle
+            }
+          }
+        }
+      }`
+    );
+  
+    const response = await queryRequest.json();
+    const products = response.data.products.edges;
+  
+    let result = [];
+  
+    products.forEach(({ node }) => {
+      result.push(node);
+    });
+    
+    console.log(result);
+
+  return result;
 }
 
-export async function createChart({ title, body }) {
-  sizeCharts.push({ id: String(Date.now()), title, body });
+export async function createChart({ title, handle }) {
+  sizeCharts.push({ id: String(Date.now()), title, handle });
 }

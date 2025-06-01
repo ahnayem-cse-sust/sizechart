@@ -8,13 +8,17 @@ export async function getCharts({ request}) {
     const queryRequest = await admin.graphql(
       `#graphql
       query getProducts {
-        products (first: 3) {
+        products ( first: 5 ) {
           edges {
             node {
               id
               title
               handle
             }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
           }
         }
       }`

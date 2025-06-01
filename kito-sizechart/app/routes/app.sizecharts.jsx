@@ -9,8 +9,9 @@ import {FormLayout, TextField,
 
 } from '@shopify/polaris';
 
-export async function loader() {
-  const charts = await getCharts();
+export async function loader( { request} ) {
+  
+  let charts = await getCharts( { request} );
   return Response.json({ charts });
 }
 
@@ -25,21 +26,21 @@ export async function action({ request }) {
 export default function SizeChartsAdmin() {
   const { charts } = useLoaderData();
   const [title, setTitle] = useState();
-  const [body, setBody] = useState();
+  const [handle, setHandle] = useState();
 
   const handleTitleChange = useCallback(
     (newValue) => setTitle(newValue),
     [],
   );
   
-  const handleBodyChange = useCallback(
-    (newValue) => setBody(newValue),
+  const handleHandleChange = useCallback(
+    (newValue) => setHandle(newValue),
     [],
   );
 
   const handleSubmit = useCallback(
     (form) => {
-      setBody('');
+      setHandle('');
       setTitle('');
     },
     [],
@@ -64,10 +65,10 @@ export default function SizeChartsAdmin() {
                   autoComplete="off"
                 />
                 <TextField
-                  name="body"
-                  value={body}
+                  name="handle"
+                  value={handle}
                   label="Chart content..."
-                  onChange={handleBodyChange}
+                  onChange={handleHandleChange}
                   autoComplete="off"
                 />
             </div>
@@ -84,7 +85,7 @@ export default function SizeChartsAdmin() {
       <List type="number">
         {charts.map(chart => (
           <List.Item key={chart.id}>
-            <strong>{chart.title}</strong>: {chart.body}
+            <strong>{chart.title}</strong>: {chart.handle}
           </List.Item>
         ))}
       </List>

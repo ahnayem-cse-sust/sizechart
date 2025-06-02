@@ -3,7 +3,7 @@
 client_id = "a1bc1bd37c50e2b5dfb17cba64cf58e2"
 name = "kito-sizechart"
 handle = "kito-sizechart"
-application_url = "https://garlic-respected-pixel-tablet.trycloudflare.com"
+application_url = "https://av-monitoring-function-chemicals.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,9 +27,9 @@ scopes = "read_products, write_products"
 
 [auth]
 redirect_urls = [
-  "https://garlic-respected-pixel-tablet.trycloudflare.com/auth/callback",
-  "https://garlic-respected-pixel-tablet.trycloudflare.com/auth/shopify/callback",
-  "https://garlic-respected-pixel-tablet.trycloudflare.com/api/auth/callback"
+  "https://av-monitoring-function-chemicals.trycloudflare.com/auth/callback",
+  "https://av-monitoring-function-chemicals.trycloudflare.com/auth/shopify/callback",
+  "https://av-monitoring-function-chemicals.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

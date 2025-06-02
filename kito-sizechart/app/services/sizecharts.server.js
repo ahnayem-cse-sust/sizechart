@@ -57,6 +57,7 @@ async function getNext({admin},after,first){
               node {
                 id
                 title
+                onlineStorePreviewUrl
               }
             }
             pageInfo {
@@ -87,7 +88,8 @@ async function getPrevious({admin},before,last){
               cursor
               node {
                 id
-                title
+                title 
+                onlineStorePreviewUrl
               }
             }
             pageInfo {
@@ -109,6 +111,37 @@ async function getPrevious({admin},before,last){
     return await queryRequest.json();
 }
 
+async function getFirst({admin},first){
+  const queryRequest = await admin.graphql(
+      `#graphql
+        query getProducts($first: Int!) {
+          products(first: $first) {
+            edges {
+              cursor
+              node {
+                id
+                title 
+                onlineStorePreviewUrl
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+              hasPreviousPage
+              startCursor
+            }
+          }
+        }`,
+      {
+        variables: {
+          first
+        },
+      }
+    ); 
+
+    return await queryRequest.json();
+}
+
 
 export async function getProducts({ request }) {
   const url = new URL(request.url);
@@ -122,7 +155,11 @@ export async function getProducts({ request }) {
     response = await getNext({admin}, after, first);
   } else{
     const before = url.searchParams.get('before');
-    response = await getPrevious({admin}, before, first);
+    if(before){
+      response = await getPrevious({admin}, before, first);
+    } else{
+      response = await getFirst({admin},first);
+    }
   }
 
   // const queryRequest = await admin.graphql(

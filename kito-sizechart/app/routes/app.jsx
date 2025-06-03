@@ -22,7 +22,7 @@ export default function App() {
         <Link to="/app/sizecharts" rel="home">
           Home
         </Link>
-        <Link to="/app/sizechart/create">Templates</Link>
+        <Link to="/app/sizechart/templates">Templates</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>

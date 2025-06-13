@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from '@remix-run/react';
+import { useLoaderData, useNavigate, Form } from '@remix-run/react';
 import { getProducts } from "../services/sizecharts.server";
 import {
   IndexTable,
@@ -19,8 +19,10 @@ export async function loader( { request} ) {
 
 export default function SizeChartsAdmin() {
   
-  const { products, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+  const { products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
   const navigate = useNavigate();
+
+  console.log(sizeCharts);
 
   const resourceName = {
     singular: 'product',
@@ -32,7 +34,7 @@ export default function SizeChartsAdmin() {
 
   const rowMarkup = products.map(
     (
-      {id, title, onlineStorePreviewUrl},
+      {id, title, onlineStorePreviewUrl,metafield},
       index,
     ) => (
       <IndexTable.Row
@@ -48,14 +50,23 @@ export default function SizeChartsAdmin() {
         </IndexTable.Cell>
         <IndexTable.Cell>{title}</IndexTable.Cell>
         <IndexTable.Cell>
-          Sizes
+          <Form method="post">
+              <input type="hidden" name="productId" value={id} />
+              <select name="sizeChartId" defaultValue={metafield || ""}>
+                <option value="">Select Size Chart</option>
+                {sizeCharts.map(chart => (
+                  <option key={chart.id} value={chart.id}>{chart.title}</option>
+                ))}
+              </select>
+              <button type="submit" style={{ marginLeft: 10 }}>Save</button>
+            </Form>
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Button
           url={onlineStorePreviewUrl}
           target="_blank"
           >
-            Click To Preview
+            View in store
           </Button>
         </IndexTable.Cell>
       </IndexTable.Row>
@@ -75,7 +86,7 @@ export default function SizeChartsAdmin() {
         headings={[
           {title: 'Product ID'},
           {title: 'Product Title'},
-          {title: 'Available Sizes'},
+          {title: 'Size Chart'},
           {title: 'Store Preview'},
         ]}
       >

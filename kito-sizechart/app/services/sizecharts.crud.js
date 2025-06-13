@@ -2,6 +2,8 @@ import { authenticate } from "../shopify.server";
 
 let sizeCharts = [
   { id: "1", title: "Men's Shirts", content: "Size info here" },
+  { id: "2", title: "WoMen's Shirts", content: "Size info here" },
+  { id: "3", title: "All Shirts", content: "Size info here" },
 ];
 
 export async function getCharts() {

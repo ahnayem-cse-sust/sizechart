@@ -1,6 +1,5 @@
-
-
 import { authenticate } from "../shopify.server";
+import { getCharts } from "./sizecharts.crud";
 
 async function getNext({admin},after,first){
   const queryRequest = await admin.graphql(
@@ -130,11 +129,11 @@ export async function getProducts({ request }) {
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
-  // console.log(products);
+  const sizeCharts = await getCharts();
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
   const startCursor = pageInfo.startCursor;
   const hasPreviousPage = pageInfo.hasPreviousPage;
 
-  return Response.json({ products, hasNextPage, endCursor, hasPreviousPage, startCursor });
+  return Response.json({ products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor });
 }

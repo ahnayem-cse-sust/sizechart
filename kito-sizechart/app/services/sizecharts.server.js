@@ -13,6 +13,9 @@ async function getNext({admin},after,first){
                 id
                 title
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -45,6 +48,9 @@ async function getPrevious({admin},before,last){
                 id
                 title 
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -77,6 +83,9 @@ async function getFirst({admin},first){
                 id
                 title 
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -115,39 +124,13 @@ export async function getProducts({ request }) {
     } else{
       response = await getFirst({admin},first);
     }
-  }
-
-  // const queryRequest = await admin.graphql(
-  //     `#graphql
-  //       query getProducts($first: Int!, $after: String) {
-  //         products(first: $first, after: $after) {
-  //           edges {
-  //             cursor
-  //             node {
-  //               id
-  //               title
-  //             }
-  //           }
-  //           pageInfo {
-  //             hasNextPage
-  //             endCursor
-  //             hasPreviousPage
-  //             startCursor
-  //           }
-  //         }
-  //       }`,
-  //     {
-  //       variables: {
-  //         first,
-  //         after,
-  //       },
-  //     }
-  //   );  
+  }  
     
 
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
+  console.log(products);
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
   const startCursor = pageInfo.startCursor;

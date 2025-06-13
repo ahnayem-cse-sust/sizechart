@@ -130,7 +130,7 @@ export async function getProducts({ request }) {
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
-  console.log(products);
+  // console.log(products);
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
   const startCursor = pageInfo.startCursor;

@@ -1,51 +1,5 @@
-// import { authenticate } from "../shopify.server";
-
-
-// export async function getCharts({ request}) {
-  
-//     const { admin } = await authenticate.admin(request);
-  
-//     const queryRequest = await admin.graphql(
-//       `#graphql
-//       query getProducts {
-//         products ( first: 5 ) {
-//           edges {
-//             node {
-//               id
-//               title
-//               handle
-//             }
-//           }
-//           pageInfo {
-//             hasNextPage
-//             endCursor
-//           }
-//         }
-//       }`
-//     );
-  
-//     const response = await queryRequest.json();
-//     const products = response.data.products.edges;
-  
-//     let result = [];
-  
-//     products.forEach(({ node }) => {
-//       result.push(node);
-//     });
-    
-//     console.log(result);
-
-//   return result;
-// }
-
-// export async function createChart({ title, handle }) {
-//   sizeCharts.push({ id: String(Date.now()), title, handle });
-// }
-
-
-// app/routes/products.jsx
-
 import { authenticate } from "../shopify.server";
+import { getCharts } from "./sizecharts.crud";
 
 async function getNext({admin},after,first){
   const queryRequest = await admin.graphql(
@@ -58,6 +12,9 @@ async function getNext({admin},after,first){
                 id
                 title
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -90,6 +47,9 @@ async function getPrevious({admin},before,last){
                 id
                 title 
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -122,6 +82,9 @@ async function getFirst({admin},first){
                 id
                 title 
                 onlineStorePreviewUrl
+                metafield(namespace: "custom", key: "size_chart_id") {
+                  value
+                }
               }
             }
             pageInfo {
@@ -160,43 +123,52 @@ export async function getProducts({ request }) {
     } else{
       response = await getFirst({admin},first);
     }
-  }
-
-  // const queryRequest = await admin.graphql(
-  //     `#graphql
-  //       query getProducts($first: Int!, $after: String) {
-  //         products(first: $first, after: $after) {
-  //           edges {
-  //             cursor
-  //             node {
-  //               id
-  //               title
-  //             }
-  //           }
-  //           pageInfo {
-  //             hasNextPage
-  //             endCursor
-  //             hasPreviousPage
-  //             startCursor
-  //           }
-  //         }
-  //       }`,
-  //     {
-  //       variables: {
-  //         first,
-  //         after,
-  //       },
-  //     }
-  //   );  
+  }  
     
 
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
+  console.log(products);
+  const sizeCharts = await getCharts();
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
   const startCursor = pageInfo.startCursor;
   const hasPreviousPage = pageInfo.hasPreviousPage;
 
-  return Response.json({ products, hasNextPage, endCursor, hasPreviousPage, startCursor });
+  return Response.json({ products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor });
+}
+
+export async function saveProductSizechart({ request }) {
+    const formData = await request.formData();
+    const productId = formData.get("productId");
+    const sizeChartId = formData.get("sizeChartId");
+  
+    const { admin } = await authenticate.admin(request);
+  
+    const response = await admin.graphql(`
+      mutation SetMetafield {
+        metafieldsSet(metafields: [
+          {
+            ownerId: "${productId}",
+            namespace: "custom",
+            key: "size_chart_id",
+            type: "single_line_text_field",
+            value: "${sizeChartId}"
+          }
+        ]) {
+          metafields {
+            id
+            key
+            value
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `);
+    console.log(response);
+    return response;
 }

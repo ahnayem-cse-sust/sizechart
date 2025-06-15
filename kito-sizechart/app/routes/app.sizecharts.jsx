@@ -1,5 +1,6 @@
 import { useLoaderData, useNavigate, Form } from '@remix-run/react';
-import { getProducts } from "../services/sizecharts.server";
+import { getProducts, saveProductSizechart } from "../services/sizecharts.server";
+import { redirect } from '@remix-run/react';
 import {
   IndexTable,
   Card,
@@ -15,6 +16,12 @@ export async function loader( { request} ) {
   return await getProducts( { request} );
 }
 
+export async function action({ request }) {
+
+  await saveProductSizechart({ request });
+
+  return redirect("/app/sizecharts");
+}
 
 
 export default function SizeChartsAdmin() {
@@ -52,8 +59,8 @@ export default function SizeChartsAdmin() {
         <IndexTable.Cell>
           <Form method="post">
               <input type="hidden" name="productId" value={id} />
-              <select name="sizeChartId" defaultValue={metafield || ""}>
-                <option value="">Select Size Chart</option>
+              <select name="sizeChartId" defaultValue={metafield?.value || ""}>
+                <option key="0" value="0">Select Size Chart</option>
                 {sizeCharts.map(chart => (
                   <option key={chart.id} value={chart.id}>{chart.title}</option>
                 ))}

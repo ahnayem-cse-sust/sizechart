@@ -129,6 +129,7 @@ export async function getProducts({ request }) {
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
+  console.log(products);
   const sizeCharts = await getCharts();
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
@@ -136,4 +137,38 @@ export async function getProducts({ request }) {
   const hasPreviousPage = pageInfo.hasPreviousPage;
 
   return Response.json({ products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor });
+}
+
+export async function saveProductSizechart({ request }) {
+    const formData = await request.formData();
+    const productId = formData.get("productId");
+    const sizeChartId = formData.get("sizeChartId");
+  
+    const { admin } = await authenticate.admin(request);
+  
+    const response = await admin.graphql(`
+      mutation SetMetafield {
+        metafieldsSet(metafields: [
+          {
+            ownerId: "${productId}",
+            namespace: "custom",
+            key: "size_chart_id",
+            type: "single_line_text_field",
+            value: "${sizeChartId}"
+          }
+        ]) {
+          metafields {
+            id
+            key
+            value
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `);
+    console.log(response);
+    return response;
 }

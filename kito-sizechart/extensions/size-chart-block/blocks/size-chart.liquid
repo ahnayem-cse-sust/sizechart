@@ -1,0 +1,23 @@
+
+<h2>Size chart Block.</h2>
+
+{% if product.metafields.custom.size_chart_id %}
+  {% assign chart_id = product.metafields.custom.size_chart_id.value %}
+  <div class="size-chart-container">
+    {% assign chart = shop.metaobjects['size_chart'].values | where: "id", chart_id | first %}
+    {% if chart %}
+      <h2>Size chart found.</h2>
+      <h3>{{ chart.title }}</h3>
+      <div>{{ chart.content | metafield_tag }}</div>
+    {% else %}
+      <p>Size chart not found.</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Size Chart",
+  "target": "section"
+}
+{% endschema %}

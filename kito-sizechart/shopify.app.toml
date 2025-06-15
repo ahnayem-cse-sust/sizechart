@@ -3,7 +3,7 @@
 client_id = "a1bc1bd37c50e2b5dfb17cba64cf58e2"
 name = "kito-sizechart"
 handle = "kito-sizechart"
-application_url = "https://projected-finish-salt-limiting.trycloudflare.com"
+application_url = "https://qualifications-challenges-db-toner.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-04"
 scopes = "read_products, write_products"
 
 [auth]
-redirect_urls = ["https://projected-finish-salt-limiting.trycloudflare.com/auth/callback", "https://projected-finish-salt-limiting.trycloudflare.com/auth/shopify/callback", "https://projected-finish-salt-limiting.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://qualifications-challenges-db-toner.trycloudflare.com/auth/callback", "https://qualifications-challenges-db-toner.trycloudflare.com/auth/shopify/callback", "https://qualifications-challenges-db-toner.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

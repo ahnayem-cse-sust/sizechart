@@ -1,4 +1,4 @@
-import { authenticate } from "../shopify.server";
+import db from "../db.server";
 
 let sizeCharts = [
   { id: "1", title: "Men's Shirts", content: "Size info here" },
@@ -7,7 +7,14 @@ let sizeCharts = [
 ];
 
 export async function getCharts() {
-  return sizeCharts;
+  const allCharts = await db.sizeChart.findMany({
+    orderBy: { createdAt: "desc" }
+  });
+  // await db.sizeChart.create({data:{
+  //   "title": "AAA",
+  //   "content": "AAA",
+  // }});
+  return allCharts;
 }
 
 export async function getChartById(id) {
@@ -15,8 +22,16 @@ export async function getChartById(id) {
 }
 
 export async function createChart({ title, content }) {
-  const newChart = { id: String(Date.now()), title, content };
-  sizeCharts.push(newChart);
+  // const newChart = { id: String(Date.now()), title, content };
+  // sizeCharts.push(newChart);
+  
+  const newChart = await db.sizeChart.create({
+    data: {
+      title,
+      content
+    }
+  });
+
   return newChart;
 }
 

@@ -3,7 +3,7 @@
 client_id = "a1bc1bd37c50e2b5dfb17cba64cf58e2"
 name = "kito-sizechart"
 handle = "kito-sizechart"
-application_url = "https://constantly-wc-accident-class.trycloudflare.com"
+application_url = "https://elsewhere-jake-lanes-browsing.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,11 @@ api_version = "2025-04"
 scopes = "read_products, write_products"
 
 [auth]
-redirect_urls = ["https://constantly-wc-accident-class.trycloudflare.com/auth/callback", "https://constantly-wc-accident-class.trycloudflare.com/auth/shopify/callback", "https://constantly-wc-accident-class.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://elsewhere-jake-lanes-browsing.trycloudflare.com/auth/callback",
+  "https://elsewhere-jake-lanes-browsing.trycloudflare.com/auth/shopify/callback",
+  "https://elsewhere-jake-lanes-browsing.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

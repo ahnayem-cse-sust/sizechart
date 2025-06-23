@@ -1,4 +1,5 @@
 import db from "../db.server";
+import {cors} from "remix-utils/cors";
 
 export async function loader ({ request }){
     const url = new URL(request.url);

@@ -1,5 +1,5 @@
 
-<h2>{{ product.metafields.custom.size_chart_id }}</h2>
+{% comment %} <h2>{{ product.metafields.custom.size_chart_id }}</h2>
 {% if product.metafields.custom.size_chart_id %}
   <h2>Size chart exist.</h2>
   {% assign chart_id = product.metafields.custom.size_chart_id %}
@@ -13,7 +13,36 @@
       <p>Size chart not found.</p>
     {% endif %}
   </div>
-{% endif %}
+{% endif %} {% endcomment %}
+
+<div id="sizeChart">Loading size chart...</div>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function(){
+  
+    let chart_id = {{ product.metafields.custom.size_chart_id }};
+    console.log("FFFF"+chart_id);
+    fetch('https://occurrence-ia-holland-mag.trycloudflare.com/api/sizechart?chartId='+chart_id)
+    .then(response => response.json)
+    .then(resData => {    
+      document.getElementById("sizeChart").innerHTML = "<p>"+resData.data.content+"</p>";
+    })
+    .catch(() => {
+      document.getElementById("sizeChart").innerHTML = "<p>Faild to load sizechart.</p>";
+    });
+
+  })
+
+</script>
+
+
+
+
+
+
+
+
 
 {% schema %}
 {

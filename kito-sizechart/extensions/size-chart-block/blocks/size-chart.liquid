@@ -17,6 +17,22 @@
 
 <div id="sizeChart">Loading size chart...</div>
 
+<form method="post" action="/cart/add">
+  <input type="hidden" name="id" value="{{ product.variants.first.id }}" />
+
+  <!-- Your custom size selector -->
+  <label for="custom-size">Select Size:</label>
+  <select name="properties[Selected Size]" id="custom-size" required>
+    <option value="">-- choose size --</option>
+    <option value="S">S</option>
+    <option value="M">M</option>
+    <option value="L">L</option>
+    <option value="XL">XL</option>
+  </select>
+
+  <button type="submit">Add to cart</button>
+</form>
+
 <script>
 
   document.addEventListener("DOMContentLoaded", function(){

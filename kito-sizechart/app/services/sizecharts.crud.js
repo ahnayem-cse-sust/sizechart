@@ -1,29 +1,41 @@
-import { authenticate } from "../shopify.server";
-
-let sizeCharts = [
-  { id: "1", title: "Men's Shirts", content: "Size info here" },
-  { id: "2", title: "WoMen's Shirts", content: "Size info here" },
-  { id: "3", title: "All Shirts", content: "Size info here" },
-];
+import db from "../db.server";
 
 export async function getCharts() {
-  return sizeCharts;
+  const allCharts = await db.sizeChart.findMany({
+    orderBy: { createdAt: "desc" }
+  });
+
+  return allCharts;
 }
 
 export async function getChartById(id) {
-  return sizeCharts.find(chart => chart.id === id);
+
+  return await db.sizeChart.findUnique({
+    where: {
+      id:Number(id)
+    }
+  });
 }
 
 export async function createChart({ title, content }) {
-  const newChart = { id: String(Date.now()), title, content };
-  sizeCharts.push(newChart);
-  return newChart;
+  
+  const response = await db.sizeChart.create({data:{
+    "title": title,
+    "content": content,
+  }});
+
+  return response;
 }
 
 export async function updateChart(id, { title, content }) {
-  const chart = await getChartById(id);
-  if (chart) {
-    chart.title = title;
-    chart.content = content;
-  }
+  const updateChart = await db.sizeChart.update({
+    where: {
+      id: Number(id),
+    },
+    data: {
+      title: title,
+      content: content
+    },
+  });
+  return updateChart;
 }

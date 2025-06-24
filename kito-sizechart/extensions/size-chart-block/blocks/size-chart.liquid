@@ -22,9 +22,10 @@
   document.addEventListener("DOMContentLoaded", function(){
   
     let chart_id = {{ product.metafields.custom.size_chart_id }};
-    fetch('https://mayor-fiscal-utility-snow.trycloudflare.com/api/sizechart?chartId='+chart_id)
-    .then(response => response.json)
-    .then(resData => {    
+    fetch('https://oct-billion-floral-identical.trycloudflare.com/api/sizechart?chartId='+chart_id)
+    .then(response => response.json())
+    .then(resData => { 
+      console.log(resData);   
       document.getElementById("sizeChart").innerHTML = "<p>"+resData.data.content+"</p>";
     })
     .catch(() => {

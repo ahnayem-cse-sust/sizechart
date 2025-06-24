@@ -13,7 +13,7 @@
       <p>Size chart not found.</p>
     {% endif %}
   </div>
-{% endif %} {% endcomment %}
+{% endif %}  {% endcomment %}
 
 <div id="sizeChart">Loading size chart...</div>
 
@@ -22,8 +22,7 @@
   document.addEventListener("DOMContentLoaded", function(){
   
     let chart_id = {{ product.metafields.custom.size_chart_id }};
-    console.log("FFFF"+chart_id);
-    fetch('https://occurrence-ia-holland-mag.trycloudflare.com/api/sizechart?chartId='+chart_id)
+    fetch('https://mayor-fiscal-utility-snow.trycloudflare.com/api/sizechart?chartId='+chart_id)
     .then(response => response.json)
     .then(resData => {    
       document.getElementById("sizeChart").innerHTML = "<p>"+resData.data.content+"</p>";

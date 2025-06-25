@@ -15,38 +15,52 @@
   </div>
 {% endif %}  {% endcomment %}
 
-<div id="sizeChart">Loading size chart...</div>
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
 
-<script>
+<div class="size-chart-block">
+  {% if product.metafields.custom.size_chart_id %}
+  <div id="sizeChart">Loading size gg chart...</div>
 
-  document.addEventListener("DOMContentLoaded", function(){
-  
-    let chart_id = {{ product.metafields.custom.size_chart_id }};
-    fetch('https://oct-billion-floral-identical.trycloudflare.com/api/sizechart?chartId='+chart_id)
-    .then(response => response.json())
-    .then(resData => { 
-      console.log(resData);   
-      document.getElementById("sizeChart").innerHTML = "<p>"+resData.data.content+"</p>";
+  <input type="hidden" name="id" value="{{ product.variants.first.id }}" />
+      <label for="size-select">Select Size:</label>
+      <select name="properties[Selected Size]" id="size-select" form="{{ product_form_id }}" required>
+        <option value="">-- Choose size --</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+      </select>
+
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function(){
+    
+      let chart_id = {{ product.metafields.custom.size_chart_id }};
+      fetch('https://soma-tradition-jacob-swiss.trycloudflare.com/api/sizechart?chartId='+chart_id)
+      .then(response => response.json())
+      .then(resData => { 
+        console.log(resData);   
+        document.getElementById("sizeChart").innerHTML = "<p>"+resData.data.content+"</p>";
+      })
+      .catch(() => {
+        document.getElementById("sizeChart").innerHTML = "<p>Faild to load sizechart.</p>";
+      });
+
     })
-    .catch(() => {
-      document.getElementById("sizeChart").innerHTML = "<p>Faild to load sizechart.</p>";
-    });
 
-  })
-
-</script>
-
-
-
-
-
-
+  </script>
+  {% endif %}
+</div>
 
 
 
 {% schema %}
 {
-  "name": "Size Chart",
-  "target": "section"
+  "name": "Size Chart Block",
+  "target": "section",
+  "settings": [],
+  "enabled_on": {
+    "templates": ["product"]
+  }
 }
 {% endschema %}

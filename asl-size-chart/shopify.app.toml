@@ -1,0 +1,24 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "c6fc7520a4e94bf94c1475790f539245"
+name = "Size Chart"
+handle = "asl-size-chart"
+application_url = "https://manually-rankings-affects-prevent.trycloudflare.com"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products"
+
+[auth]
+redirect_urls = ["https://manually-rankings-affects-prevent.trycloudflare.com/auth/callback", "https://manually-rankings-affects-prevent.trycloudflare.com/auth/shopify/callback", "https://manually-rankings-affects-prevent.trycloudflare.com/api/auth/callback"]
+
+[pos]
+embedded = false

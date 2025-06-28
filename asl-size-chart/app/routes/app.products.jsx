@@ -20,7 +20,7 @@ export async function action({ request }) {
 
   await saveProductSizechart({ request });
 
-  return redirect("/app/sizecharts");
+  return redirect("/app/products");
 }
 
 

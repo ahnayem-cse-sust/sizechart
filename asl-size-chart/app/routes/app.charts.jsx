@@ -1,18 +1,15 @@
 import {List, Text, TextField, Button, InlineError} from '@shopify/polaris';
 import { useLoaderData, useActionData, Form, Link } from '@remix-run/react';
-import { getChartById, updateChart } from "../services/sizecharts.crud";
+import { getCharts, createChart } from "../services/sizecharts.crud";
 import { redirect } from '@remix-run/react';
 import {useState, useCallback} from 'react';
 
-export async function loader({ params }) {
-  const chart = await getChartById(params.id);
-  if(!chart){
-    throw new Response("Not found", { status:404 });
-  }
-  return Response.json({chart});
+export async function loader() {
+  const charts = await getCharts();
+  return Response.json({charts});
 }
 
-export async function action({ request, params }) {
+export async function action({ request }) {
   const formData = await request.formData();
   const title = formData.get("title")?.trim();
   const content = formData.get("content")?.trim();
@@ -25,17 +22,17 @@ export async function action({ request, params }) {
     return Response.json({ errors, values: { title, content } }, { status: 400 });
   }
 
-  await updateChart(params.id, { title, content });
-  return redirect("/app/sizechart/templates");
+  await createChart({ title, content });
+  return redirect("/app/charts");
 }
 
-export default function SizeChartsTemplateEdit() {
-  const { chart } = useLoaderData();
+export default function SizeChartsTemplateCreate() {
+  const { charts } = useLoaderData();
   const actionData = useActionData();
   const errors = actionData?.errors || {};
 
-  const [title, setTitle] = useState(chart.title);
-  const [content, setContent] = useState(chart.content);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const handleTitleChange = useCallback(
     (newValue) => setTitle(newValue),
@@ -51,7 +48,7 @@ export default function SizeChartsTemplateEdit() {
   return (
     <div style={{ padding: 20 }}>
       <Text variant="headingLg" as="h5">
-        Edit Sizechart
+        Create Sizechart
       </Text>
       <div style={{ padding: 30 }}>
         <Form method='post'>
@@ -79,9 +76,25 @@ export default function SizeChartsTemplateEdit() {
           <Button 
           submit={true}
           >
-            Update</Button>
+            Create</Button>
         </Form>
       </div>
+
+       <br />
+
+        <Text variant="headingLg" as="h5">
+          Existing Charts
+        </Text>
+        <br />
+        <List type='number'>
+          {charts.map(chart => (
+            <List.Item key={chart.id}>
+              <strong>{chart.title}</strong>
+              &nbsp;
+              <Link to={`/app/chart/${chart.id}`}>Edit</Link>
+            </List.Item>
+          ))}
+        </List>
 
 
     </div>

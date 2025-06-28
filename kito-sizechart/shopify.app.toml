@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "a1bc1bd37c50e2b5dfb17cba64cf58e2"
-name = "kito-sizechart"
-handle = "kito-sizechart"
-application_url = "https://soma-tradition-jacob-swiss.trycloudflare.com"
+name = "Size Chart"
+handle = "asl-size-chart"
+application_url = "https://helena-jewellery-podcasts-valuation.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,11 +26,7 @@ api_version = "2025-04"
 scopes = "read_products, write_products"
 
 [auth]
-redirect_urls = [
-  "https://soma-tradition-jacob-swiss.trycloudflare.com/auth/callback",
-  "https://soma-tradition-jacob-swiss.trycloudflare.com/auth/shopify/callback",
-  "https://soma-tradition-jacob-swiss.trycloudflare.com/api/auth/callback"
-]
+redirect_urls = ["https://helena-jewellery-podcasts-valuation.trycloudflare.com/auth/callback", "https://helena-jewellery-podcasts-valuation.trycloudflare.com/auth/shopify/callback", "https://helena-jewellery-podcasts-valuation.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

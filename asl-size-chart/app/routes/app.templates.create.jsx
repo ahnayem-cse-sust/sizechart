@@ -4,26 +4,38 @@ import {
   Card,
   Layout,
   Page,
-  Text,
+  Grid,
   Button,
-  Form, FormLayout, Checkbox, TextField,
+  Form, FormLayout, ButtonGroup, TextField,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 
 export default function TemplateCreateForm() {
   const [title, setTitle] = useState('');
+  const [sizeList, setSizeList] = useState([{ value: "" }]);
+
+  const handleTitleChange = useCallback((value) => setTitle(value), []);
+  
+  const handleChangeSizeList = (index, value) => {
+    const newSizes = [...sizeList];
+    newSizes[index].value = value;
+    setSizeList(newSizes);
+  };
+
+  const addSize = () => {
+    setSizeList([...sizeList, { value: "" }]);
+  };  
 
   const handleSubmit = useCallback(() => {
     setTitle('');
   }, []);
 
-  const handleTitleChange = useCallback((value) => setEmail(value), []);
 
   return (
     <Page>
       <TitleBar title="Size Chart \ Template \ Create" />
 
-      <PageActions
+      {/* <PageActions
         primaryAction={{
           content: 'Save',
         }}
@@ -32,30 +44,45 @@ export default function TemplateCreateForm() {
             content: 'Cancel',
           },
         ]}
-      />
+      /> */}
       <Layout>
         <Layout.Section>
           <Card>
-            <Button url='/app/templates'>
-              Back
-            </Button>
             <Form onSubmit={handleSubmit}>
               <FormLayout>
 
-                <TextField
-                  value={title}
-                  onChange={handleTitleChange}
-                  label="Title"
-                  type="text"
-                  autoComplete=""
-                  helpText={
-                    <span>
-                      This title will help to find desired template on chart creation.
-                    </span>
-                  }
-                />
+                <Grid columns={{sm: 3}}>
+                  <Grid.Cell columnSpan={{xs: 6, sm: 4, md: 4, lg: 8, xl: 8}}>
+                    <TextField
+                      value={title}
+                      onChange={handleTitleChange}
+                      label="Title"
+                      type="text"
+                      autoComplete=""
+                    />      
+                  </Grid.Cell>
+                </Grid>
+                
+                <Grid columns={{sm: 3}}>
+                  <Grid.Cell columnSpan={{xs: 6, sm: 4, md: 4, lg: 8, xl: 8}}>
+                    {sizeList.map((row, index) => (
+                      <TextField
+                        key={index}
+                        label={`Input ${index + 1}`}
+                        value={row.value}
+                        onChange={(val) => handleChange(index, val)}
+                        autoComplete="off"
+                      />
+                    ))} 
+                    <Button onClick={addSize}>+</Button>    
+                  </Grid.Cell>
+                </Grid>
+                
+                <ButtonGroup>
+                  <Button url='/app/templates'>Cancel</Button>
+                  <Button variant="primary" submit>Submit</Button>
+                </ButtonGroup>
 
-                <Button submit>Submit</Button>
               </FormLayout>
             </Form>
           </Card>

@@ -1,0 +1,13 @@
+.list-rm button {
+    transform: translateY(5px);
+    margin-left: 5px;
+    /* box-shadow: none; */
+}
+
+.list-rm svg {
+    fill: brown !important;
+}
+
+.list-rm{
+    margin-bottom: 5px;
+}

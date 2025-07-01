@@ -6,7 +6,7 @@ import {
   Page,
   Grid,
   Button,
-  Form, FormLayout, ButtonGroup, TextField,Text
+  Form, FormLayout, ButtonGroup, TextField, Text
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { XIcon } from "@shopify/polaris-icons";
@@ -14,17 +14,34 @@ import '../assets/style.css';
 
 export default function TemplateCreateForm() {
   const [title, setTitle] = useState('');
+  const [titleError, setTitleError] = useState(null);
   const [sizeList, setSizeList] = useState([{ value: "XL" }, { value: "L" }]);
   const [newSize, setNewSize] = useState('');
+  const [errorNewSize, setErrorNewSize] = useState(null);
+  const [description, setDescription] = useState('');
 
-  const handleTitleChange = useCallback((value) => setTitle(value), []);
-
+  const handleTitleChange = useCallback((value) => {
+    setTitle(value);
+    if (value.trim() !== "") {
+      setTitleError(null);
+    }
+  }, []);
+  
   const handleNewSize = (value) => {
+    if (value.trim() !== "") {
+      setErrorNewSize(null);
+    }
     setNewSize(value);
   };
 
   const addSize = () => {
-    setSizeList([...sizeList, { value: newSize }]);
+    if (newSize.trim() === "") {
+      setErrorNewSize("Size cannot be empty");
+    } else {
+      setErrorNewSize(null);
+      setSizeList([...sizeList, { value: newSize }]);
+      setNewSize('');
+    }
   };
 
   const removeSize = (index) => {
@@ -32,9 +49,15 @@ export default function TemplateCreateForm() {
     newList.splice(index, 1);
     setSizeList(newList);
   };
+  
+  const handleDescriptionChange = useCallback((value) => {
+    setDescription(value);
+  }, []);
 
   const handleSubmit = useCallback(() => {
-    setTitle('');
+    if (title.trim() === "") {
+      setTitleError("Title cannot be empty");
+    }
   }, []);
 
 
@@ -60,7 +83,7 @@ export default function TemplateCreateForm() {
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                    <Text variant="headingXl" as="h4">
+                    <Text variant="headingLg" as="h5">
                       Title:
                     </Text>
                     <TextField
@@ -68,13 +91,16 @@ export default function TemplateCreateForm() {
                       onChange={handleTitleChange}
                       type="text"
                       autoComplete=""
+                      error={titleError}
                     />
                   </Grid.Cell>
                 </Grid>
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
-                    <span>Available Sizes:</span>
+                    <Text variant="headingLg" as="h5">
+                      Available Sizes:
+                    </Text>
                     <List type="number">
                       {sizeList.map((row, index) => (
                         <div>
@@ -99,9 +125,24 @@ export default function TemplateCreateForm() {
                         value={newSize}
                         onChange={(val) => handleNewSize(val)}
                         autoComplete="off"
+                        error={errorNewSize}
                       />
                       <Button onClick={addSize}>+ Add Size</Button>
                     </ButtonGroup>
+                  </Grid.Cell>
+                </Grid>
+
+                <Grid>
+                  <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+                    <Text variant="headingLg" as="h5">
+                      Description:
+                    </Text>
+                    <TextField
+                      value={description}
+                      onChange={handleDescriptionChange}
+                      type="text"
+                      autoComplete=""
+                    />
                   </Grid.Cell>
                 </Grid>
 

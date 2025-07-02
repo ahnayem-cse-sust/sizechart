@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   List,
   Card,
@@ -10,15 +10,29 @@ import {
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { XIcon } from "@shopify/polaris-icons";
+// import ReactQuill from 'react-quill';
+
+import 'react-quill/dist/quill.snow.css';
 import '../assets/style.css';
 
+
 export default function TemplateCreateForm() {
+  const [ReactQuill, setReactQuill] = useState(null);
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState(null);
   const [sizeList, setSizeList] = useState([{ value: "XL" }, { value: "L" }]);
   const [newSize, setNewSize] = useState('');
   const [errorNewSize, setErrorNewSize] = useState(null);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(null);
+
+  useEffect(() => {
+    // Dynamically load Quill client-side
+    import('react-quill').then((mod) => {
+      setReactQuill(() => mod.default);
+      import('react-quill/dist/quill.snow.css'); // optionally import styles
+    });
+  }, []);
+
 
   const handleTitleChange = useCallback((value) => {
     setTitle(value);
@@ -26,7 +40,7 @@ export default function TemplateCreateForm() {
       setTitleError(null);
     }
   }, []);
-  
+
   const handleNewSize = (value) => {
     if (value.trim() !== "") {
       setErrorNewSize(null);
@@ -49,10 +63,10 @@ export default function TemplateCreateForm() {
     newList.splice(index, 1);
     setSizeList(newList);
   };
-  
-  const handleDescriptionChange = useCallback((value) => {
+
+  const handleDescriptionChange = (value) => {
     setDescription(value);
-  }, []);
+  };
 
   const handleSubmit = useCallback(() => {
     if (title.trim() === "") {
@@ -83,7 +97,7 @@ export default function TemplateCreateForm() {
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                    <Text variant="headingLg" as="h5">
+                    <Text variant="headingMd" as="h6">
                       Title:
                     </Text>
                     <TextField
@@ -98,7 +112,7 @@ export default function TemplateCreateForm() {
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
-                    <Text variant="headingLg" as="h5">
+                    <Text variant="headingMd" as="h6">
                       Available Sizes:
                     </Text>
                     <List type="number">
@@ -133,21 +147,36 @@ export default function TemplateCreateForm() {
                 </Grid>
 
                 <Grid>
-                  <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                    <Text variant="headingLg" as="h5">
+                  <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
+                    <Text variant="headingMd" as="h6">
                       Description:
                     </Text>
-                    <TextField
+                    {/* <TextField
                       value={description}
                       onChange={handleDescriptionChange}
                       type="text"
                       autoComplete=""
-                    />
+                    /> */}
+                    <div>
+                      {ReactQuill ? (
+                        <ReactQuill
+                          value={description}
+                          onChange={handleDescriptionChange}
+                          theme="snow"
+                          style={{ height: '300px', marginBottom: '10px' }}
+                        />
+                      ) : (
+                        <p>Loading editor...</p>
+                      )}
+
+                      {/* {error && <p style={{ color: 'red', marginTop: '-10px' }}>{error}</p>} */}
+                    </div>
                   </Grid.Cell>
                 </Grid>
 
 
 
+<br/>
                 <ButtonGroup>
                   <Button url='/app/templates'>Cancel</Button>
                   <Button variant="primary" submit>Submit</Button>

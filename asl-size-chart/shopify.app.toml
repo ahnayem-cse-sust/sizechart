@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://consoles-asking-az-vc.trycloudflare.com"
+application_url = "https://tracks-sell-juice-better.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,11 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://consoles-asking-az-vc.trycloudflare.com/auth/callback", "https://consoles-asking-az-vc.trycloudflare.com/auth/shopify/callback", "https://consoles-asking-az-vc.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://tracks-sell-juice-better.trycloudflare.com/auth/callback",
+  "https://tracks-sell-juice-better.trycloudflare.com/auth/shopify/callback",
+  "https://tracks-sell-juice-better.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

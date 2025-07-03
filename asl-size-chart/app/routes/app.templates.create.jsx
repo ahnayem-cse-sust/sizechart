@@ -81,10 +81,10 @@ export default function TemplateCreateForm() {
 
   const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 
-  const fileUpload = !file && <DropZone.FileUpload actionTitle="Upload image" actionHint="Accepts .gif, .jpeg, and .png" />;
+  const fileUpload = !file && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, and .png" />;
 
   const uploadedFiles = file && (
-    <div style={{ padding: '20px'}}>
+    <div style={{ padding: '25px'}}>
       {validImageTypes.includes(file.type) ? (
         <div style={{ width: '30%', height: '150px', overflow: 'hidden',margin: 'auto' }}>
           <img
@@ -103,8 +103,11 @@ export default function TemplateCreateForm() {
           />
         </div>
       ) : (
-        <Text alignment='center' tone="critical">{file.name} is not supported.</Text>
+        <div>
+        <Text alignment='center' tone="critical" variant="headingMd" as="h6">Uploaded file format not supported.</Text>
+        </div>
       )}
+      <DropZone.FileUpload actionTitle="Change" actionHint="Accepts .gif, .jpeg, and .png" />
     </div>
   );
 
@@ -119,16 +122,6 @@ export default function TemplateCreateForm() {
     <Page>
       <TitleBar title="Size Chart \ Template \ Create" />
 
-      {/* <PageActions
-        primaryAction={{
-          content: 'Save',
-        }}
-        secondaryActions={[
-          {
-            content: 'Cancel',
-          },
-        ]}
-      /> */}
       <Layout>
         <Layout.Section>
           <Card>
@@ -218,9 +211,9 @@ export default function TemplateCreateForm() {
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
-                    {/* <Text variant="headingMd" as="h6">
-                      Use An Image for Better Perceptioin:
-                    </Text> */}
+                    <Text variant="headingMd" as="h6">
+                      Upload Image: 
+                    </Text>
                     <DropZone
                       allowMultiple={false}
                       onDrop={handleDropZoneDrop}>

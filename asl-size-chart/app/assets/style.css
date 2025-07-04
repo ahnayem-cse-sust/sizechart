@@ -22,3 +22,17 @@
     border: 1px solid black;
     border-collapse: collapse;
 }
+
+.measurement-table input {
+  border: none;
+  outline: none;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: border 0.2s ease;
+}
+
+.measurement-table input:focus  {
+  border-bottom: 1px solid #007ace; /* Shopify blue or your preferred color */
+  outline: none;
+  background: transparent;
+}

@@ -26,7 +26,7 @@ export default function TemplateCreateForm() {
   const [errorNewSize, setErrorNewSize] = useState(null);
   const [description, setDescription] = useState(null);
   const [file, setFile] = useState(null);
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
 
   const [sizeTable, setSizeTable] = useState([
     ["Size", "Chest", "Waist"],
@@ -221,7 +221,12 @@ export default function TemplateCreateForm() {
                     <Text variant="headingMd" as="h6">
                       Size Measurement:
                     </Text>
-                    <div className='measurement-table'>
+                    <div>
+                      <Button onClick={() => setIsDisabled(!isDisabled)}>
+                        {isDisabled ? 'Edit' : 'Save'}
+                      </Button>
+                    </div>
+                    {/* <div className='measurement-table'>
                       <table style={{ width: '100%' }}>
                         <colgroup>
                           <col span="1" style={{ "background-color": "#D6EEEE" }} />
@@ -264,8 +269,39 @@ export default function TemplateCreateForm() {
                         </tr>
                       </table>
                     </div>
-                    <br />
-                    {sizeTable.map((row, rIdx) => (
+                    <br /> */}
+                    <div className={!isDisabled ? 'measurement-table' : 'measurement-table'}>
+                      <table style={{ width: '100%' }}>
+                        {/* <colgroup>
+                          <col span="1" style={{ "background-color": "#D6EEEE" }} />
+                        </colgroup> */}
+                        {sizeTable.map((row, rIdx) => (
+                          <tr key={rIdx} wrap={false} gap="2">
+                            {row.map((cell, cIdx) => (
+                              <td>
+                                {/* <input type="text" 
+                                key={cIdx}
+                                  labelHidden
+                                  value={cell}
+                                  onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                                  
+                                /> */}
+                                <TextField
+                                  key={cIdx}
+                                  labelHidden
+                                  value={cell}
+                                  onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                                  // readOnly={isDisabled}
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </table>
+                    </div>
+
+
+                    {/* {sizeTable.map((row, rIdx) => (
                       <InlineStack key={rIdx} wrap={false} gap="2">
                         {row.map((cell, cIdx) => (
                           <TextField
@@ -308,7 +344,7 @@ export default function TemplateCreateForm() {
                           - Remove last column
                         </Button>
                       )}
-                    </InlineStack>
+                    </InlineStack> */}
                   </Grid.Cell>
                 </Grid>
 

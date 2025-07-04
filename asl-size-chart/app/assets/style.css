@@ -8,6 +8,17 @@
     fill: brown !important;
 }
 
-.list-rm{
+.list-rm {
     margin-bottom: 5px;
+}
+
+.display-none {
+    display: none;
+}
+
+.measurement-table table,
+.measurement-table th,
+.measurement-table td {
+    border: 1px solid black;
+    border-collapse: collapse;
 }

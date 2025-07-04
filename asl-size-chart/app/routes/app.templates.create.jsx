@@ -7,7 +7,7 @@ import {
   Grid,
   Button,
   Form, FormLayout, ButtonGroup, TextField, Text,
-  DropZone
+  DropZone, InlineStack, BlockStack
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { XIcon } from "@shopify/polaris-icons";
@@ -26,6 +26,14 @@ export default function TemplateCreateForm() {
   const [errorNewSize, setErrorNewSize] = useState(null);
   const [description, setDescription] = useState(null);
   const [file, setFile] = useState(null);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const [sizeTable, setSizeTable] = useState([
+    ["Size", "Chest", "Waist"],
+    ["S", "6", "4"],
+    ["M", "6", "6"],
+    ["L", "7", "8"],
+  ]);
 
   useEffect(() => {
     // Dynamically load Quill client-side
@@ -79,14 +87,29 @@ export default function TemplateCreateForm() {
     []
   );
 
+  const addSizeTableRow = () => setSizeTable([...sizeTable, new Array(sizeTable[0].length).fill("")]);
+  const addSizeTableColumn = () => setSizeTable(sizeTable.map(row => [...row, ""]));
+
+  const updateSizeTableCell = (rIdx, cIdx, val) =>
+    setSizeTable(sizeTable.map((row, rowIndex) =>
+      rowIndex === rIdx
+        ? row.map((cell, colIndex) => (colIndex === cIdx ? val : cell))
+        : row
+    ));
+
+  const removeSizeTableRow = (i) => setSizeTable(sizeTable.filter((_, idx) => idx !== i));
+  const removeSizeTableColumn = (i) =>
+    setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
+
+
   const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 
   const fileUpload = !file && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, and .png" />;
 
   const uploadedFiles = file && (
-    <div style={{ padding: '25px'}}>
+    <div style={{ padding: '25px' }}>
       {validImageTypes.includes(file.type) ? (
-        <div style={{ width: '30%', height: '150px', overflow: 'hidden',margin: 'auto' }}>
+        <div style={{ width: '30%', height: '150px', overflow: 'hidden', margin: 'auto' }}>
           <img
             src={
               validImageTypes.includes(file.type)
@@ -104,12 +127,20 @@ export default function TemplateCreateForm() {
         </div>
       ) : (
         <div>
-        <Text alignment='center' tone="critical" variant="headingMd" as="h6">Uploaded file format not supported.</Text>
+          <Text alignment='center' tone="critical" variant="headingMd" as="h6">Uploaded file format not supported.</Text>
         </div>
       )}
       <DropZone.FileUpload actionTitle="Change" actionHint="Accepts .gif, .jpeg, and .png" />
     </div>
   );
+
+  const handleInputClick = () => {
+    setIsDisabled(false);
+  };
+
+  const handleBlur = () => {
+    setIsDisabled(true);
+  };
 
   const handleSubmit = useCallback(() => {
     if (title.trim() === "") {
@@ -121,17 +152,21 @@ export default function TemplateCreateForm() {
   return (
     <Page>
       <TitleBar title="Size Chart \ Template \ Create" />
-
       <Layout>
         <Layout.Section>
           <Card>
+            <Text variant="headingLg" as="h3" alignment='center'>
+              Create Size Chart Template
+            </Text>
+            <br />
+            <br />
             <Form onSubmit={handleSubmit}>
               <FormLayout>
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
                     <Text variant="headingMd" as="h6">
-                      Title:
+                      Template Title:
                     </Text>
                     <TextField
                       value={title}
@@ -179,6 +214,104 @@ export default function TemplateCreateForm() {
                   </Grid.Cell>
                 </Grid>
 
+                <input type="hidden" name="sizeTableData" value={JSON.stringify(sizeTable)} />
+
+                <Grid>
+                  <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
+                    <Text variant="headingMd" as="h6">
+                      Size Measurement:
+                    </Text>
+                    <div className='measurement-table'>
+                      <table style={{ width: '100%' }}>
+                        <colgroup>
+                          <col span="1" style={{ "background-color": "#D6EEEE" }} />
+                        </colgroup>
+                        <tr>
+                          <th><TextField
+                            labelHidden
+                            onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                            disabled
+                          /></th>
+                          <th>TUE</th>
+                          <th>WED</th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <td>1</td>
+                          <td>2</td>
+                          <td onClick={handleInputClick}>
+                            <TextField
+                              labelHidden
+                              onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                              disabled={isDisabled}
+                              onBlur={handleBlur}
+                            />
+                          </td>
+                          <td>4</td>
+                        </tr>
+                        <tr>
+                          <td>8</td>
+                          <td>9</td>
+                          <td>10</td>
+                          <td onClick={handleInputClick}>
+                            <TextField
+                              labelHidden
+                              onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                              disabled={isDisabled}
+                              onBlur={handleBlur}
+                            />
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <br />
+                    {sizeTable.map((row, rIdx) => (
+                      <InlineStack key={rIdx} wrap={false} gap="2">
+                        {row.map((cell, cIdx) => (
+                          <TextField
+                            key={cIdx}
+                            labelHidden
+                            value={cell}
+                            onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                          />
+                        ))}
+                        {rIdx === 0 && (
+                          <div className="display-none">
+                            <Button
+                              tone="critical"
+                              onClick={() => removeSizeTableRow(rIdx)}
+                              accessibilityLabel="Remove row"
+                            >
+                              Remove row
+                            </Button>
+                          </div>
+                        )}
+                        {rIdx > 0 && (
+                          <Button
+                            tone="critical"
+                            onClick={() => removeSizeTableRow(rIdx)}
+                            accessibilityLabel="Remove row"
+                          >
+                            Remove row
+                          </Button>
+                        )}
+                      </InlineStack>
+                    ))}
+                    <InlineStack gap="4">
+                      <Button onClick={addSizeTableRow}>+ Add row</Button>
+                      <Button onClick={addSizeTableColumn}>+ Add column</Button>
+                      {sizeTable[0].length > 1 && (
+                        <Button
+                          tone="critical"
+                          onClick={() => removeSizeTableColumn(sizeTable[0].length - 1)}
+                        >
+                          - Remove last column
+                        </Button>
+                      )}
+                    </InlineStack>
+                  </Grid.Cell>
+                </Grid>
+
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
                     <Text variant="headingMd" as="h6">
@@ -212,7 +345,7 @@ export default function TemplateCreateForm() {
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
                     <Text variant="headingMd" as="h6">
-                      Upload Image: 
+                      Upload Image:
                     </Text>
                     <DropZone
                       allowMultiple={false}

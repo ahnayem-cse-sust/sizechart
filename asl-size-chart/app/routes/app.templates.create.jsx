@@ -21,12 +21,11 @@ export default function TemplateCreateForm() {
   const [ReactQuill, setReactQuill] = useState(null);
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState(null);
-  const [sizeList, setSizeList] = useState([{ value: "XL" }, { value: "L" }]);
-  const [newSize, setNewSize] = useState('');
-  const [errorNewSize, setErrorNewSize] = useState(null);
+  // const [sizeList, setSizeList] = useState([{ value: "XL" }, { value: "L" }]);
+  // const [newSize, setNewSize] = useState('');
+  // const [errorNewSize, setErrorNewSize] = useState(null);
   const [description, setDescription] = useState(null);
   const [file, setFile] = useState(null);
-  const [isDisabled, setIsDisabled] = useState(true);
 
   const [sizeTable, setSizeTable] = useState([
     ["Size", "Chest", "Waist"],
@@ -51,28 +50,28 @@ export default function TemplateCreateForm() {
     }
   }, []);
 
-  const handleNewSize = (value) => {
-    if (value.trim() !== "") {
-      setErrorNewSize(null);
-    }
-    setNewSize(value);
-  };
+  // const handleNewSize = (value) => {
+  //   if (value.trim() !== "") {
+  //     setErrorNewSize(null);
+  //   }
+  //   setNewSize(value);
+  // };
 
-  const addSize = () => {
-    if (newSize.trim() === "") {
-      setErrorNewSize("Size cannot be empty");
-    } else {
-      setErrorNewSize(null);
-      setSizeList([...sizeList, { value: newSize }]);
-      setNewSize('');
-    }
-  };
+  // const addSize = () => {
+  //   if (newSize.trim() === "") {
+  //     setErrorNewSize("Size cannot be empty");
+  //   } else {
+  //     setErrorNewSize(null);
+  //     setSizeList([...sizeList, { value: newSize }]);
+  //     setNewSize('');
+  //   }
+  // };
 
-  const removeSize = (index) => {
-    const newList = [...sizeList];
-    newList.splice(index, 1);
-    setSizeList(newList);
-  };
+  // const removeSize = (index) => {
+  //   const newList = [...sizeList];
+  //   newList.splice(index, 1);
+  //   setSizeList(newList);
+  // };
 
   const handleDescriptionChange = (value) => {
     setDescription(value);
@@ -178,7 +177,7 @@ export default function TemplateCreateForm() {
                   </Grid.Cell>
                 </Grid>
 
-                <Grid>
+                {/* <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
                     <Text variant="headingMd" as="h6">
                       Available Sizes:
@@ -212,13 +211,13 @@ export default function TemplateCreateForm() {
                       <Button onClick={addSize}>+ Add Size</Button>
                     </ButtonGroup>
                   </Grid.Cell>
-                </Grid>
+                </Grid> */}
 
                 <input type="hidden" name="sizeTableData" value={JSON.stringify(sizeTable)} />
 
                 <Grid>
                   <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
-                    <Text variant="headingMd" as="h6">
+                  <Text variant="headingMd" as="h6">
                       Size Measurement:
                     </Text>
                     <div className='measurement-table'>

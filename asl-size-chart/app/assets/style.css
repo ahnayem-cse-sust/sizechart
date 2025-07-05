@@ -1,26 +1,29 @@
 .list-rm button {
-    transform: translateY(5px);
-    margin-left: 5px;
-    /* box-shadow: none; */
+  transform: translateY(5px);
+  margin-left: 5px;
+  /* box-shadow: none; */
 }
 
 .list-rm svg {
-    fill: brown !important;
+  fill: brown !important;
 }
 
 .list-rm {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .display-none {
-    display: none;
+  display: none;
 }
 
 .measurement-table table,
-.measurement-table th,
 .measurement-table td {
-    border: 1px solid black;
-    border-collapse: collapse;
+  border: 1px solid rgb(205, 202, 202);
+  border-collapse: collapse;
+}
+
+.measurement-table th {
+  background-color: rgb(246, 245, 248);
 }
 
 .measurement-table input {
@@ -31,8 +34,9 @@
   transition: border 0.2s ease;
   text-align: center;
 }
-.measurement-table div{
-    border: none;
+
+.measurement-table div {
+  border: none;
 }
 
 .measurement-table div:focus-within {
@@ -42,12 +46,22 @@
 .measurement-table div:focus {
   border: none;
 }
+
 .measurement-table input:focus {
   outline: none !important;
   box-shadow: none !important;
   border-color: transparent !important;
 }
-.mid-el{
+
+.mid-el {
   margin: 2px;
   text-align: center;
+}
+
+.sz-chart-col-btn {
+  padding: 1.2em 0px;
+  background-color: rgb(246, 245, 248);
+  transform: translateX(-35%);
+  border: 1px solid rgb(205, 202, 202);
+  border-collapse: collapse;
 }

@@ -221,76 +221,12 @@ export default function TemplateCreateForm() {
                     <Text variant="headingMd" as="h6">
                       Size Measurement:
                     </Text>
-                    {/* <div>
-                      <Button onClick={() => setIsDisabled(!isDisabled)}>
-                        {isDisabled ? 'Edit' : 'Save'}
-                      </Button>
-                    </div> */}
-                    {/* <div className='measurement-table'>
-                      <table style={{ width: '100%' }}>
-                        <colgroup>
-                          <col span="1" style={{ "background-color": "#D6EEEE" }} />
-                        </colgroup>
-                        <tr>
-                          <th><TextField
-                            labelHidden
-                            onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                            disabled
-                          /></th>
-                          <th>TUE</th>
-                          <th>WED</th>
-                          <th></th>
-                        </tr>
-                        <tr>
-                          <td>1</td>
-                          <td>2</td>
-                          <td onClick={handleInputClick}>
-                            <TextField
-                              labelHidden
-                              onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                              disabled={isDisabled}
-                              onBlur={handleBlur}
-                            />
-                          </td>
-                          <td>4</td>
-                        </tr>
-                        <tr>
-                          <td>8</td>
-                          <td>9</td>
-                          <td>10</td>
-                          <td onClick={handleInputClick}>
-                            <TextField
-                              labelHidden
-                              onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                              disabled={isDisabled}
-                              onBlur={handleBlur}
-                            />
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                    <br /> */}
                     <div className='measurement-table'>
-                      <table style={{ width: '100%' }}>
-                        {/* <colgroup>
-                          <col span="1" style={{ "background-color": "#D6EEEE" }} />
-                        </colgroup> */}
+                      <table style={{ width: '100%' }}> 
                         {sizeTable.map((row, rIdx) => (
                           <tr key={rIdx} wrap={false} gap="2">
                             {row.map((cell, cIdx) => (
                               <td>
-                                {/* <input type="text" 
-                                key={cIdx}
-                                  labelHidden
-                                  value={cell}
-                                  onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                                  
-                                /> */}
-                                {/* {isDisabled && (
-                                  <span>
-                                    {cell}
-                                  </span>
-                                )} */}
                                 <TextField
                                   key={cIdx}
                                   labelHidden
@@ -318,59 +254,13 @@ export default function TemplateCreateForm() {
                         </tr>
                       </table>
                     </div>
-
-
-
-                    {/* {sizeTable.map((row, rIdx) => (
-                      <InlineStack key={rIdx} wrap={false} gap="2">
-                        {row.map((cell, cIdx) => (
-                          <TextField
-                            key={cIdx}
-                            labelHidden
-                            value={cell}
-                            onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                          />
-                        ))}
-                        {rIdx === 0 && (
-                          <div className="display-none">
-                            <Button
-                              tone="critical"
-                              onClick={() => removeSizeTableRow(rIdx)}
-                              accessibilityLabel="Remove row"
-                            >
-                              Remove row
-                            </Button>
-                          </div>
-                        )}
-                        {rIdx > 0 && (
-                          <Button
-                            tone="critical"
-                            onClick={() => removeSizeTableRow(rIdx)}
-                            accessibilityLabel="Remove row"
-                          >
-                            Remove row
-                          </Button>
-                        )}
-                      </InlineStack>
-                    ))}
-                    <InlineStack gap="4">
-                      <Button onClick={addSizeTableRow}>+ Add row</Button>
-                      <Button onClick={addSizeTableColumn}>+ Add column</Button>
-                      {sizeTable[0].length > 1 && (
-                        <Button
-                          tone="critical"
-                          onClick={() => removeSizeTableColumn(sizeTable[0].length - 1)}
-                        >
-                          - Remove last column
-                        </Button>
-                      )}
-                    </InlineStack> */}
                   </Grid.Cell>
+
                   <Grid.Cell columnSpan={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}>
                     <table style={{ height: '100%' }}>
                       <tr>
                         <td className='mid-el'>
-                          <div >
+                          <div className='sz-chart-col-btn'>
                             <Button icon={PlusIcon} onClick={addSizeTableColumn}>
 
                             </Button>

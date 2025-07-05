@@ -7,10 +7,10 @@ import {
   Grid,
   Button,
   Form, FormLayout, ButtonGroup, TextField, Text,
-  DropZone, InlineStack, BlockStack
+  DropZone, Icon
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { XIcon } from "@shopify/polaris-icons";
+import { XIcon, PlusIcon, MinusIcon } from "@shopify/polaris-icons";
 // import ReactQuill from 'react-quill';
 
 import 'react-quill/dist/quill.snow.css';
@@ -221,11 +221,11 @@ export default function TemplateCreateForm() {
                     <Text variant="headingMd" as="h6">
                       Size Measurement:
                     </Text>
-                    <div>
+                    {/* <div>
                       <Button onClick={() => setIsDisabled(!isDisabled)}>
                         {isDisabled ? 'Edit' : 'Save'}
                       </Button>
-                    </div>
+                    </div> */}
                     {/* <div className='measurement-table'>
                       <table style={{ width: '100%' }}>
                         <colgroup>
@@ -270,7 +270,7 @@ export default function TemplateCreateForm() {
                       </table>
                     </div>
                     <br /> */}
-                    <div className={!isDisabled ? 'measurement-table' : 'measurement-table'}>
+                    <div className='measurement-table'>
                       <table style={{ width: '100%' }}>
                         {/* <colgroup>
                           <col span="1" style={{ "background-color": "#D6EEEE" }} />
@@ -286,19 +286,39 @@ export default function TemplateCreateForm() {
                                   onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
                                   
                                 /> */}
+                                {/* {isDisabled && (
+                                  <span>
+                                    {cell}
+                                  </span>
+                                )} */}
                                 <TextField
                                   key={cIdx}
                                   labelHidden
                                   value={cell}
                                   onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                                  // readOnly={isDisabled}
                                 />
                               </td>
                             ))}
                           </tr>
                         ))}
+                        <tr>
+                          <th colSpan={sizeTable[0].length}>
+                            <Button icon={PlusIcon} onClick={addSizeTableRow}></Button>
+                            {sizeTable.length > 1 && (
+                              <Button
+                                tone="critical"
+                                icon={MinusIcon}
+                                onClick={() => removeSizeTableRow(sizeTable.length - 1)}
+                              >
+
+                              </Button>
+                            )}
+                          </th>
+
+                        </tr>
                       </table>
                     </div>
+
 
 
                     {/* {sizeTable.map((row, rIdx) => (
@@ -345,6 +365,29 @@ export default function TemplateCreateForm() {
                         </Button>
                       )}
                     </InlineStack> */}
+                  </Grid.Cell>
+                  <Grid.Cell columnSpan={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}>
+                    <table style={{ height: '100%' }}>
+                      <tr>
+                        <td className='mid-el'>
+                          <div >
+                            <Button icon={PlusIcon} onClick={addSizeTableColumn}>
+
+                            </Button>
+                            {sizeTable[0].length > 1 && (
+                              <Button
+                                tone="critical"
+                                icon={MinusIcon}
+                                onClick={() => removeSizeTableColumn(sizeTable[0].length - 1)}
+                              >
+
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
                   </Grid.Cell>
                 </Grid>
 

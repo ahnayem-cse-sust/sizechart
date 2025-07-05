@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://bangladesh-triangle-ruth-impossible.trycloudflare.com"
+application_url = "https://wheat-criminal-affair-clusters.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,7 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://bangladesh-triangle-ruth-impossible.trycloudflare.com/auth/callback", "https://bangladesh-triangle-ruth-impossible.trycloudflare.com/auth/shopify/callback", "https://bangladesh-triangle-ruth-impossible.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://wheat-criminal-affair-clusters.trycloudflare.com/auth/callback", "https://wheat-criminal-affair-clusters.trycloudflare.com/auth/shopify/callback", "https://wheat-criminal-affair-clusters.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

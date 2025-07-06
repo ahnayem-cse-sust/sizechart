@@ -1,4 +1,4 @@
-import db from "../db.server";
+
 
 const template_categories = [
   'Mens Fashion',
@@ -6,8 +6,8 @@ const template_categories = [
   'Kids Fashion'
 ];
 
-export async function geTemplateCategoryList() {
-  return Response.json(template_categories);
+export async function getTemplateCategoryList() {
+  return template_categories;
 }
 
 export async function getList() {
@@ -21,4 +21,10 @@ export async function getList() {
   ]
 
   return allTemplates;
+}
+
+export async function getTemplateSettings() {
+  const templateCategories = getTemplateCategoryList();
+
+  return Response.json({ templateCategories });
 }

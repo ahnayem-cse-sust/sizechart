@@ -53,15 +53,21 @@
   border-color: transparent !important;
 }
 
-.mid-el {
-  margin: 2px;
-  text-align: center;
+.sz-chart-col-btn {
+    height: 100%;
+    background-color: rgb(233, 237, 237);
+    text-align: center;
+    width: min-content;
+    transform: translateX(-45%);
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 
-.sz-chart-col-btn {
-  padding: 1.2em 0px;
-  background-color: rgb(246, 245, 248);
-  transform: translateX(-35%);
-  border: 1px solid rgb(205, 202, 202);
-  border-collapse: collapse;
+.sz-chart-row-btn {
+    width: 100%;
+    background-color: rgb(233, 237, 237);
+    text-align: center;
+    transform: translateY(-45%);
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
 }

@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://want-breach-treat-jaguar.trycloudflare.com"
+application_url = "https://gsm-confidentiality-hollywood-cove.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,11 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://want-breach-treat-jaguar.trycloudflare.com/auth/callback", "https://want-breach-treat-jaguar.trycloudflare.com/auth/shopify/callback", "https://want-breach-treat-jaguar.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://gsm-confidentiality-hollywood-cove.trycloudflare.com/auth/callback",
+  "https://gsm-confidentiality-hollywood-cove.trycloudflare.com/auth/shopify/callback",
+  "https://gsm-confidentiality-hollywood-cove.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

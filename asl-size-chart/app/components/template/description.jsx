@@ -27,7 +27,7 @@ export default function DescriptionComponent() {
 
 
   return (
-
+<div>
     <Grid>
       <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
         <Text variant="headingMd" as="h6">
@@ -50,7 +50,9 @@ export default function DescriptionComponent() {
         </div>
       </Grid.Cell>
     </Grid>
-
+      <br />
+      <br />
+  </div>
   );
 }
 

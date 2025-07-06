@@ -6,13 +6,10 @@ import {
   Grid,
   Button,
   Form, FormLayout, ButtonGroup, TextField, Text,
-  DropZone, Select
+  Select
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { getTemplateCategoryList } from '../services/template';
-import DescriptionComponent from '../components/template/description';
-import MeasurementComponent from '../components/template/measurement';
-import ImageUploadComponent from '../components/template/image_upload';
 
 import '../assets/style.css';
 
@@ -92,13 +89,6 @@ export default function TemplateCreateForm() {
                     />
                   </Grid.Cell>
                 </Grid>
-
-                <DescriptionComponent />
-
-                <br />
-                <MeasurementComponent />
-
-                <ImageUploadComponent />
 
                 <ButtonGroup>
                   <Button url='/app/templates'>Cancel</Button>

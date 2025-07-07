@@ -1,69 +1,67 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useLoaderData, useActionData, Form } from '@remix-run/react';
 import {
   Card,
   Layout,
   Page,
   Grid,
   Button,
-  Form, FormLayout, ButtonGroup, TextField, Text,
-  Select
+   FormLayout, ButtonGroup, TextField, Text,
+  Select, InlineError
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { getTemplateCategoryList } from '../services/template';
+import { redirect } from '@remix-run/react';
+import { getTemplateCategoryList, saveTemplate } from '../services/template.server';
 
 import '../assets/style.css';
 
+export async function loader() {
+  const templateCategories = await getTemplateCategoryList();
+
+  return Response.json({ templateCategories });
+}
+
+export async function action({ request }) {
+  console.log("GGGGGFDFF");
+  console.log(request);
+  const formData = await request.formData();
+  const title = formData.get("title")?.trim();
+  const category = formData.get("category")?.trim();
+
+  const errors = {};
+  if (!title) errors.title = "Title is required";
+  if (!category) errors.content = "Content is required";
+
+  if (Object.keys(errors).length) {
+    return Response.json({ errors, values: { title, category } }, { status: 400 });
+  }
+
+  await saveTemplate({ title, category });
+  return redirect("/app/templates");
+}
+
+
 export default function TemplateCreateForm() {
+  const { templateCategories } = useLoaderData();
+  const actionData = useActionData();
+  const errors = actionData?.errors || {};
+
   const [title, setTitle] = useState('');
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('');
-  const [templateCategories, setTemplateCategories] = useState([]);
-  const [titleError, setTitleError] = useState(null);
-  const [selectedTemplateCategoryError, setSelectedTemplateCategoryError] = useState();
 
-  useEffect(() => {
-    let isMounted = true;
 
-    getTemplateCategoryList()
-      .then((data) => {
-        console.log(data);
-        setTemplateCategories(data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-
-    return () => {
-      isMounted = false; 
-    };
-  }, []); 
 
   const handleTitleChange = useCallback((value) => {
-    if (value.trim() !== "") {
-      setTitleError(null);
-    }
     setTitle(value);
   }, []);
 
   const handleSelectedCategoryChange = useCallback(
-    (value) => setSelectedTemplateCategory(value),
+    (value) => {
+
+      setSelectedTemplateCategory(value);
+    },
     [],
   );
-
-
-  const handleSubmit = () => {
-    if (title.trim() === '') {
-      setTitleError('Title is required');
-      return;
-    }
-    if (selectedTemplateCategory.trim() === '') {
-      setSelectedTemplateCategoryError('Category is required');
-      return;
-    }
-
-    setTitleError(null);
-    setSelectedTemplateCategoryError(null);
-    console.log('Form submitted with title:', title);
-  };
 
 
   return (
@@ -77,7 +75,7 @@ export default function TemplateCreateForm() {
             </Text>
             <br />
             <br />
-            <Form onSubmit={handleSubmit}>
+            <Form method='post'>
               <FormLayout>
 
                 <Grid>
@@ -86,11 +84,12 @@ export default function TemplateCreateForm() {
                       Template Title:
                     </Text>
                     <TextField
+                      name='title'
                       value={title}
                       onChange={handleTitleChange}
                       autoComplete="off"
-                      error={titleError}
                     />
+                    {errors.title && <InlineError message={errors.title} />}
                   </Grid.Cell>
                 </Grid>
 
@@ -100,11 +99,12 @@ export default function TemplateCreateForm() {
                       Template Category:
                     </Text>
                     <Select
+                      name='category'
                       options={templateCategories}
                       onChange={handleSelectedCategoryChange}
                       value={selectedTemplateCategory}
-                      error={selectedTemplateCategoryError}
                     />
+                    {errors.title && <InlineError message={errors.category} />}
                   </Grid.Cell>
                 </Grid>
 

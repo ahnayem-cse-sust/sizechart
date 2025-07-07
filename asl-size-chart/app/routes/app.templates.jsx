@@ -1,7 +1,7 @@
 import { List, Text, Button, Page, Layout, Card } from '@shopify/polaris';
 import { TitleBar } from "@shopify/app-bridge-react";
 import { useLoaderData, Link } from '@remix-run/react';
-import { getList } from '../services/template';
+import { getList } from '../services/template.server';
 import { Outlet, useLocation  } from '@remix-run/react';
 
 

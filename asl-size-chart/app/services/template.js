@@ -1,9 +1,10 @@
 
 
 const template_categories = [
-  'Mens Fashion',
-  'Womens Fashion',
-  'Kids Fashion'
+  { label: 'Select an option', value: '', disabled: true },
+  { label: 'Mens Fashion', value: 'Mens Fashion' },
+  { label: 'Womens Fashion', value: 'Womens Fashion'},
+  { label: 'Kids Fashion', value: 'Kids Fashion' }
 ];
 
 export async function getTemplateCategoryList() {
@@ -23,8 +24,11 @@ export async function getList() {
   return allTemplates;
 }
 
-export async function getTemplateSettings() {
-  const templateCategories = getTemplateCategoryList();
+export async function save() {
+  const response = await db.sizeChart.create({data:{
+    "title": title,
+    "content": content,
+  }});
 
-  return Response.json({ templateCategories });
+  return response;
 }

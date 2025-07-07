@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Layout,
@@ -15,24 +15,33 @@ import '../assets/style.css';
 
 export default function TemplateCreateForm() {
   const [title, setTitle] = useState('');
-  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState();
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('');
   const [templateCategories, setTemplateCategories] = useState([]);
   const [titleError, setTitleError] = useState(null);
+  const [selectedTemplateCategoryError, setSelectedTemplateCategoryError] = useState();
 
-  getTemplateCategoryList()
-  .then((data) => {
-    console.log(data);
-    setTemplateCategories(data);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+  useEffect(() => {
+    let isMounted = true;
+
+    getTemplateCategoryList()
+      .then((data) => {
+        console.log(data);
+        setTemplateCategories(data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+
+    return () => {
+      isMounted = false; 
+    };
+  }, []); 
 
   const handleTitleChange = useCallback((value) => {
-    setTitle(value);
     if (value.trim() !== "") {
       setTitleError(null);
     }
+    setTitle(value);
   }, []);
 
   const handleSelectedCategoryChange = useCallback(
@@ -41,11 +50,20 @@ export default function TemplateCreateForm() {
   );
 
 
-  const handleSubmit = useCallback(() => {
-    if (title.trim() === "") {
-      setTitleError("Title cannot be empty");
+  const handleSubmit = () => {
+    if (title.trim() === '') {
+      setTitleError('Title is required');
+      return;
     }
-  }, []);
+    if (selectedTemplateCategory.trim() === '') {
+      setSelectedTemplateCategoryError('Category is required');
+      return;
+    }
+
+    setTitleError(null);
+    setSelectedTemplateCategoryError(null);
+    console.log('Form submitted with title:', title);
+  };
 
 
   return (
@@ -70,8 +88,7 @@ export default function TemplateCreateForm() {
                     <TextField
                       value={title}
                       onChange={handleTitleChange}
-                      type="text"
-                      autoComplete=""
+                      autoComplete="off"
                       error={titleError}
                     />
                   </Grid.Cell>
@@ -86,6 +103,7 @@ export default function TemplateCreateForm() {
                       options={templateCategories}
                       onChange={handleSelectedCategoryChange}
                       value={selectedTemplateCategory}
+                      error={selectedTemplateCategoryError}
                     />
                   </Grid.Cell>
                 </Grid>

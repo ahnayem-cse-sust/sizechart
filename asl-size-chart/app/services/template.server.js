@@ -11,7 +11,7 @@ export async function getTemplateCategoryList() {
   return template_categories;
 }
 
-export async function getList({ request }) {
+export async function getPaginatedTemplates({ request }) {
   const PAGE_SIZE = 3;
   const url = new URL(request.url);
       const page = parseInt(url.searchParams.get("page") || "1", 10);
@@ -41,4 +41,21 @@ export async function saveTemplate({ title, category }) {
     }
   });
   return response;
+}
+
+export async function deleteTemplate(id) {
+    if (isNaN(id)) {
+      return Response.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    // delete related contents first if needed
+    // await db.templateContent.deleteMany({
+    //   where: { template_id: id },
+    // });
+
+    await db.template.delete({
+      where: { id },
+    });
+
+    return Response.json({ success: true });
 }

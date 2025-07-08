@@ -1,17 +1,19 @@
 import {
+    useBreakpoints,
     IndexTable,
     Card,
     useIndexResourceState,
     Text,
     Box,
     Pagination,
-    Link
+    Link,
+    Button,
+    ButtonGroup,
+    InlineStack
 } from '@shopify/polaris';
 import { useNavigate } from "@remix-run/react";
 
-export function TemplateListComponent({ data }) {
-    const templates = data.templates || [];
-    const pagination = data.pagination || { currentPage: 1, totalPages: 1 };
+export function TemplateListComponent({ templates, pagination }) {
     const resourceName = {
         singular: "size chart",
         plural: "size charts",
@@ -19,69 +21,113 @@ export function TemplateListComponent({ data }) {
 
     const navigate = useNavigate();
 
-
     const { selectedResources, allResourcesSelected, handleSelectionChange } =
         useIndexResourceState(templates);
 
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this template?")) return;
+
+        const formData = new FormData();
+        formData.append("intent", "DELETE");
+        formData.append("id", id);
+
+        const res = await fetch("/app/templates", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (res.ok) {
+            window.location.reload(); // Or use `navigate()` to refresh
+        } else {
+            alert("Failed to delete.");
+        }
+    };
+
     return (
         <div>
-            {templates && (
-                <Box paddingBlockEnd="400">
-                    <Card>
-                        <IndexTable
-                            resourceName={resourceName}
-                            itemCount={templates.length}
-                            selectedItemsCount={
-                                allResourcesSelected ? "All" : selectedResources.length
-                            }
-                            onSelectionChange={handleSelectionChange}
-                            headings={[
-                                { title: "Title" },
-                                // { title: "Rows" },
-                                { title: "Created" },
-                            ]}
-                        >
-                            {templates.map((template, index) => (
-                                <IndexTable.Row
-                                    id={template.id.toString()}
-                                    key={template.id}
-                                    selected={selectedResources.includes(template.id)}
-                                    position={index}
-                                >
-                                    <IndexTable.Cell>
-                                        <Link to={`/admin/templates/${template.id}`}>
-                                            <Text variant="bodyMd" fontWeight="medium" as="span">
-                                                {template.title}
-                                            </Text>
-                                        </Link>
-                                    </IndexTable.Cell>
-                                    {/* <IndexTable.Cell>
-                                        {templates.length - 1} rows
-                                    </IndexTable.Cell> */}
-                                    <IndexTable.Cell>
-                                        {new Date(template.createdAt).toLocaleDateString()}
-                                    </IndexTable.Cell>
-                                </IndexTable.Row>
-                            ))}
-                        </IndexTable>
+            <Box paddingBlockEnd="400">
+                <Card>
+                    <IndexTable
+                        resourceName={resourceName}
+                        itemCount={templates.length}
+                        selectedItemsCount={
+                            allResourcesSelected ? "All" : selectedResources.length
+                        }
+                        onSelectionChange={handleSelectionChange}
+                        selectedResources={selectedResources}
+                        headings={[
+                            { title: "Title" },
+                            { title: "Created" },
+                            { title: "Actions" },
+                        ]}
+                        promotedBulkActions={[
+                            {
+                                content: 'Delete selected',
+                                onAction: () => {
+                                    // You can optionally delete selectedResources here
+                                    console.log("Delete selected", selectedResources);
+                                },
+                            },
+                        ]}
+                    >
+                        {templates.map((template, index) => (
+                            <IndexTable.Row
+                                id={template.id.toString()}
+                                key={template.id}
+                                selected={selectedResources.includes(template.id.toString())}
+                                position={index}
+                                onClick={() => {
+                                    console.log("Selected - ", template.id);
+                                }}
+                            >
+                                <IndexTable.Cell>
+                                    <Link to={`/app/templates/edit/${template.id}`}>
+                                        <Text variant="bodyMd" fontWeight="medium" as="span">
+                                            {template.title}
+                                        </Text>
+                                    </Link>
+                                </IndexTable.Cell>
+                                <IndexTable.Cell>
+                                    {new Date(template.createdAt).toLocaleDateString()}
+                                </IndexTable.Cell>
+                                <IndexTable.Cell>
+                                    <InlineStack gap="2">
+                                        {/* <Link to={`/app/sizecharts/${chart.id}/edit`}>
+                                            </Link> */}
+                                        <Button size="slim">Edit</Button>
+                                        <Button
+                                            size="slim"
+                                            tone="critical"
+                                            onClick={(e) => {
+                                                e.stopPropagation(); 
+                                                handleDelete(template.id);
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </InlineStack>
+                                </IndexTable.Cell>
+                            </IndexTable.Row>
+                        ))}
+                    </IndexTable>
 
-                        <div className="flex justify-between items-center px-4 py-3">
-                            <Pagination
-                                hasPrevious={pagination.currentPage > 1}
-                                onPrevious={() => {
-                                    navigate(`?page=${pagination.currentPage - 1}`);
-                                }}
-                                hasNext={pagination.currentPage < pagination.totalPages}
-                                onNext={() => {
-                                    navigate(`?page=${pagination.currentPage + 1}`);
-                                }}
-                            />
-                            <Text variant="bodySm" as="p">
-                                Page {pagination.currentPage} of {pagination.totalPages}
-                            </Text>
-                        </div>
-                    </Card>
-                </Box>)}
+                    <div className="flex justify-between items-center px-4 py-3">
+                        <Pagination
+                            hasPrevious={pagination.currentPage > 1}
+                            onPrevious={() => {
+                                navigate(`?page=${pagination.currentPage - 1}`);
+                            }}
+                            hasNext={pagination.currentPage < pagination.totalPages}
+                            onNext={() => {
+                                navigate(`?page=${pagination.currentPage + 1}`);
+                            }}
+                        />
+                        <Text variant="bodySm" as="p">
+                            Page {pagination.currentPage} of {pagination.totalPages}
+                        </Text>
+                    </div>
+                </Card>
+            </Box>
         </div>
     );
 }

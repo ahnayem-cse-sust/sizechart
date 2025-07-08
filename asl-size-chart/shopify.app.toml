@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://os-statewide-glasgow-shade.trycloudflare.com"
+application_url = "https://applies-dance-duncan-protected.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,11 +18,7 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = [
-  "https://os-statewide-glasgow-shade.trycloudflare.com/auth/callback",
-  "https://os-statewide-glasgow-shade.trycloudflare.com/auth/shopify/callback",
-  "https://os-statewide-glasgow-shade.trycloudflare.com/api/auth/callback"
-]
+redirect_urls = ["https://applies-dance-duncan-protected.trycloudflare.com/auth/callback", "https://applies-dance-duncan-protected.trycloudflare.com/auth/shopify/callback", "https://applies-dance-duncan-protected.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

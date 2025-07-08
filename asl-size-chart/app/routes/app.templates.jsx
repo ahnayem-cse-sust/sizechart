@@ -3,17 +3,39 @@ import { Button, Page, Layout, Card } from '@shopify/polaris';
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Outlet, useLocation } from '@remix-run/react';
 import { TemplateListComponent } from '../components/template/list';
-import { getList } from '../services/template.server';
+import { getPaginatedTemplates,deleteTemplate } from '../services/template.server';
 
 
 export async function loader({ request }) {
-  const response = await getList({ request });
+  const response = await getPaginatedTemplates({ request });
   const listData = await response.json();
-  return Response.json({ listData });
+  const templates = listData.templates;
+  const pagination = listData.pagination;
+  return Response.json({ templates, pagination });
+}
+
+export async function action({ request }) {
+  const form = await request.formData();
+  const intent = form.get("intent");
+
+  let response;
+
+  switch (intent) {
+    case "DELETE":
+      response = await deleteTemplate(Number(form.get("id")));
+      break;
+  
+    default:
+      response = Response.json({ error: "Invalid intent" }, { status: 400 });
+      break;
+  }
+
+  return response;
+
 }
 
 export default function SizeChartTemplates() {
-  const { listData } = useLoaderData();
+  const { templates, pagination } = useLoaderData();
   const location = useLocation();
   const isBaseRoute = location.pathname === "/app/templates";
   // const isCreateRoute = location.pathname === "/app/templates";
@@ -39,7 +61,7 @@ export default function SizeChartTemplates() {
             </Card>
           </Layout.Section>
           <Layout.Section>
-            <TemplateListComponent data={listData} />
+            <TemplateListComponent templates={templates} pagination={pagination} />
           </Layout.Section>
         </Layout>
       </Page>)}

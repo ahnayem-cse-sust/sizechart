@@ -8,11 +8,11 @@ import {
   Select,Form
 } from "@shopify/polaris";
 
-export default function TemplateFormComponent({templateCategories, templateId}) {
+export default function TemplateFormComponent({templateCategories, template}) {
   const [active, setActive] = useState();
-  const [modalTitle, setModalTitle] = useState('Create Template');
-  const [title, setTitle] = useState('');
-  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('');
+  const [modalTitle, setModalTitle] = useState(template? 'Edit Template' : 'Create Template');
+  const [title, setTitle] = useState(template? template.title : '');
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState(template? template.category : '');
 
   const toggleModal = useCallback(() => setActive((prev) => !prev), []);
 
@@ -56,7 +56,8 @@ export default function TemplateFormComponent({templateCategories, templateId}) 
           setActive(true);
         }}
       >
-        Create Template
+        {!template && "Create Template"}
+        {template && "Edit"}
       </Button>
       <Modal
         open={active}
@@ -64,7 +65,7 @@ export default function TemplateFormComponent({templateCategories, templateId}) 
         title={modalTitle}
         primaryAction={{
           content: "Save",
-          onAction:() => handleSave(templateId)
+          onAction:() => handleSave(template?.id)
         }}
         secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
       >

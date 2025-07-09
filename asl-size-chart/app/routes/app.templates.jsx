@@ -1,6 +1,6 @@
 import { useLoaderData } from '@remix-run/react';
 import {
-  Button, Page, Layout,
+  Page, Layout,
   Text,
   InlineStack
 } from '@shopify/polaris';
@@ -64,7 +64,7 @@ export default function SizeChartTemplates() {
                 Save templates to create multiple sizecharts in short time.
               </Text>
               </div>
-              <TemplateFormComponent templateCategories={templateCategories} templateId={null}/>
+              <TemplateFormComponent templateCategories={templateCategories} template={null}/>
             </InlineStack>
           </Layout.Section>
 

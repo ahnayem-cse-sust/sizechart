@@ -59,3 +59,15 @@ export async function deleteTemplate(id) {
 
     return Response.json({ success: true });
 }
+
+export async function getTemplateById(id) {
+    if (isNaN(id)) {
+      return Response.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const template = await db.template.findFirst({
+      where: { id },
+    });
+
+    return Response.json({ template });
+}

@@ -46,7 +46,7 @@ export function TemplateListComponent({ templates, pagination }) {
     return (
         <div>
             <Box paddingBlockEnd="400">
-                <Card>
+                {/* <Card> */}
                     <IndexTable
                         resourceName={resourceName}
                         itemCount={templates.length}
@@ -126,7 +126,7 @@ export function TemplateListComponent({ templates, pagination }) {
                             Page {pagination.currentPage} of {pagination.totalPages}
                         </Text>
                     </div>
-                </Card>
+                {/* </Card> */}
             </Box>
         </div>
     );

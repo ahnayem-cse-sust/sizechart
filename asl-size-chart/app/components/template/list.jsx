@@ -53,8 +53,8 @@ export function TemplateListComponent({ templates, pagination }) {
                         selectedItemsCount={
                             allResourcesSelected ? "All" : selectedResources.length
                         }
-                        onSelectionChange={handleSelectionChange}
                         selectedResources={selectedResources}
+                        onSelectionChange={handleSelectionChange}
                         headings={[
                             { title: "Title" },
                             { title: "Created" },
@@ -72,9 +72,9 @@ export function TemplateListComponent({ templates, pagination }) {
                     >
                         {templates.map((template, index) => (
                             <IndexTable.Row
-                                id={template.id.toString()}
+                                id={template.id}
                                 key={template.id}
-                                selected={selectedResources.includes(template.id.toString())}
+                                selected={selectedResources.includes(template.id)}
                                 position={index}
                                 onClick={() => {
                                     console.log("Selected - ", template.id);

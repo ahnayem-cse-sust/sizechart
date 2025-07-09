@@ -92,9 +92,7 @@ export function TemplateListComponent({ templates, pagination }) {
                                 </IndexTable.Cell>
                                 <IndexTable.Cell>
                                     <InlineStack gap="2">
-                                        {/* <Link to={`/app/sizecharts/${chart.id}/edit`}>
-                                            </Link> */}
-                                        <Button size="slim">Edit</Button>
+                                        <Button url={`/app/templates/${template.id}`} size="slim">View</Button>
                                         <Button
                                             size="slim"
                                             tone="critical"

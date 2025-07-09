@@ -64,7 +64,7 @@ export default function SizeChartTemplates() {
                 Save templates to create multiple sizecharts in short time.
               </Text>
               </div>
-              <TemplateFormComponent templateCategories={templateCategories}/>
+              <TemplateFormComponent templateCategories={templateCategories} templateId={null}/>
             </InlineStack>
           </Layout.Section>
 

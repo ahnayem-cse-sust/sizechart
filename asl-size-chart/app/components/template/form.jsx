@@ -1,15 +1,14 @@
 import { Modal, TextField, Button } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 import {
-  Card,
   Layout,
   Page,
   Grid,
-  FormLayout, ButtonGroup, Text,
-  Select, InlineError,Form
+  FormLayout, Text,
+  Select,Form
 } from "@shopify/polaris";
 
-export default function TemplateFormComponent({templateCategories}) {
+export default function TemplateFormComponent({templateCategories, templateId}) {
   const [active, setActive] = useState();
   const [modalTitle, setModalTitle] = useState('Create Template');
   const [title, setTitle] = useState('');
@@ -28,6 +27,26 @@ export default function TemplateFormComponent({templateCategories}) {
     [],
   );
 
+  const handleSave = async (id) => {
+        console.log(id);
+        return;
+
+        const formData = new FormData();
+        formData.append("intent", "CREATE");
+        formData.append("id", id);
+
+        const res = await fetch("/app/templates", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (res.ok) {
+            window.location.reload(); // Or use `navigate()` to refresh
+        } else {
+            alert("Failed to delete.");
+        }
+    };
+
   return (
     <div>
       <Button
@@ -45,7 +64,7 @@ export default function TemplateFormComponent({templateCategories}) {
         title={modalTitle}
         primaryAction={{
           content: "Save",
-          onAction: async () => { console.log("fffff"); }
+          onAction:() => handleSave(templateId)
         }}
         secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
       >

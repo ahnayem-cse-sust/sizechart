@@ -1,16 +1,5 @@
 import db from '../db.server';
 
-const template_categories = [
-  { label: 'Select an option', value: '', disabled: true },
-  { label: 'Mens Fashion', value: 'Mens Fashion' },
-  { label: 'Womens Fashion', value: 'Womens Fashion' },
-  { label: 'Kids Fashion', value: 'Kids Fashion' }
-];
-
-export async function getTemplateCategoryList() {
-  return template_categories;
-}
-
 export async function getPaginatedTemplates({ request }) {
   const PAGE_SIZE = 3;
   const url = new URL(request.url);
@@ -71,3 +60,4 @@ export async function getTemplateById(id) {
 
     return Response.json({ template });
 }
+

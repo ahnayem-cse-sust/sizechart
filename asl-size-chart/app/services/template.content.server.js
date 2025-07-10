@@ -1,12 +1,14 @@
 import db from "../db.server";
 
-const content_types = [
-  'Text',
-  'Advanced Table',
-  'Image'
-];
+export async function getAllTemplateContent(template_id) {
+  if (isNaN(template_id)) {
+      return Response.json({ error: "Invalid ID" }, { status: 400 });
+    }
 
-export async function getContentTypeList() {
-  return Response.json(content_types);
+    const templateContents = await db.templateContent.findMany({
+      where: { template_id },
+    });
+
+    return Response.json({ templateContents });
 }
 

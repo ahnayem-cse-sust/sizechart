@@ -8,16 +8,18 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { Outlet, useLocation } from '@remix-run/react';
 import { TemplateListComponent } from '../components/template/list';
 import TemplateFormComponent from '../components/template/form';
-import { getTemplateCategoryList,getPaginatedTemplates, deleteTemplate } from '../services/template.server';
+import { getPaginatedTemplates, deleteTemplate } from '../services/template.server';
+import {
+    TEMPLATE_CATEGORIES
+ } from '../services/utils/defines';
 
 
 export async function loader({ request }) {
-  const templateCategories = await getTemplateCategoryList();
   const response = await getPaginatedTemplates({ request });
   const listData = await response.json();
   const templates = listData.templates;
   const pagination = listData.pagination;
-  return Response.json({ templateCategories, templates, pagination });
+  return Response.json({ templates, pagination });
 }
 
 
@@ -42,7 +44,7 @@ export async function action({ request }) {
 }
 
 export default function SizeChartTemplates() {
-  const { templateCategories, templates, pagination } = useLoaderData();
+  const { templates, pagination } = useLoaderData();
   const location = useLocation();
   const isBaseRoute = location.pathname === "/app/templates";
   // const isCreateRoute = location.pathname === "/app/templates";
@@ -64,7 +66,7 @@ export default function SizeChartTemplates() {
                 Save templates to create multiple sizecharts in short time.
               </Text>
               </div>
-              <TemplateFormComponent templateCategories={templateCategories} template={null}/>
+              <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={null}/>
             </InlineStack>
           </Layout.Section>
 

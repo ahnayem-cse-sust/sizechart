@@ -27,7 +27,7 @@ export default function MeasurementComponent({ content }) {
   const removeSizeTableColumn = (i) =>
     setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
 
-  const handleTableDelete = async (content_id) => {
+  const handleBlockDelete = async (content_id) => {
         if (!confirm("Are you sure you want to delete this table?")) return;
 
         const formData = new FormData();
@@ -62,7 +62,7 @@ export default function MeasurementComponent({ content }) {
             <Button
               tone="critical"
               icon={DeleteIcon}
-              onClick={() => handleTableDelete(content.id)}
+              onClick={() => handleBlockDelete(content.id)}
             ></Button>
           </ButtonGroup>
 

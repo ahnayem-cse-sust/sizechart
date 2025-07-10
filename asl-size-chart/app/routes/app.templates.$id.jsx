@@ -12,15 +12,16 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { getTemplateById } from '../services/template.server';
 import TemplateFormComponent from '../components/template/form';
 import MeasurementComponent from '../components/template/measurement';
+import ImageUploadComponent from '../components/template/image_upload';
+import DescriptionComponent from '../components/template/description';
 import BlockButtonComponent from '../components/template/block_button';
-import { getAllTemplateContent, addTableByTemplateId, deleteContentByContentId } from '../services/template.content.server';
+import { getAllTemplateContent, addBlockByTemplateId, deleteContentByContentId } from '../services/template.content.server';
 
 import {
     TEMPLATE_CATEGORIES,
     CONTENT_TYPE_DESCRIPTION,
     CONTENT_TYPE_TABLE,
-    CONTENT_TYPE_IMAGE,
-    CONTENT_TYPE_LIST
+    CONTENT_TYPE_IMAGE
 } from '../services/utils/defines';
 
 import '../assets/style.css';
@@ -41,8 +42,8 @@ export async function action({ request }) {
     let response;
 
     switch (intent) {
-        case "ADD_TABLE":
-            response = await addTableByTemplateId(Number(form.get("template_id")));
+        case "ADD_BLOCK":
+            response = await addBlockByTemplateId(form.get("content_type"),Number(form.get("template_id")));
             break;
 
         case "CONTENT_DELETE":
@@ -88,14 +89,29 @@ export default function TemplateView() {
                     >
                         <p>No content available.Add contents to presizely guide your customers.</p>
                         <div className='mr-top-10'>
-                            <BlockButtonComponent btnText={'+ Add New Content'} templateId={template.id} />
+                            <BlockButtonComponent btnText={'+ Add Content'} templateId={template.id} />
                         </div>
                     </EmptyState>)}
                     {templateContents.map((content, index) => {
-                        if (content.content_type === CONTENT_TYPE_TABLE) {
-                            return <MeasurementComponent key={index} content={content} />;
+                        switch (content.content_type) {
+                            case CONTENT_TYPE_TABLE:
+                                return <MeasurementComponent key={index} content={content} />;
+                            case CONTENT_TYPE_DESCRIPTION:
+                                return <DescriptionComponent key={index} content={content} />;
+                            case CONTENT_TYPE_IMAGE:
+                                return <ImageUploadComponent key={index} content={content} />;
+                        
+                            default:
+                                return;
                         }
                     })}
+
+                    {templateContents.length > 0 && (
+                        <div className='mr-top-10'>
+                        <BlockButtonComponent btnText={'+ Add New Block'} templateId={template.id} />
+                    </div>
+                    )}
+                    
                 </Card>
             </BlockStack>
         </Page>

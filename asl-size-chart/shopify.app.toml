@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://gabriel-vessel-unsubscribe-affected.trycloudflare.com"
+application_url = "https://flu-culture-marcus-bulletin.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://gabriel-vessel-unsubscribe-affected.trycloudflare.com/auth/callback",
-  "https://gabriel-vessel-unsubscribe-affected.trycloudflare.com/auth/shopify/callback",
-  "https://gabriel-vessel-unsubscribe-affected.trycloudflare.com/api/auth/callback"
+  "https://flu-culture-marcus-bulletin.trycloudflare.com/auth/callback",
+  "https://flu-culture-marcus-bulletin.trycloudflare.com/auth/shopify/callback",
+  "https://flu-culture-marcus-bulletin.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

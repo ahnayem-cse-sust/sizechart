@@ -37,10 +37,9 @@ export async function deleteTemplate(id) {
       return Response.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    // delete related contents first if needed
-    // await db.templateContent.deleteMany({
-    //   where: { template_id: id },
-    // });
+    await db.templateContent.deleteMany({
+      where: { template_id: id },
+    });
 
     await db.template.delete({
       where: { id },

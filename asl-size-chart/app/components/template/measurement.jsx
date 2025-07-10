@@ -3,18 +3,15 @@ import {
   Grid,
   Text,
   Button,
-  TextField
+  TextField, ButtonGroup, InlineStack
 } from "@shopify/polaris";
-import { PlusIcon, MinusIcon } from "@shopify/polaris-icons";
+import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 
 
-export default function MeasurementComponent() {
-  const [sizeTable, setSizeTable] = useState([
-    ["Size", "Chest", "Waist"],
-    ["S", "6", "4"],
-    ["M", "6", "6"],
-    ["L", "7", "8"],
-  ]);
+export default function MeasurementComponent({ content }) {
+  const content_array = JSON.parse(content.content_obj);
+  const [sizeTable, setSizeTable] = useState(content_array);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   const addSizeTableRow = () => setSizeTable([...sizeTable, new Array(sizeTable[0].length).fill("")]);
   const addSizeTableColumn = () => setSizeTable(sizeTable.map(row => [...row, ""]));
@@ -30,18 +27,48 @@ export default function MeasurementComponent() {
   const removeSizeTableColumn = (i) =>
     setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
 
+  const handleTableDelete = async (content_id) => {
+        if (!confirm("Are you sure you want to delete this table?")) return;
+
+        const formData = new FormData();
+        formData.append("intent", "CONTENT_DELETE");
+        formData.append("content_id", content_id);
+
+        const res = await fetch("/app/templates/"+content.template_id, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (res.ok) {
+            window.location.reload(); // Or use `navigate()` to refresh
+        } else {
+            alert("Failed to delete.");
+        }
+    };
+
 
   return (
 
 
     <Grid>
       <input type="hidden" name="sizeTableData" value={JSON.stringify(sizeTable)} />
-      <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
-        <Text variant="headingMd" as="h6">
-          Size Measurement:
-        </Text>
+      <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
+        <InlineStack align="space-between" blockAlign="center">
+          <Text as="h2" variant="headingLg">
+            Size Measurement:
+          </Text>
+          <ButtonGroup>
+            <Button disabled={isSaveDisabled} variant="primary">Save</Button>
+            <Button
+              tone="critical"
+              icon={DeleteIcon}
+              onClick={() => handleTableDelete(content.id)}
+            ></Button>
+          </ButtonGroup>
+
+        </InlineStack>
       </Grid.Cell>
-      <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
+      <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
         <div className='measurement-table'>
           <table style={{ width: '100%' }}>
             {sizeTable.map((row, rIdx) => (
@@ -63,7 +90,7 @@ export default function MeasurementComponent() {
       </Grid.Cell>
 
       <Grid.Cell columnSpan={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}>
-        <table  className='sz-chart-col-btn'>
+        <table className='sz-chart-col-btn'>
           <tr>
             <td>
               <div>
@@ -83,7 +110,7 @@ export default function MeasurementComponent() {
         </table>
 
       </Grid.Cell>
-      <Grid.Cell columnSpan={{ xs: 10, sm: 10, md: 10, lg: 10, xl: 10 }}>
+      <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
         <table className='sz-chart-row-btn'>
           <tr>
             <th colSpan={sizeTable[0].length}>

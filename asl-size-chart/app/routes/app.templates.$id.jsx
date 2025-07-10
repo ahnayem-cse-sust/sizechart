@@ -13,7 +13,7 @@ import { getTemplateById } from '../services/template.server';
 import TemplateFormComponent from '../components/template/form';
 import MeasurementComponent from '../components/template/measurement';
 import BlockButtonComponent from '../components/template/block_button';
-import { getAllTemplateContent, addTableByTemplateId } from '../services/template.content.server';
+import { getAllTemplateContent, addTableByTemplateId, deleteContentByContentId } from '../services/template.content.server';
 
 import {
     TEMPLATE_CATEGORIES,
@@ -43,6 +43,10 @@ export async function action({ request }) {
     switch (intent) {
         case "ADD_TABLE":
             response = await addTableByTemplateId(Number(form.get("template_id")));
+            break;
+
+        case "CONTENT_DELETE":
+            response = await deleteContentByContentId(Number(form.get("content_id")));
             break;
 
         default:
@@ -89,7 +93,7 @@ export default function TemplateView() {
                     </EmptyState>)}
                     {templateContents.map((content, index) => {
                         if (content.content_type === CONTENT_TYPE_TABLE) {
-                            return <MeasurementComponent key={index} />;
+                            return <MeasurementComponent key={index} content={content} />;
                         }
                     })}
                 </Card>

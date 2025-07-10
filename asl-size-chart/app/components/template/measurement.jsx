@@ -13,38 +13,73 @@ export default function MeasurementComponent({ content }) {
   const [sizeTable, setSizeTable] = useState(content_array);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
-  const addSizeTableRow = () => setSizeTable([...sizeTable, new Array(sizeTable[0].length).fill("")]);
-  const addSizeTableColumn = () => setSizeTable(sizeTable.map(row => [...row, ""]));
+  const addSizeTableRow = () => {
+    setSizeTable([...sizeTable, new Array(sizeTable[0].length).fill("")]);
+    setIsSaveDisabled(false);
+  }
 
-  const updateSizeTableCell = (rIdx, cIdx, val) =>
+  const addSizeTableColumn = () => {
+    setIsSaveDisabled(false);
+    setSizeTable(sizeTable.map(row => [...row, ""]));
+  }
+
+  const updateSizeTableCell = (rIdx, cIdx, val) => {
+    setIsSaveDisabled(false);
     setSizeTable(sizeTable.map((row, rowIndex) =>
       rowIndex === rIdx
         ? row.map((cell, colIndex) => (colIndex === cIdx ? val : cell))
         : row
     ));
+  }
 
-  const removeSizeTableRow = (i) => setSizeTable(sizeTable.filter((_, idx) => idx !== i));
-  const removeSizeTableColumn = (i) =>
+  const removeSizeTableRow = (i) => {
+    setSizeTable(sizeTable.filter((_, idx) => idx !== i));
+    setIsSaveDisabled(false);
+  }
+
+  const removeSizeTableColumn = (i) => {
     setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
+    setIsSaveDisabled(false);
+  }
 
+  const handleBlockSave = async (content_id) => {
+
+    const formData = new FormData();
+    formData.append("intent", "SAVE_BLOCK");
+    formData.append("content_id", content_id);
+    formData.append("content_obj", JSON.stringify(sizeTable));
+
+    const res = await fetch("/app/templates/" + content.template_id, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.ok) {
+      alert("Successfully saved.");
+      setIsSaveDisabled(true);
+    } else {
+      alert("Failed to save.");
+    }
+  };
+  
   const handleBlockDelete = async (content_id) => {
-        if (!confirm("Are you sure you want to delete this table?")) return;
+    if (!confirm("Are you sure you want to delete this table?")) return;
 
-        const formData = new FormData();
-        formData.append("intent", "CONTENT_DELETE");
-        formData.append("content_id", content_id);
+    const formData = new FormData();
+    formData.append("intent", "CONTENT_DELETE");
+    formData.append("content_id", content_id);
 
-        const res = await fetch("/app/templates/"+content.template_id, {
-            method: "POST",
-            body: formData,
-        });
+    const res = await fetch("/app/templates/" + content.template_id, {
+      method: "POST",
+      body: formData,
+    });
 
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to delete.");
-        }
-    };
+    if (res.ok) {
+      window.location.reload(); // Or use `navigate()` to refresh
+    } else {
+      alert("Failed to delete.");
+    }
+  };
 
 
   return (
@@ -58,7 +93,13 @@ export default function MeasurementComponent({ content }) {
             Size Measurement:
           </Text>
           <ButtonGroup>
-            <Button disabled={isSaveDisabled} variant="primary">Save</Button>
+            <Button 
+            disabled={isSaveDisabled} 
+            variant="primary"
+            onClick={() => handleBlockSave(content.id)}
+            >
+            Save
+            </Button>
             <Button
               tone="critical"
               icon={DeleteIcon}

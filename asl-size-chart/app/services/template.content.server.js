@@ -20,12 +20,12 @@ export async function addBlockByTemplateId(content_type, template_id) {
 
   let content_obj;
   if (content_type == CONTENT_TYPE_TABLE) {
-    content_obj = [
+    content_obj = JSON.stringify([
       ["Size", "Chest", "Waist"],
       ["S", "6", "4"],
       ["M", "6", "6"],
       ["L", "7", "8"],
-    ];
+    ]);
   } else {
     content_obj = '';
   }
@@ -35,9 +35,24 @@ export async function addBlockByTemplateId(content_type, template_id) {
       serial_no: 1,
       template_id: Number(template_id),
       content_type: content_type,
-      content_obj: JSON.stringify(content_obj),
+      content_obj: content_obj,
     },
   })
+
+  return Response.json({ templateContents });
+}
+
+export async function saveContent(id,content_obj) {
+  if (isNaN(id)) {
+    return Response.json({ error: "Invalid ID" }, { status: 400 });
+  }
+
+  const templateContents = await db.templateContent.update({
+      where: { id },
+      data: {
+        content_obj: content_obj,
+      },
+    });
 
   return Response.json({ templateContents });
 }

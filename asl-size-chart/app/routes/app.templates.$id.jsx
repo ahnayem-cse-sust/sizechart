@@ -15,7 +15,10 @@ import MeasurementComponent from '../components/template/measurement';
 import ImageUploadComponent from '../components/template/image_upload';
 import DescriptionComponent from '../components/template/description';
 import BlockButtonComponent from '../components/template/block_button';
-import { getAllTemplateContent, addBlockByTemplateId, deleteContentByContentId } from '../services/template.content.server';
+import {
+    getAllTemplateContent, addBlockByTemplateId,
+    deleteContentByContentId, saveContent
+} from '../services/template.content.server';
 
 import {
     TEMPLATE_CATEGORIES,
@@ -23,8 +26,6 @@ import {
     CONTENT_TYPE_TABLE,
     CONTENT_TYPE_IMAGE
 } from '../services/utils/defines';
-
-import '../assets/style.css';
 
 export async function loader({ params }) {
     const { id } = params;
@@ -43,7 +44,11 @@ export async function action({ request }) {
 
     switch (intent) {
         case "ADD_BLOCK":
-            response = await addBlockByTemplateId(form.get("content_type"),Number(form.get("template_id")));
+            response = await addBlockByTemplateId(form.get("content_type"), Number(form.get("template_id")));
+            break;
+
+        case "SAVE_BLOCK":
+            response = await saveContent(Number(form.get("content_id")), form.get("content_obj"));
             break;
 
         case "CONTENT_DELETE":
@@ -62,8 +67,6 @@ export async function action({ request }) {
 
 export default function TemplateView() {
     const { template, templateContents } = useLoaderData();
-
-    console.log(templateContents);
 
     return (
         <Page>
@@ -100,7 +103,7 @@ export default function TemplateView() {
                                 return <DescriptionComponent key={index} content={content} />;
                             case CONTENT_TYPE_IMAGE:
                                 return <ImageUploadComponent key={index} content={content} />;
-                        
+
                             default:
                                 return;
                         }
@@ -108,10 +111,10 @@ export default function TemplateView() {
 
                     {templateContents.length > 0 && (
                         <div className='mr-top-10'>
-                        <BlockButtonComponent btnText={'+ Add New Block'} templateId={template.id} />
-                    </div>
+                            <BlockButtonComponent btnText={'+ Add New Block'} templateId={template.id} />
+                        </div>
                     )}
-                    
+
                 </Card>
             </BlockStack>
         </Page>

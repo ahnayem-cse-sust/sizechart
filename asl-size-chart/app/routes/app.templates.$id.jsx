@@ -42,8 +42,6 @@ export async function action({ request }) {
 export default function TemplateViewComponent() {
     const { template, templateContents } = useLoaderData();
 
-    console.log(template);
-
     return (
         <Page>
             <BlockStack gap="400">
@@ -68,7 +66,7 @@ export default function TemplateViewComponent() {
                     >
                         <p>No content available.Add contents to presizely guide your customers.</p>
                         <div className='mr-top-10'>
-                            <AddBlockPopoverButton btnText={'+ Add New Content'} />
+                            <AddBlockPopoverButton btnText={'+ Add New Content'} templateId={template.id} />
                         </div>
                     </EmptyState>)}
                 </Card>
@@ -78,7 +76,7 @@ export default function TemplateViewComponent() {
 }
 
 
-function AddBlockPopoverButton({ btnText }) {
+function AddBlockPopoverButton({ btnText, templateId }) {
     const [popoverActive, setPopoverActive] = useState(false);
 
     const togglePopoverActive = useCallback(
@@ -92,6 +90,10 @@ function AddBlockPopoverButton({ btnText }) {
         </Button>
     );
 
+    const addTableBlock = (templateId)=>{
+        console.log(templateId);
+    }
+
     return (
         <div>
             <Popover
@@ -102,7 +104,7 @@ function AddBlockPopoverButton({ btnText }) {
             >
                 <ActionList
                     actionRole="menuitem"
-                    items={[{ content: 'Advanced Table' }, { content: 'Text' }]}
+                    items={[{ content: 'Advanced Table', onAction:() => addTableBlock(templateId)}, { content: 'Text' }]}
                 />
             </Popover>
         </div>

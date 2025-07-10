@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://equivalent-engineers-lonely-threatened.trycloudflare.com"
+application_url = "https://biggest-expectations-imports-arthur.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://equivalent-engineers-lonely-threatened.trycloudflare.com/auth/callback",
-  "https://equivalent-engineers-lonely-threatened.trycloudflare.com/auth/shopify/callback",
-  "https://equivalent-engineers-lonely-threatened.trycloudflare.com/api/auth/callback"
+  "https://biggest-expectations-imports-arthur.trycloudflare.com/auth/callback",
+  "https://biggest-expectations-imports-arthur.trycloudflare.com/auth/shopify/callback",
+  "https://biggest-expectations-imports-arthur.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

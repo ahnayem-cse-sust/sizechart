@@ -5,14 +5,15 @@ import {
     Text,
     Page,
     InlineStack,
-    BlockStack, Button,
-    EmptyState, Popover, ActionList
+    BlockStack,
+    EmptyState,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { getTemplateById } from '../services/template.server';
 import TemplateFormComponent from '../components/template/form';
 import MeasurementComponent from '../components/template/measurement';
-import { getAllTemplateContent } from '../services/template.content.server';
+import BlockButtonComponent from '../components/template/block_button';
+import { getAllTemplateContent, addTableByTemplateId } from '../services/template.content.server';
 
 import {
     TEMPLATE_CATEGORIES,
@@ -34,13 +35,30 @@ export async function loader({ params }) {
 }
 
 export async function action({ request }) {
+    const form = await request.formData();
+    const intent = form.get("intent");
 
+    let response;
+
+    switch (intent) {
+        case "ADD_TABLE":
+            response = await addTableByTemplateId(Number(form.get("template_id")));
+            break;
+
+        default:
+            response = Response.json({ error: "Invalid intent" }, { status: 400 });
+            break;
+    }
+
+    return response;
 
 }
 
 
-export default function TemplateViewComponent() {
+export default function TemplateView() {
     const { template, templateContents } = useLoaderData();
+
+    console.log(templateContents);
 
     return (
         <Page>
@@ -66,9 +84,14 @@ export default function TemplateViewComponent() {
                     >
                         <p>No content available.Add contents to presizely guide your customers.</p>
                         <div className='mr-top-10'>
-                            <AddBlockPopoverButton btnText={'+ Add New Content'} templateId={template.id} />
+                            <BlockButtonComponent btnText={'+ Add New Content'} templateId={template.id} />
                         </div>
                     </EmptyState>)}
+                    {templateContents.map((content, index) => {
+                        if (content.content_type === CONTENT_TYPE_TABLE) {
+                            return <MeasurementComponent key={index} />;
+                        }
+                    })}
                 </Card>
             </BlockStack>
         </Page>
@@ -76,39 +99,6 @@ export default function TemplateViewComponent() {
 }
 
 
-function AddBlockPopoverButton({ btnText, templateId }) {
-    const [popoverActive, setPopoverActive] = useState(false);
 
-    const togglePopoverActive = useCallback(
-        () => setPopoverActive((popoverActive) => !popoverActive),
-        [],
-    );
-
-    const activator = (
-        <Button variant='primary' onClick={togglePopoverActive} disclosure>
-            {btnText}
-        </Button>
-    );
-
-    const addTableBlock = (templateId)=>{
-        console.log(templateId);
-    }
-
-    return (
-        <div>
-            <Popover
-                active={popoverActive}
-                activator={activator}
-                autofocusTarget="first-node"
-                onClose={togglePopoverActive}
-            >
-                <ActionList
-                    actionRole="menuitem"
-                    items={[{ content: 'Advanced Table', onAction:() => addTableBlock(templateId)}, { content: 'Text' }]}
-                />
-            </Popover>
-        </div>
-    );
-}
 
 

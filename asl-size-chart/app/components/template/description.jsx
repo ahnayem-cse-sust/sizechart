@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Grid,
-  Text,ButtonGroup,Button,
+  Text, ButtonGroup, Button,
   InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
@@ -12,8 +12,9 @@ import 'react-quill/dist/quill.snow.css';
 
 export default function DescriptionComponent({ content }) {
   const [ReactQuill, setReactQuill] = useState(null);
-  const [description, setDescription] = useState(null);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const content_obj = content.content_obj ? JSON.parse(content.content_obj) : '';
+  const [description, setDescription] = useState(content_obj);
 
 
   useEffect(() => {
@@ -26,26 +27,49 @@ export default function DescriptionComponent({ content }) {
 
   const handleDescriptionChange = (value) => {
     setDescription(value);
+    if (value !== content_obj) {
+      setIsSaveDisabled(false);
+    }
+  };
+
+  const handleBlockSave = async (content_id) => {
+
+    const formData = new FormData();
+    formData.append("intent", "SAVE_BLOCK");
+    formData.append("content_id", content_id);
+    formData.append("content_obj", JSON.stringify(description));
+
+    const res = await fetch("/app/templates/" + content.template_id, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.ok) {
+      alert("Successfully saved.");
+      setIsSaveDisabled(true);
+    } else {
+      alert("Failed to save.");
+    }
   };
 
   const handleBlockDelete = async (content_id) => {
-        if (!confirm("Are you sure you want to delete this table?")) return;
+    if (!confirm("Are you sure you want to delete this table?")) return;
 
-        const formData = new FormData();
-        formData.append("intent", "CONTENT_DELETE");
-        formData.append("content_id", content_id);
+    const formData = new FormData();
+    formData.append("intent", "CONTENT_DELETE");
+    formData.append("content_id", content_id);
 
-        const res = await fetch("/app/templates/"+content.template_id, {
-            method: "POST",
-            body: formData,
-        });
+    const res = await fetch("/app/templates/" + content.template_id, {
+      method: "POST",
+      body: formData,
+    });
 
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to delete.");
-        }
-    };
+    if (res.ok) {
+      window.location.reload(); // Or use `navigate()` to refresh
+    } else {
+      alert("Failed to delete.");
+    }
+  };
 
 
   return (
@@ -57,7 +81,13 @@ export default function DescriptionComponent({ content }) {
               Description:
             </Text>
             <ButtonGroup>
-              <Button disabled={isSaveDisabled} variant="primary">Save</Button>
+              <Button
+                disabled={isSaveDisabled}
+                variant="primary"
+                onClick={() => handleBlockSave(content.id)}
+              >
+                Save
+              </Button>
               <Button
                 tone="critical"
                 icon={DeleteIcon}

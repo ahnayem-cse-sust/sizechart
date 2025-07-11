@@ -17,7 +17,7 @@ import DescriptionComponent from '../components/template/description';
 import BlockButtonComponent from '../components/template/block_button';
 import {
     getAllTemplateContent, addBlockByTemplateId,
-    deleteContentByContentId, saveContent
+    deleteContentByContentId, saveContent, saveImageContent, deleteImageContentByContentId
 } from '../services/template.content.server';
 
 import {
@@ -51,8 +51,16 @@ export async function action({ request }) {
             response = await saveContent(Number(form.get("content_id")), form.get("content_obj"));
             break;
 
+        case "SAVE_IMAGE_BLOCK":
+            response = await saveImageContent(Number(form.get("content_id")), form.get("content_obj"));
+            break;
+
         case "CONTENT_DELETE":
             response = await deleteContentByContentId(Number(form.get("content_id")));
+            break;
+
+        case "IMAGE_CONTENT_DELETE":
+            response = await deleteImageContentByContentId(Number(form.get("content_id")));
             break;
 
         default:
@@ -73,19 +81,24 @@ export default function TemplateView() {
             <BlockStack gap="400">
                 <Card>
                     <InlineStack wrap={false}>
-                        <Text variant="headingLg">Title: </Text>
+                        <Text variant="headingLg">Template Title: </Text>
                         <Text>{template.title}</Text>
                     </InlineStack>
 
                     <InlineStack wrap={false}>
                         <Text variant="headingLg">
-                            Category:
+                            Template Category:
                         </Text>
                         <Text>{template.category}</Text>
                     </InlineStack>
                     <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={template} />
                 </Card>
                 <Card>
+                    <InlineStack align="center">
+                        <Text variant="heading2xl" as="h3">
+                            {template.title} Size Guide
+                        </Text>
+                    </InlineStack>
                     {templateContents.length < 1 && (<EmptyState
                         heading="Manage your size guide"
                         image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"

@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 import {
     Grid,
     DropZone,
-    Text,ButtonGroup,Button,
-    InlineStack
+    Text, ButtonGroup, Button,
+    InlineStack, MediaCard
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 
@@ -11,23 +11,86 @@ export default function ImageUploadComponent({ content }) {
     const [file, setFile] = useState(null);
     const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
+    const previousFileUrl = content.content_obj ? '/uploads/' + content.content_obj : null;
+
+    // console.log(content);
+
     const handleDropZoneDrop = useCallback(
         (_dropFiles, acceptedFiles, _rejectedFiles) => {
             if (acceptedFiles.length > 0) {
                 setFile(acceptedFiles[0]); // Only accept first file
+                setIsSaveDisabled(false);
+            } else {
+                setIsSaveDisabled(true);
             }
         },
         []
     );
 
-    const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+    const handleBlockSave = async (content_id) => {
+        const formData = new FormData();
+        formData.append("intent", "SAVE_IMAGE_BLOCK");
+        formData.append("content_id", content_id);
+        formData.append("content_obj", file);
 
-    const fileUpload = !file && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, and .png" />;
+        const res = await fetch("/app/templates/" + content.template_id, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (res.ok) {
+            alert("Successfully saved.");
+            setIsSaveDisabled(true);
+        } else {
+            alert("Failed to save.");
+        }
+    };
+
+    const handleBlockDelete = async (content_id) => {
+        if (!confirm("Are you sure you want to delete this table?")) return;
+
+        const formData = new FormData();
+        formData.append("intent", "IMAGE_CONTENT_DELETE");
+        formData.append("content_id", content_id);
+
+        const res = await fetch("/app/templates/" + content.template_id, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (res.ok) {
+            window.location.reload(); // Or use `navigate()` to refresh
+        } else {
+            alert("Failed to delete.");
+        }
+    };
+
+    const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+
+    const fileUpload = (!file && !previousFileUrl) && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, .jpg and .png" />;
+
+    const previousFile = (!file && previousFileUrl) && (
+        <div style={{ padding: '25px' }}>
+            <div style={{ width: '50%', height: '250px', overflow: 'hidden', margin: 'auto' }}>
+                <img
+                    src={previousFileUrl}
+                    alt="Uploaded preview"
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: 'var(--p-border-radius-base)',
+                    }}
+                />
+            </div>
+            <DropZone.FileUpload actionTitle="Change" actionHint="Accepts .gif, .jpeg, and .png" />
+        </div>
+    );
 
     const uploadedFiles = file && (
         <div style={{ padding: '25px' }}>
             {validImageTypes.includes(file.type) ? (
-                <div style={{ width: '30%', height: '150px', overflow: 'hidden', margin: 'auto' }}>
+                <div style={{ width: '50%', height: '250px', overflow: 'hidden', margin: 'auto' }}>
                     <img
                         src={
                             validImageTypes.includes(file.type)
@@ -52,26 +115,6 @@ export default function ImageUploadComponent({ content }) {
         </div>
     );
 
-    const handleBlockDelete = async (content_id) => {
-        if (!confirm("Are you sure you want to delete this table?")) return;
-
-        const formData = new FormData();
-        formData.append("intent", "CONTENT_DELETE");
-        formData.append("content_id", content_id);
-
-        const res = await fetch("/app/templates/" + content.template_id, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to delete.");
-        }
-    };
-
-
     return (
 
 
@@ -82,7 +125,13 @@ export default function ImageUploadComponent({ content }) {
                         Upload Image:
                     </Text>
                     <ButtonGroup>
-                        <Button disabled={isSaveDisabled} variant="primary">Save</Button>
+                        <Button
+                            disabled={isSaveDisabled}
+                            variant="primary"
+                            onClick={() => handleBlockSave(content.id)}
+                        >
+                            Save
+                        </Button>
                         <Button
                             tone="critical"
                             icon={DeleteIcon}
@@ -97,6 +146,7 @@ export default function ImageUploadComponent({ content }) {
                 <DropZone
                     allowMultiple={false}
                     onDrop={handleDropZoneDrop}>
+                    {previousFile}
                     {uploadedFiles}
                     {fileUpload}
                 </DropZone>

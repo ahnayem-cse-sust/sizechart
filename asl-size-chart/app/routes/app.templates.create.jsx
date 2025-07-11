@@ -13,7 +13,6 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { redirect } from '@remix-run/react';
 import { getTemplateCategoryList, saveTemplate } from '../services/template.server';
 
-import '../assets/style.css';
 
 export async function loader() {
   const templateCategories = await getTemplateCategoryList();

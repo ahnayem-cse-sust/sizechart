@@ -1,9 +1,8 @@
 import db from "../db.server";
-import { writeFile, unlink } from 'fs/promises';
-import path from 'path';
-import { v4 as uuid } from 'uuid';
 import * as content_constants from './constants/content';
-import * as global_constants from './constants/global';
+import * as upload_util from "./utils/upload";
+
+const moduleName = 'Template-Content';
 
 export async function contentFactory({ request }) {
   const form = await request.formData();
@@ -106,27 +105,23 @@ async function saveImageContent(id, content_obj) {
     return Response.json({ error: 'Invalid file' }, { status: 400 });
   }
 
-  const buffer = Buffer.from(await image.arrayBuffer());
-  const filename = 'template-content-' + id + '-' + `${uuid()}-${image.name}`;
-  const filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, filename);
+  const fileName = await upload_util.upload(moduleName, image);
 
-  await writeFile(filepath, buffer);
+  if (!fileName)
+    return Response.json({ error: 'Upload error' }, { status: 400 });
 
-  const content = await db.templateContent.findFirst({
+  const oldContent = await db.templateContent.findFirst({
     where: { id },
   });
+
+  await upload_util.remove(oldContent.content_obj);
 
   const templateContents = await db.templateContent.update({
     where: { id },
     data: {
-      content_obj: filename,
+      content_obj: fileName,
     },
   });
-
-  if (content.content_obj) {
-    const unlink_filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, content.content_obj);
-    await unlink(unlink_filepath);
-  }
 
   return Response.json({ templateContents });
 }
@@ -152,10 +147,7 @@ async function deleteImageContentByContentId(id) {
     where: { id },
   });
 
-  if (content.content_obj) {
-    const unlink_filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, content.content_obj);
-    await unlink(unlink_filepath);
-  }
+  await upload_util.remove(content.content_obj);
 
   await db.templateContent.deleteMany({
     where: { id },

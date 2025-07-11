@@ -6,6 +6,7 @@ import {
   TextField, ButtonGroup, InlineStack
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
+import * as content_constants from '../../services/constants/content';
 
 
 export default function MeasurementComponent({ content }) {
@@ -45,7 +46,7 @@ export default function MeasurementComponent({ content }) {
   const handleBlockSave = async (content_id) => {
 
     const formData = new FormData();
-    formData.append("intent", "SAVE_BLOCK");
+    formData.append("intent", content_constants.INTENT_SAVE_BLOCK);
     formData.append("content_id", content_id);
     formData.append("content_obj", JSON.stringify(sizeTable));
 
@@ -66,7 +67,7 @@ export default function MeasurementComponent({ content }) {
     if (!confirm("Are you sure you want to delete this table?")) return;
 
     const formData = new FormData();
-    formData.append("intent", "CONTENT_DELETE");
+    formData.append("intent", content_constants.INTENT_CONTENT_DELETE);
     formData.append("content_id", content_id);
 
     const res = await fetch("/app/templates/" + content.template_id, {

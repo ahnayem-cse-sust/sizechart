@@ -1,17 +1,16 @@
 import {
-    useBreakpoints,
     IndexTable,
-    Card,
     useIndexResourceState,
     Text,
     Box,
     Pagination,
     Link,
     Button,
-    ButtonGroup,
     InlineStack
 } from '@shopify/polaris';
 import { useNavigate } from "@remix-run/react";
+import { INTENT,INTENT_DELETE } from '../../services/constants/global';
+import { TEMPLATE_BASE_URL, TEMPLATE_CONTENTS_URL } from '../../services/constants/routes';
 
 export function TemplateListComponent({ templates, pagination }) {
     const resourceName = {
@@ -28,10 +27,10 @@ export function TemplateListComponent({ templates, pagination }) {
         if (!confirm("Are you sure you want to delete this template?")) return;
 
         const formData = new FormData();
-        formData.append("intent", "DELETE");
+        formData.append(INTENT, INTENT_DELETE);
         formData.append("id", id);
 
-        const res = await fetch("/app/templates", {
+        const res = await fetch(TEMPLATE_BASE_URL, {
             method: "POST",
             body: formData,
         });
@@ -81,7 +80,7 @@ export function TemplateListComponent({ templates, pagination }) {
                                 }}
                             >
                                 <IndexTable.Cell>
-                                    <Link to={`/app/templates/edit/${template.id}`}>
+                                    <Link to={TEMPLATE_CONTENTS_URL+`${template.id}`}>
                                         <Text variant="bodyMd" fontWeight="medium" as="span">
                                             {template.title}
                                         </Text>
@@ -92,7 +91,7 @@ export function TemplateListComponent({ templates, pagination }) {
                                 </IndexTable.Cell>
                                 <IndexTable.Cell>
                                     <InlineStack gap="2">
-                                        <Button url={`/app/templates/${template.id}`} size="slim">View</Button>
+                                        <Button url={TEMPLATE_CONTENTS_URL+`${template.id}`} size="slim">View</Button>
                                         <Button
                                             size="slim"
                                             tone="critical"

@@ -1,0 +1,17 @@
+
+export const CONTENT_TYPE_DESCRIPTION = 'CT_DSC';
+export const CONTENT_TYPE_TABLE = 'CT_TBL';
+export const CONTENT_TYPE_IMAGE = 'CT_IMG';
+
+export const CONTENT_TYPE_LIST = {
+  CONTENT_TYPE_DESCRIPTION: 'Description',
+  CONTENT_TYPE_TABLE: 'Advanced Table',
+  CONTENT_TYPE_IMAGE: 'Image',
+};
+
+export const INTENT = 'intent';
+export const INTENT_ADD_BLOCK = 'ADD_BLOCK';
+export const INTENT_SAVE_BLOCK = 'SAVE_BLOCK';
+export const INTENT_SAVE_IMAGE_BLOCK = 'SAVE_IMAGE_BLOCK';
+export const INTENT_CONTENT_DELETE = 'CONTENT_DELETE';
+export const INTENT_IMAGE_CONTENT_DELETE = 'IMAGE_CONTENT_DELETE';

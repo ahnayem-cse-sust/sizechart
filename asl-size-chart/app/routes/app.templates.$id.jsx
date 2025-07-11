@@ -16,16 +16,11 @@ import ImageUploadComponent from '../components/template/image_upload';
 import DescriptionComponent from '../components/template/description';
 import BlockButtonComponent from '../components/template/block_button';
 import {
-    getAllTemplateContent, addBlockByTemplateId,
-    deleteContentByContentId, saveContent, saveImageContent, deleteImageContentByContentId
+    getAllTemplateContent, contentFactory
 } from '../services/template.content.server';
 
-import {
-    TEMPLATE_CATEGORIES,
-    CONTENT_TYPE_DESCRIPTION,
-    CONTENT_TYPE_TABLE,
-    CONTENT_TYPE_IMAGE
-} from '../services/utils/defines';
+import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
+import * as content_constants from '../services/constants/content';
 
 export async function loader({ params }) {
     const { id } = params;
@@ -37,39 +32,7 @@ export async function loader({ params }) {
 }
 
 export async function action({ request }) {
-    const form = await request.formData();
-    const intent = form.get("intent");
-
-    let response;
-
-    switch (intent) {
-        case "ADD_BLOCK":
-            response = await addBlockByTemplateId(form.get("content_type"), Number(form.get("template_id")));
-            break;
-
-        case "SAVE_BLOCK":
-            response = await saveContent(Number(form.get("content_id")), form.get("content_obj"));
-            break;
-
-        case "SAVE_IMAGE_BLOCK":
-            response = await saveImageContent(Number(form.get("content_id")), form.get("content_obj"));
-            break;
-
-        case "CONTENT_DELETE":
-            response = await deleteContentByContentId(Number(form.get("content_id")));
-            break;
-
-        case "IMAGE_CONTENT_DELETE":
-            response = await deleteImageContentByContentId(Number(form.get("content_id")));
-            break;
-
-        default:
-            response = Response.json({ error: "Invalid intent" }, { status: 400 });
-            break;
-    }
-
-    return response;
-
+    return await contentFactory({ request });
 }
 
 
@@ -110,11 +73,11 @@ export default function TemplateView() {
                     </EmptyState>)}
                     {templateContents.map((content, index) => {
                         switch (content.content_type) {
-                            case CONTENT_TYPE_TABLE:
+                            case content_constants.CONTENT_TYPE_TABLE:
                                 return <MeasurementComponent key={index} content={content} />;
-                            case CONTENT_TYPE_DESCRIPTION:
+                            case content_constants.CONTENT_TYPE_DESCRIPTION:
                                 return <DescriptionComponent key={index} content={content} />;
-                            case CONTENT_TYPE_IMAGE:
+                            case content_constants.CONTENT_TYPE_IMAGE:
                                 return <ImageUploadComponent key={index} content={content} />;
 
                             default:

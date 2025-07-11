@@ -1,8 +1,44 @@
 import db from "../db.server";
-import { CONTENT_TYPE_TABLE, CONTENT_TYPE_DESCRIPTION, CONTENT_TYPE_IMAGE } from "./utils/defines";
-import { writeFile,unlink } from 'fs/promises';
+import { writeFile, unlink } from 'fs/promises';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
+import * as content_constants from './constants/content';
+import * as global_constants from './constants/global';
+
+export async function contentFactory({ request }) {
+  const form = await request.formData();
+  const intent = form.get(content_constants.INTENT);
+
+  let response;
+
+  switch (intent) {
+    case content_constants.INTENT_ADD_BLOCK:
+      response = await addBlockByTemplateId(form.get("content_type"), Number(form.get("template_id")));
+      break;
+
+    case content_constants.INTENT_SAVE_BLOCK:
+      response = await saveContent(Number(form.get("content_id")), form.get("content_obj"));
+      break;
+
+    case content_constants.INTENT_SAVE_IMAGE_BLOCK:
+      response = await saveImageContent(Number(form.get("content_id")), form.get("content_obj"));
+      break;
+
+    case content_constants.INTENT_CONTENT_DELETE:
+      response = await deleteContentByContentId(Number(form.get("content_id")));
+      break;
+
+    case content_constants.INTENT_IMAGE_CONTENT_DELETE:
+      response = await deleteImageContentByContentId(Number(form.get("content_id")));
+      break;
+
+    default:
+      response = Response.json({ error: "Invalid intent" }, { status: 400 });
+      break;
+  }
+
+  return response;
+}
 
 export async function getAllTemplateContent(template_id) {
   if (isNaN(template_id)) {
@@ -16,13 +52,13 @@ export async function getAllTemplateContent(template_id) {
   return Response.json({ templateContents });
 }
 
-export async function addBlockByTemplateId(content_type, template_id) {
+async function addBlockByTemplateId(content_type, template_id) {
   if (isNaN(template_id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
 
   let content_obj;
-  if (content_type == CONTENT_TYPE_TABLE) {
+  if (content_type == content_constants.CONTENT_TYPE_TABLE) {
     content_obj = JSON.stringify([
       ["Size", "Chest", "Waist"],
       ["S", "6", "4"],
@@ -45,7 +81,7 @@ export async function addBlockByTemplateId(content_type, template_id) {
   return Response.json({ templateContents });
 }
 
-export async function saveContent(id, content_obj) {
+async function saveContent(id, content_obj) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
@@ -60,7 +96,7 @@ export async function saveContent(id, content_obj) {
   return Response.json({ templateContents });
 }
 
-export async function saveImageContent(id, content_obj) {
+async function saveImageContent(id, content_obj) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
@@ -71,15 +107,15 @@ export async function saveImageContent(id, content_obj) {
   }
 
   const buffer = Buffer.from(await image.arrayBuffer());
-  const filename = 'template-content-'+id+'-'+`${uuid()}-${image.name}`;
-  const filepath = path.resolve('public/uploads', filename);
+  const filename = 'template-content-' + id + '-' + `${uuid()}-${image.name}`;
+  const filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, filename);
 
   await writeFile(filepath, buffer);
 
   const content = await db.templateContent.findFirst({
     where: { id },
   });
-  
+
   const templateContents = await db.templateContent.update({
     where: { id },
     data: {
@@ -88,14 +124,14 @@ export async function saveImageContent(id, content_obj) {
   });
 
   if (content.content_obj) {
-    const unlink_filepath = path.resolve('public/uploads', content.content_obj);
+    const unlink_filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, content.content_obj);
     await unlink(unlink_filepath);
   }
 
   return Response.json({ templateContents });
 }
 
-export async function deleteContentByContentId(id) {
+async function deleteContentByContentId(id) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
@@ -107,7 +143,7 @@ export async function deleteContentByContentId(id) {
   return Response.json({ success: true });
 }
 
-export async function deleteImageContentByContentId(id) {
+async function deleteImageContentByContentId(id) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
@@ -115,9 +151,9 @@ export async function deleteImageContentByContentId(id) {
   const content = await db.templateContent.findFirst({
     where: { id },
   });
-  
+
   if (content.content_obj) {
-    const unlink_filepath = path.resolve('public/uploads', content.content_obj);
+    const unlink_filepath = path.resolve(global_constants.PUBLIC_UPLOAD_PATH, content.content_obj);
     await unlink(unlink_filepath);
   }
 

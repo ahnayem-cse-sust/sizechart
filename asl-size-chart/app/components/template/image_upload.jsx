@@ -3,7 +3,7 @@ import {
     Grid,
     DropZone,
     Text, ButtonGroup, Button,
-    InlineStack, MediaCard
+    InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 

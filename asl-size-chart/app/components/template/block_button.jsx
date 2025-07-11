@@ -3,11 +3,7 @@ import {
     Button,
     Popover, ActionList
 } from "@shopify/polaris";
-import {
-    CONTENT_TYPE_DESCRIPTION,
-    CONTENT_TYPE_TABLE,
-    CONTENT_TYPE_IMAGE
-} from '../../services/utils/defines';
+import * as content_constants from '../../services/constants/content';
 
 export default function BlockButtonComponent({ btnText, templateId }) {
     const [popoverActive, setPopoverActive] = useState(false);
@@ -26,7 +22,7 @@ export default function BlockButtonComponent({ btnText, templateId }) {
     const addBlock = async (contentType,templateId) => {
 
         const formData = new FormData();
-        formData.append("intent", "ADD_BLOCK");
+        formData.append("intent", content_constants.INTENT_ADD_BLOCK);
         formData.append("template_id", templateId);
         formData.append("content_type", contentType);
 
@@ -53,9 +49,9 @@ export default function BlockButtonComponent({ btnText, templateId }) {
                 <ActionList
                     actionRole="menuitem"
                     items={[
-                        { content: 'Advanced Table', onAction: () => addBlock(CONTENT_TYPE_TABLE,templateId) },
-                        { content: 'Text', onAction: () => addBlock(CONTENT_TYPE_DESCRIPTION,templateId) },
-                        { content: 'Image', onAction: () => addBlock(CONTENT_TYPE_IMAGE,templateId) }
+                        { content: 'Advanced Table', onAction: () => addBlock(content_constants.CONTENT_TYPE_TABLE,templateId) },
+                        { content: 'Text', onAction: () => addBlock(content_constants.CONTENT_TYPE_DESCRIPTION,templateId) },
+                        { content: 'Image', onAction: () => addBlock(content_constants.CONTENT_TYPE_IMAGE,templateId) }
                     ]}
                 />
             </Popover>

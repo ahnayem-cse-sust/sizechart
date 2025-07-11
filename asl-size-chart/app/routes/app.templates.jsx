@@ -9,9 +9,8 @@ import { Outlet, useLocation } from '@remix-run/react';
 import { TemplateListComponent } from '../components/template/list';
 import TemplateFormComponent from '../components/template/form';
 import { getPaginatedTemplates, deleteTemplate } from '../services/template.server';
-import {
-    TEMPLATE_CATEGORIES
- } from '../services/utils/defines';
+import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
+import { TEMPLATE_BASE_URL } from '../services/constants/routes';
 
 
 export async function loader({ request }) {
@@ -46,7 +45,7 @@ export async function action({ request }) {
 export default function SizeChartTemplates() {
   const { templates, pagination } = useLoaderData();
   const location = useLocation();
-  const isBaseRoute = location.pathname === "/app/templates";
+  const isBaseRoute = location.pathname === TEMPLATE_BASE_URL;
   // const isCreateRoute = location.pathname === "/app/templates";
   // const isBaseRoute = location.pathname === "/app/templates";
 
@@ -59,14 +58,14 @@ export default function SizeChartTemplates() {
           <Layout.Section>
             <InlineStack align="space-between" blockAlign="center">
               <div>
-              <Text as="h2" variant="headingLg">
-                Manage Templates
-              </Text>
-              <Text as="p" tone="subdued" variant="bodyXs">
-                Save templates to create multiple sizecharts in short time.
-              </Text>
+                <Text as="h2" variant="headingLg">
+                  Manage Templates
+                </Text>
+                <Text as="p" tone="subdued" variant="bodyXs">
+                  Save templates to create multiple sizecharts in short time.
+                </Text>
               </div>
-              <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={null}/>
+              <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={null} />
             </InlineStack>
           </Layout.Section>
 

@@ -114,7 +114,7 @@ export default function MeasurementComponent({ content }) {
         <div className='measurement-table'>
           <table style={{ width: '100%' }}>
             {sizeTable.map((row, rIdx) => (
-              <tr key={rIdx} wrap={false} gap="2">
+              <tr key={rIdx} gap="2">
                 {row.map((cell, cIdx) => (
                   <td>
                     <TextField

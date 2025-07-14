@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://trio-duty-extreme-examines.trycloudflare.com"
+application_url = "https://stolen-motivation-budget-bent.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,7 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://trio-duty-extreme-examines.trycloudflare.com/auth/callback", "https://trio-duty-extreme-examines.trycloudflare.com/auth/shopify/callback", "https://trio-duty-extreme-examines.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://stolen-motivation-budget-bent.trycloudflare.com/auth/callback", "https://stolen-motivation-budget-bent.trycloudflare.com/auth/shopify/callback", "https://stolen-motivation-budget-bent.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

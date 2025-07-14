@@ -97,7 +97,7 @@ export default function TemplateView() {
                             {template.title} Size Guide
                         </Text>
                     </InlineStack>
-                    <TemplateContentComponent />
+                    <TemplateContentComponent templateContents={templateContents} />
                     <div className='mr-top-10'>
                         <BlockButtonComponent btnText={'+ Add New Block'} templateId={template.id} />
                     </div>

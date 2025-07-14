@@ -14,6 +14,11 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { Card, Text } from '@shopify/polaris';
+import { useEffect } from 'react';
+import * as content_constants from '../../services/constants/content';
+import MeasurementComponent from './measurement';
+import ImageUploadComponent from './image_upload';
+import DescriptionComponent from './description';
 
 const DraggableItem = ({ id, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -33,14 +38,21 @@ const DraggableItem = ({ id, children }) => {
   );
 };
 
-export default function TemplateContentComponent() {
-  const [items, setItems] = useState([
-    { id: 'block-1', type: 'text', content: 'This is a text block' },
-    { id: 'block-2', type: 'image', content: 'https://via.placeholder.com/150' },
-    { id: 'block-3', type: 'table', content: [['Size', 'Chest'], ['M', '38']] },
-  ]);
+export default function TemplateContentComponent({templateContents}) {
+  // const [items, setItems] = useState([
+  //   { id: 'block-1', type: 'text', content: 'This is a text block' },
+  //   { id: 'block-2', type: 'image', content: 'https://via.placeholder.com/150' },
+  //   { id: 'block-3', type: 'table', content: [['Size', 'Chest'], ['M', '38']] },
+  // ]);
+  const [items, setItems] = useState(templateContents);
+
+  console.log(templateContents);
 
   const sensors = useSensors(useSensor(PointerSensor));
+
+  useEffect(() => {
+    console.log('Updated items:', items);
+  }, [items]);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -58,25 +70,9 @@ export default function TemplateContentComponent() {
         {items.map((item) => (
           <DraggableItem key={item.id} id={item.id}>
             <Card>
-              {item.type === 'text' && <Text>{item.content}</Text>}
-              {item.type === 'image' && (
-                <img src={item.content} alt="Uploaded" style={{ width: '100%' }} />
-              )}
-              {item.type === 'table' && (
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {item.content.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        {row.map((cell, colIndex) => (
-                          <td key={colIndex} style={{ border: '1px solid gray', padding: '4px' }}>
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} />}
+              {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} />}
+              {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} />}              
             </Card>
           </DraggableItem>
         ))}

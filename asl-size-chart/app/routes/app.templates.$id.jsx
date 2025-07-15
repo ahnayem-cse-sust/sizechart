@@ -55,7 +55,7 @@ export default function TemplateView() {
                     </InlineStack>
                     <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={template} />
                 </Card>
-                <Card>
+                {/* <Card>
                     <InlineStack align="center">
                         <Text variant="heading2xl" as="h3">
                             {template.title} Size Guide
@@ -90,7 +90,7 @@ export default function TemplateView() {
                         </div>
                     )}
 
-                </Card>
+                </Card> */}
                 <Card>
                     <InlineStack align="center">
                         <Text variant="heading2xl" as="h3">

@@ -13,12 +13,15 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
-import { Card, Text } from '@shopify/polaris';
+import { Card, Button } from '@shopify/polaris';
 import { useEffect } from 'react';
 import * as content_constants from '../../services/constants/content';
 import MeasurementComponent from './measurement';
 import ImageUploadComponent from './image_upload';
 import DescriptionComponent from './description';
+import {
+  DragHandleIcon
+} from '@shopify/polaris-icons';
 
 const DraggableItem = ({ id, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -27,26 +30,39 @@ const DraggableItem = ({ id, children }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: 'move',
     marginBottom: '1rem',
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
+    <div ref={setNodeRef} style={style} {...attributes} >
+      {/* <div style={{ position: 'relative', top: 8, left: 8, zIndex: 10 }}>
+        <Button icon={DragHandleIcon} size="micro" {...listeners} />
+      </div> */}
+      {children({ listeners })}
     </div>
   );
 };
 
-export default function TemplateContentComponent({templateContents}) {
+const ContentBlock = ({ item, listeners }) => {
+  return (
+    <Card>
+      <div>
+        <span style={{cursor:'move'}}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
+      </div>
+      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} />}
+      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} />}
+      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} />}
+    </Card>
+  );
+};
+
+export default function TemplateContentComponent({ templateContents }) {
   // const [items, setItems] = useState([
   //   { id: 'block-1', type: 'text', content: 'This is a text block' },
   //   { id: 'block-2', type: 'image', content: 'https://via.placeholder.com/150' },
   //   { id: 'block-3', type: 'table', content: [['Size', 'Chest'], ['M', '38']] },
   // ]);
   const [items, setItems] = useState(templateContents);
-
-  console.log(templateContents);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -69,11 +85,10 @@ export default function TemplateContentComponent({templateContents}) {
       <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         {items.map((item) => (
           <DraggableItem key={item.id} id={item.id}>
-            <Card>
-              {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} />}
-              {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} />}
-              {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} />}              
-            </Card>
+            
+              {({ listeners }) => (
+                <ContentBlock item={item} listeners={listeners} />
+              )}
           </DraggableItem>
         ))}
       </SortableContext>

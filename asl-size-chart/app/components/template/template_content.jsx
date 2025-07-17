@@ -68,6 +68,32 @@ export default function TemplateContentComponent({ templateContents }) {
 
   useEffect(() => {
     console.log('Updated items:', items);
+    let serialArray = [];
+    let serial = 0;
+    items.forEach(element => {
+      serialArray.push({
+        id: element.id,
+        serial_no: ++serial
+      });
+    });
+    console.log(serialArray);
+    
+    // const formData = new FormData();
+    // formData.append("intent", "SAVE_BLOCK");
+    // formData.append("content_id", content_id);
+    // formData.append("content_obj", JSON.stringify(description));
+
+    // const res = await fetch("/app/templates/" + content.template_id, {
+    //   method: "POST",
+    //   body: formData,
+    // });
+
+    // if (res.ok) {
+    //   alert("Successfully saved.");
+    //   setIsSaveDisabled(true);
+    // } else {
+    //   alert("Failed to save.");
+    // }
   }, [items]);
 
   const handleDragEnd = (event) => {

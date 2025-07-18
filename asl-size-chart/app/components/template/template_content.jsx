@@ -47,7 +47,7 @@ const ContentBlock = ({ item, listeners }) => {
   return (
     <Card>
       <div>
-        <span style={{cursor:'move'}}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
+        <span style={{ cursor: 'move' }}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
       </div>
       {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} />}
       {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} />}
@@ -57,43 +57,38 @@ const ContentBlock = ({ item, listeners }) => {
 };
 
 export default function TemplateContentComponent({ templateContents }) {
-  // const [items, setItems] = useState([
-  //   { id: 'block-1', type: 'text', content: 'This is a text block' },
-  //   { id: 'block-2', type: 'image', content: 'https://via.placeholder.com/150' },
-  //   { id: 'block-3', type: 'table', content: [['Size', 'Chest'], ['M', '38']] },
-  // ]);
   const [items, setItems] = useState(templateContents);
-
+  const [loaded, setLoaded] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-    console.log('Updated items:', items);
-    let serialArray = [];
-    let serial = 0;
-    items.forEach(element => {
-      serialArray.push({
-        id: element.id,
-        serial_no: ++serial
+    if (loaded) {
+      let serialArray = [];
+      let serial = 0;
+      items.forEach(element => {
+        serialArray.push({
+          id: element.id,
+          serial_no: ++serial
+        });
       });
-    });
-    console.log(serialArray);
-    
-    // const formData = new FormData();
-    // formData.append("intent", "SAVE_BLOCK");
-    // formData.append("content_id", content_id);
-    // formData.append("content_obj", JSON.stringify(description));
 
-    // const res = await fetch("/app/templates/" + content.template_id, {
-    //   method: "POST",
-    //   body: formData,
-    // });
+      const formData = new FormData();
+      formData.append("intent", "UPDATE_SERIAL");
+      formData.append("serial_json", JSON.stringify(serialArray));
 
-    // if (res.ok) {
-    //   alert("Successfully saved.");
-    //   setIsSaveDisabled(true);
-    // } else {
-    //   alert("Failed to save.");
-    // }
+      fetch("/app/templates", {
+        method: "POST",
+        body: formData,
+      }).then(res => {
+        // console.log(res);
+        if (res.ok) {
+          console.log("Serial updated successfully");
+        } else {
+          console.log("Something went wrong!! Serial not updated.")
+        }
+      });
+    }
+
   }, [items]);
 
   const handleDragEnd = (event) => {
@@ -104,6 +99,7 @@ export default function TemplateContentComponent({ templateContents }) {
       const newIndex = items.findIndex((item) => item.id === over.id);
       setItems((items) => arrayMove(items, oldIndex, newIndex));
     }
+    setLoaded(true);
   };
 
   return (
@@ -111,10 +107,10 @@ export default function TemplateContentComponent({ templateContents }) {
       <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         {items.map((item) => (
           <DraggableItem key={item.id} id={item.id}>
-            
-              {({ listeners }) => (
-                <ContentBlock item={item} listeners={listeners} />
-              )}
+
+            {({ listeners }) => (
+              <ContentBlock item={item} listeners={listeners} />
+            )}
           </DraggableItem>
         ))}
       </SortableContext>

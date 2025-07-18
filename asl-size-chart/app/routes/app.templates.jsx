@@ -8,10 +8,10 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { Outlet, useLocation } from '@remix-run/react';
 import { TemplateListComponent } from '../components/template/list';
 import TemplateFormComponent from '../components/template/form';
-import { getPaginatedTemplates, deleteTemplate } from '../services/template.server';
+import { getPaginatedTemplates, deleteTemplate, updateTemplateContentSerial } from '../services/template.server';
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
 import { TEMPLATE_BASE_URL } from '../services/constants/routes';
-import { INTENT_DELETE } from '../services/constants/global';
+import { INTENT_DELETE,UPDATE_SERIAL } from '../services/constants/global';
 
 
 export async function loader({ request }) {
@@ -32,6 +32,9 @@ export async function action({ request }) {
   switch (intent) {
     case INTENT_DELETE:
       response = await deleteTemplate(Number(form.get("id")));
+      break;
+    case UPDATE_SERIAL:
+      response = await updateTemplateContentSerial(form.get("serial_json"));
       break;
 
     default:

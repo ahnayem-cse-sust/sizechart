@@ -46,6 +46,11 @@ export async function getAllTemplateContent(template_id) {
 
   const templateContents = await db.templateContent.findMany({
     where: { template_id },
+    orderBy: [
+      {
+        serial_no: 'asc',
+      },
+    ],
   });
 
   return Response.json({ templateContents });

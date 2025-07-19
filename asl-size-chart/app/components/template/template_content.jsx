@@ -19,9 +19,7 @@ import * as content_constants from '../../services/constants/content';
 import MeasurementComponent from './measurement';
 import ImageUploadComponent from './image_upload';
 import DescriptionComponent from './description';
-import {
-  DragHandleIcon
-} from '@shopify/polaris-icons';
+import { DragHandleIcon } from '@shopify/polaris-icons';
 
 const DraggableItem = ({ id, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -83,6 +81,7 @@ export default function TemplateContentComponent({ templateContents }) {
         // console.log(res);
         if (res.ok) {
           console.log("Serial updated successfully");
+          window.location.reload();
         } else {
           console.log("Something went wrong!! Serial not updated.")
         }

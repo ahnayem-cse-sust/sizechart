@@ -54,24 +54,46 @@
 }
 
 .sz-chart-col-btn {
-    height: 100%;
-    background-color: rgb(233, 237, 237);
-    text-align: center;
-    width: min-content;
-    transform: translateX(-45%);
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
+  height: 100%;
+  background-color: rgb(233, 237, 237);
+  text-align: center;
+  width: min-content;
+  transform: translateX(-45%);
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 .sz-chart-row-btn {
-    width: 100%;
-    background-color: rgb(233, 237, 237);
-    text-align: center;
-    transform: translateY(-45%);
-    border-bottom-right-radius: 15px;
-    border-bottom-left-radius: 15px;
+  width: 100%;
+  background-color: rgb(233, 237, 237);
+  text-align: center;
+  transform: translateY(-45%);
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
-.mr-top-10{
+.mr-top-10 {
   margin-top: 10px;
+}
+
+.page-spinner {
+  text-align: center;
+  min-height: 100vh;
+  margin-top: 40vh;
+}
+
+.component-spinner {
+  text-align: center;
+  position: absolute;
+  z-index: 999;
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+  background: rgb(247, 245, 245);
+  opacity: 0.4;
+}
+
+.spin {
+  position: absolute;
+  top: 40%;
+  left: 50%;
 }

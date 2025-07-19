@@ -2,7 +2,7 @@ import { useLoaderData } from '@remix-run/react';
 import {
   Page, Layout,
   Text,
-  InlineStack
+  InlineStack, Spinner
 } from '@shopify/polaris';
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Outlet, useLocation } from '@remix-run/react';
@@ -12,7 +12,7 @@ import { getPaginatedTemplates, deleteTemplate, updateTemplateContentSerial } fr
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
 import { TEMPLATE_BASE_URL } from '../services/constants/routes';
 import { INTENT_DELETE,UPDATE_SERIAL } from '../services/constants/global';
-
+import { useEffect, useState } from "react";
 
 export async function loader({ request }) {
   const response = await getPaginatedTemplates({ request });
@@ -49,14 +49,19 @@ export async function action({ request }) {
 export default function SizeChartTemplates() {
   const { templates, pagination } = useLoaderData();
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
   const isBaseRoute = location.pathname === TEMPLATE_BASE_URL;
   // const isCreateRoute = location.pathname === "/app/templates";
   // const isBaseRoute = location.pathname === "/app/templates";
 
+  useEffect(() => {
+      setLoading(false);
+  }, []);
 
   return (
     <div>
-      {isBaseRoute && (<Page>
+      {loading && (<div className='page-spinner'><Spinner accessibilityLabel="Spinner example" size="large" /></div>)}
+      {(!loading && isBaseRoute) && (<Page>
         <TitleBar title="Size Chart \ Templates" />
         <Layout>
           <Layout.Section>
@@ -78,7 +83,7 @@ export default function SizeChartTemplates() {
           </Layout.Section>
         </Layout>
       </Page>)}
-      {!isBaseRoute && (
+      {(!loading && !isBaseRoute) && (
         <Outlet />
       )}
     </div>

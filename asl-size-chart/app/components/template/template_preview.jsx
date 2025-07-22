@@ -11,12 +11,23 @@ import { CONTENT_TYPE_DESCRIPTION, CONTENT_TYPE_IMAGE, CONTENT_TYPE_TABLE } from
 
 
 const DescriptionPreview = ({ content }) => {
+  let description = content.content_obj;
+  description = description.slice(1);
+  description = description.slice(0, -1);
   return (
     <div>
-      Description
+      <br />
+      <div
+        dangerouslySetInnerHTML={{ __html: description }}
+      >
+        {/* {description} */}
+        {/* {content.content_obj} */}
+      </div>
+      <br />
     </div>
   );
 };
+
 const MeasurementPreview = ({ content }) => {
   const content_array = JSON.parse(content.content_obj);
   const [sizeTable, setSizeTable] = useState(content_array);
@@ -45,6 +56,7 @@ const MeasurementPreview = ({ content }) => {
     </div>
   );
 };
+
 const ImagePreview = ({ content }) => {
   return (
     <div>
@@ -81,14 +93,14 @@ export default function TemplatePreviewComponent({ template, templateContents })
         <Modal.Section>
           <Page>
             <Layout>
-              {templateContents.map((content, index) => (
-                <div>
-                  {content.content_type === CONTENT_TYPE_DESCRIPTION && (<DescriptionPreview content={content} />)}
-                  {content.content_type === CONTENT_TYPE_IMAGE && (<ImagePreview content={content} />)}
-                  {content.content_type === CONTENT_TYPE_TABLE && (<MeasurementPreview content={content} />)}
-                </div>
-              ))}
               <Layout.Section>
+                {templateContents.map((content, index) => (
+                  <div>
+                    {content.content_type === CONTENT_TYPE_DESCRIPTION && (<DescriptionPreview content={content} />)}
+                    {content.content_type === CONTENT_TYPE_IMAGE && (<ImagePreview content={content} />)}
+                    {content.content_type === CONTENT_TYPE_TABLE && (<MeasurementPreview content={content} />)}
+                  </div>
+                ))}
 
               </Layout.Section>
             </Layout>

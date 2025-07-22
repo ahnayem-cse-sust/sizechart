@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://opposite-src-plane-adjustable.trycloudflare.com"
+application_url = "https://affiliate-fame-became-honey.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://opposite-src-plane-adjustable.trycloudflare.com/auth/callback",
-  "https://opposite-src-plane-adjustable.trycloudflare.com/auth/shopify/callback",
-  "https://opposite-src-plane-adjustable.trycloudflare.com/api/auth/callback"
+  "https://affiliate-fame-became-honey.trycloudflare.com/auth/callback",
+  "https://affiliate-fame-became-honey.trycloudflare.com/auth/shopify/callback",
+  "https://affiliate-fame-became-honey.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

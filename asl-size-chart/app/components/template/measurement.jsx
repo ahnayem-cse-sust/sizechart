@@ -118,12 +118,13 @@ export default function MeasurementComponent({ content }) {
           <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
             <div className='measurement-table'>
               <table style={{ width: '100%' }}>
+                <tbody>
                 {sizeTable.map((row, rIdx) => (
-                  <tr key={rIdx} gap="2">
+                  <tr key={`row-${rIdx}`}>
                     {row.map((cell, cIdx) => (
-                      <td>
+                      <td key={`cell-${rIdx}-${cIdx}`}>
                         <TextField
-                          key={cIdx}
+                          // key={cIdx}
                           labelHidden
                           value={cell}
                           onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
@@ -132,12 +133,14 @@ export default function MeasurementComponent({ content }) {
                     ))}
                   </tr>
                 ))}
+                </tbody>
               </table>
             </div>
           </Grid.Cell>
 
           <Grid.Cell columnSpan={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}>
             <table className='sz-chart-col-btn'>
+              <tbody>
               <tr>
                 <td>
                   <div>
@@ -154,11 +157,13 @@ export default function MeasurementComponent({ content }) {
                   </div>
                 </td>
               </tr>
+              </tbody>
             </table>
 
           </Grid.Cell>
           <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
             <table className='sz-chart-row-btn'>
+              <tbody>
               <tr>
                 <th colSpan={sizeTable[0].length}>
                   <Button icon={PlusIcon} onClick={addSizeTableRow}></Button>
@@ -172,6 +177,7 @@ export default function MeasurementComponent({ content }) {
                   )}
                 </th>
               </tr>
+              </tbody>
             </table>
           </Grid.Cell>
         </Grid>

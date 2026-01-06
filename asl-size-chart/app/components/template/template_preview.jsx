@@ -95,7 +95,7 @@ export default function TemplatePreviewComponent({ template, templateContents })
             <Layout>
               <Layout.Section>
                 {templateContents.map((content, index) => (
-                  <div>
+                  <div key={content.id}>
                     {content.content_type === CONTENT_TYPE_DESCRIPTION && (<DescriptionPreview content={content} />)}
                     {content.content_type === CONTENT_TYPE_IMAGE && (<ImagePreview content={content} />)}
                     {content.content_type === CONTENT_TYPE_TABLE && (<MeasurementPreview content={content} />)}

@@ -32,6 +32,17 @@ export async function saveTemplate({ title, category }) {
   return response;
 }
 
+export async function updateTemplate(id, { title, category }) {
+  const response = await db.template.update({
+    where: { id },
+    data: {
+      "title": title,
+      "category": category,
+    }
+  });
+  return response;
+}
+
 export async function deleteTemplate(id) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });

@@ -3,16 +3,18 @@ import { useState, useCallback } from "react";
 import {
   Layout,
   Page,
-  Grid,
+  Grid, InlineError,
   FormLayout, Text,
-  Select,Form
+  Select, Form
 } from "@shopify/polaris";
+import { INTENT,INTENT_UPDATE } from "../../services/constants/global";
 
-export default function TemplateFormComponent({templateCategories, template}) {
+export default function TemplateFormComponent({ templateCategories, template }) {
   const [active, setActive] = useState();
-  const [modalTitle, setModalTitle] = useState(template? 'Edit Template' : 'Create Template');
-  const [title, setTitle] = useState(template? template.title : '');
-  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState(template? template.category : '');
+  const [modalTitle, setModalTitle] = useState(template ? 'Edit Template' : 'Create Template');
+  const [title, setTitle] = useState(template ? template.title : '');
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState(template ? template.category : '');
+  const [errors, setErrors] = useState({});
 
   const toggleModal = useCallback(() => setActive((prev) => !prev), []);
 
@@ -28,24 +30,35 @@ export default function TemplateFormComponent({templateCategories, template}) {
   );
 
   const handleSave = async (id) => {
-        console.log(id);
-        return;
 
-        const formData = new FormData();
-        formData.append("intent", "CREATE");
-        formData.append("id", id);
+    const errors = {};
+    if (!title) errors.title = "Title is required";
+    if (!selectedTemplateCategory) errors.category = "Category is required";
 
-        const res = await fetch("/app/templates", {
-            method: "POST",
-            body: formData,
-        });
+    if (Object.keys(errors).length) {
+      setErrors(errors);
+      return;
+    }
 
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to delete.");
-        }
-    };
+    const formData = new FormData();
+    formData.append(INTENT, id ? INTENT_UPDATE : INTENT_CREATE);
+    formData.append("id", id);
+    formData.append("title", title);
+    formData.append("category", selectedTemplateCategory);
+
+    const res = await fetch("/app/templates", {
+      method: "POST",
+      body: formData,
+    });
+
+    console.log(res);
+
+    if (res.ok) {
+      window.location.reload(); // Or use `navigate()` to refresh
+    } else {
+      alert("Failed to create template.");
+    }
+  };
 
   return (
     <div>
@@ -65,7 +78,7 @@ export default function TemplateFormComponent({templateCategories, template}) {
         title={modalTitle}
         primaryAction={{
           content: "Save",
-          onAction:() => handleSave(template?.id)
+          onAction: () => handleSave(template?.id)
         }}
         secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
       >
@@ -73,40 +86,40 @@ export default function TemplateFormComponent({templateCategories, template}) {
           <Page>
             <Layout>
               <Layout.Section>
-                  <Form>
-                    <FormLayout>
+                <Form>
+                  <FormLayout>
 
-                      <Grid>
-                        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                          <Text variant="headingMd" as="h6">
-                            Template Title:
-                          </Text>
-                          <TextField
-                            name='title'
-                            value={title}
-                            onChange={handleTitleChange}
-                            autoComplete="off"
-                          />
-                          {/* {errors.title && <InlineError message={errors.title} />} */}
-                        </Grid.Cell>
-                      </Grid>
+                    <Grid>
+                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+                        <Text variant="headingMd" as="h6">
+                          Template Title:
+                        </Text>
+                        <TextField
+                          name='title'
+                          value={title}
+                          onChange={handleTitleChange}
+                          autoComplete="off"
+                        />
+                        {errors.title && <InlineError message={errors.title} />}
+                      </Grid.Cell>
+                    </Grid>
 
-                      <Grid>
-                        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                          <Text variant="headingMd" as="h6">
-                            Template Category:
-                          </Text>
-                          <Select
-                            name='category'
-                            options={templateCategories}
-                            onChange={handleSelectedCategoryChange}
-                            value={selectedTemplateCategory}
-                          />
-                          {/* {errors.title && <InlineError message={errors.category} />} */}
-                        </Grid.Cell>
-                      </Grid>
-                    </FormLayout>
-                  </Form>
+                    <Grid>
+                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+                        <Text variant="headingMd" as="h6">
+                          Template Category:
+                        </Text>
+                        <Select
+                          name='category'
+                          options={templateCategories}
+                          onChange={handleSelectedCategoryChange}
+                          value={selectedTemplateCategory}
+                        />
+                        {errors.category && <InlineError message={errors.category} />}
+                      </Grid.Cell>
+                    </Grid>
+                  </FormLayout>
+                </Form>
               </Layout.Section>
 
             </Layout>

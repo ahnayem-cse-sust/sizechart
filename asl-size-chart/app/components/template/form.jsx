@@ -7,7 +7,7 @@ import {
   FormLayout, Text,
   Select, Form
 } from "@shopify/polaris";
-import { INTENT,INTENT_UPDATE } from "../../services/constants/global";
+import { INTENT,INTENT_UPDATE,INTENT_CREATE } from "../../services/constants/global";
 
 export default function TemplateFormComponent({ templateCategories, template }) {
   const [active, setActive] = useState();

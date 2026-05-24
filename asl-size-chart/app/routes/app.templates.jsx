@@ -11,7 +11,7 @@ import TemplateFormComponent from '../components/template/form';
 import { getPaginatedTemplates, deleteTemplate, saveTemplate, updateTemplate, updateTemplateContentSerial } from '../services/template.server';
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
 import { TEMPLATE_BASE_URL } from '../services/constants/routes';
-import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE,UPDATE_SERIAL } from '../services/constants/global';
+import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE,INTENT_UPDATE_SERIAL } from '../services/constants/global';
 import { useEffect, useState } from "react";
 
 export async function loader({ request }) {
@@ -39,7 +39,7 @@ export async function action({ request }) {
     case INTENT_UPDATE:
       response = await updateTemplate(Number(form.get("id")), { title: form.get("title"), category: form.get("category") });
       break;
-    case UPDATE_SERIAL:
+    case INTENT_UPDATE_SERIAL:
       response = await updateTemplateContentSerial(form.get("serial_json"));
       break;
 

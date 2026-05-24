@@ -6,6 +6,8 @@ import {
     InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
+import {INTENT} from '../../services/constants/global';
+import {INTENT_SAVE_IMAGE_BLOCK} from '../../services/constants/content';
 
 export default function ImageUploadComponent({ content }) {
     const [file, setFile] = useState(null);
@@ -29,7 +31,7 @@ export default function ImageUploadComponent({ content }) {
 
     const handleBlockSave = async (content_id) => {
         const formData = new FormData();
-        formData.append("intent", "SAVE_IMAGE_BLOCK");
+        formData.append(INTENT, INTENT_SAVE_IMAGE_BLOCK);
         formData.append("content_id", content_id);
         formData.append("content_obj", file);
 

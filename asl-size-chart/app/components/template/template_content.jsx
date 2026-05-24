@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { Card, Button } from '@shopify/polaris';
 import { useEffect } from 'react';
 import * as content_constants from '../../services/constants/content';
+import * as global_constants from '../../services/constants/global';
 import MeasurementComponent from './measurement';
 import ImageUploadComponent from './image_upload';
 import DescriptionComponent from './description';
@@ -71,19 +72,20 @@ export default function TemplateContentComponent({ templateContents }) {
       });
 
       const formData = new FormData();
-      formData.append("intent", "UPDATE_SERIAL");
+      formData.append(global_constants.INTENT, global_constants.INTENT_UPDATE_SERIAL);
       formData.append("serial_json", JSON.stringify(serialArray));
 
       fetch("/app/templates", {
         method: "POST",
         body: formData,
       }).then(res => {
-        // console.log(res);
+        console.log(res);
         if (res.ok) {
           console.log("Serial updated successfully");
           window.location.reload();
         } else {
           console.log("Something went wrong!! Serial not updated.")
+          // window.location.reload();
         }
       });
     }

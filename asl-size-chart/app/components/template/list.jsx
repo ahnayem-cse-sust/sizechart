@@ -75,16 +75,16 @@ export function TemplateListComponent({ templates, pagination }) {
                                 key={template.id}
                                 selected={selectedResources.includes(template.id)}
                                 position={index}
-                                onClick={() => {
-                                    console.log("Selected - ", template.id);
-                                }}
+                                // onClick={() => {
+                                //     console.log("Selected - ", template.id);
+                                // }}
                             >
                                 <IndexTable.Cell>
-                                    <Link to={TEMPLATE_CONTENTS_URL+`${template.id}`}>
+                                    {/* <Link to={TEMPLATE_CONTENTS_URL+`${template.id}`}> */}
                                         <Text variant="bodyMd" fontWeight="medium" as="span">
                                             {template.title}
                                         </Text>
-                                    </Link>
+                                    {/* </Link> */}
                                 </IndexTable.Cell>
                                 <IndexTable.Cell>
                                     {new Date(template.createdAt).toLocaleDateString()}

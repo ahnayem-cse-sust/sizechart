@@ -3,7 +3,7 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://variation-adjacent-placing-reasonably.trycloudflare.com"
+application_url = "https://affiliate-fame-became-honey.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,11 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://variation-adjacent-placing-reasonably.trycloudflare.com/auth/callback", "https://variation-adjacent-placing-reasonably.trycloudflare.com/auth/shopify/callback", "https://variation-adjacent-placing-reasonably.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://affiliate-fame-became-honey.trycloudflare.com/auth/callback",
+  "https://affiliate-fame-became-honey.trycloudflare.com/auth/shopify/callback",
+  "https://affiliate-fame-became-honey.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

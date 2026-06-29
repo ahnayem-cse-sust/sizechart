@@ -5,6 +5,8 @@ import {
   InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
+import {INTENT} from '../../services/constants/global';
+import {INTENT_SAVE_BLOCK} from '../../services/constants/content';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -35,7 +37,7 @@ export default function DescriptionComponent({ content }) {
   const handleBlockSave = async (content_id) => {
 
     const formData = new FormData();
-    formData.append("intent", "SAVE_BLOCK");
+    formData.append(INTENT, INTENT_SAVE_BLOCK);
     formData.append("content_id", content_id);
     formData.append("content_obj", JSON.stringify(description));
 

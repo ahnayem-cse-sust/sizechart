@@ -9,7 +9,7 @@ export const CONTENT_TYPE_LIST = {
   CONTENT_TYPE_IMAGE: 'Image',
 };
 
-export const INTENT = 'intent';
+
 export const INTENT_ADD_BLOCK = 'ADD_BLOCK';
 export const INTENT_SAVE_BLOCK = 'SAVE_BLOCK';
 export const INTENT_SAVE_IMAGE_BLOCK = 'SAVE_IMAGE_BLOCK';

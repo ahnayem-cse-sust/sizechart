@@ -105,16 +105,16 @@ async function saveImageContent(id, content_obj) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
   const image = content_obj;
-
+  
   if (!image || typeof image === 'string') {
     return Response.json({ error: 'Invalid file' }, { status: 400 });
   }
-
+  
   const fileName = await upload_util.upload(moduleName, image);
-
+  
   if (!fileName)
     return Response.json({ error: 'Upload error' }, { status: 400 });
-
+  
   const oldContent = await db.templateContent.findFirst({
     where: { id },
   });

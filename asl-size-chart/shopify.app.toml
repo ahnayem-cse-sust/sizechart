@@ -3,11 +3,10 @@
 client_id = "c6fc7520a4e94bf94c1475790f539245"
 name = "Size Chart"
 handle = "asl-size-chart"
-application_url = "https://affiliate-fame-became-honey.trycloudflare.com"
+application_url = "https://une-planner-actor-biography.trycloudflare.com"
 embedded = true
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
 
 [webhooks]
@@ -17,12 +16,16 @@ api_version = "2025-04"
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_products,write_products"
 
+[app_proxy]
+# Lets the storefront theme extension fetch chart data from our own
+# shop domain (avoids CORS and hardcoded tunnel URLs). Requests to
+# https://{shop}/apps/sizechart/* are forwarded here.
+url = "https://une-planner-actor-biography.trycloudflare.com/proxy/sizechart"
+subpath = "sizechart"
+prefix = "apps"
+
 [auth]
-redirect_urls = [
-  "https://affiliate-fame-became-honey.trycloudflare.com/auth/callback",
-  "https://affiliate-fame-became-honey.trycloudflare.com/auth/shopify/callback",
-  "https://affiliate-fame-became-honey.trycloudflare.com/api/auth/callback"
-]
+redirect_urls = ["https://une-planner-actor-biography.trycloudflare.com/auth/callback", "https://une-planner-actor-biography.trycloudflare.com/auth/shopify/callback", "https://une-planner-actor-biography.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

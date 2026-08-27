@@ -1,102 +1,89 @@
-import {List, Text, TextField, Button, InlineError} from '@shopify/polaris';
-import { useLoaderData, useActionData, Form, Link } from '@remix-run/react';
-import { getCharts, createChart } from "../services/sizecharts.crud";
-import { redirect } from '@remix-run/react';
-import {useState, useCallback} from 'react';
+import { useLoaderData } from '@remix-run/react';
+import {
+  Page, Layout,
+  Text,
+  InlineStack
+} from '@shopify/polaris';
+import { TitleBar } from "@shopify/app-bridge-react";
+import { Outlet, useLocation } from '@remix-run/react';
+import { ChartListComponent } from '../components/chart/list';
+import ChartFormComponent from '../components/chart/form';
+import { getPaginatedCharts, deleteChart, saveChart, updateChart } from '../services/chart.server';
+import { CHART_BASE_URL } from '../services/constants/routes';
+import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE } from '../services/constants/global';
+import { getTemplateList} from '../services/template.server';
 
-export async function loader() {
-  const charts = await getCharts();
-  return Response.json({charts});
+export async function loader({ request }) {
+  const response = await getPaginatedCharts({ request });
+  const listData = await response.json();
+  const charts = listData.charts; 
+  const pagination = listData.pagination;
+  const templatesResponse = await getTemplateList();
+  const templates = await templatesResponse.json();
+  const templateList = templates.templateList;
+
+  return Response.json({ charts, pagination, templateList });
 }
+
 
 export async function action({ request }) {
-  const formData = await request.formData();
-  const title = formData.get("title")?.trim();
-  const content = formData.get("content")?.trim();
+  const form = await request.formData();
+  const intent = form.get(INTENT);
 
-  const errors = {};
-  if (!title) errors.title = "Title is required";
-  if (!content) errors.content = "Content is required";
+  let response;
 
-  if (Object.keys(errors).length) {
-    return Response.json({ errors, values: { title, content } }, { status: 400 });
+  switch (intent) {
+    case INTENT_DELETE:
+      response = await deleteChart(Number(form.get("id")));
+      break;
+    case INTENT_CREATE:
+      response = await saveChart({ title: form.get("title"), templateId: form.get("templateId")
+                 , sizeList: form.get("sizeList") });
+      break;
+    case INTENT_UPDATE:
+      response = await updateChart(Number(form.get("id")), { title: form.get("title"), templateId: form.get("templateId"), sizeList: form.get("sizeList") });
+      break;
+
+    default:
+      response = Response.json({ error: "Invalid intent" }, { status: 400 });
+      break;
   }
 
-  await createChart({ title, content });
-  return redirect("/app/charts");
+  return response;
 }
 
-export default function SizeChartsTemplateCreate() {
-  const { charts } = useLoaderData();
-  const actionData = useActionData();
-  const errors = actionData?.errors || {};
+export default function Charts() {
+  const { charts, pagination, templateList } = useLoaderData();
+  const location = useLocation();
+  const isBaseRoute = location.pathname === CHART_BASE_URL;
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-
-  const handleTitleChange = useCallback(
-    (newValue) => setTitle(newValue),
-    [],
-  );
-
-  const handleContentChange = useCallback(
-    (newValue) => setContent(newValue),
-    [],
-  );
-
+  if (!isBaseRoute) {
+    return <Outlet />;
+  }
 
   return (
-    <div style={{ padding: 20 }}>
-      <Text variant="headingLg" as="h5">
-        Create Sizechart
-      </Text>
-      <div style={{ padding: 30 }}>
-        <Form method='post'>
-          <div>
-            <TextField 
-              label="Title:"
-              name="title" 
-              value={title} 
-              onChange={handleTitleChange}
-              autoComplete="off"
-            />
-            {errors.title &&<InlineError message={errors.title} />}
-          </div>
-          <div>
-            <TextField 
-              label="Content:"
-              name="content" 
-              value={content} 
-              multiline={5}
-              onChange={handleContentChange}
-              autoComplete="off"
-            />
-            {errors.content &&<InlineError message={errors.content} />}
-          </div>
-          <Button 
-          submit={true}
-          >
-            Create</Button>
-        </Form>
-      </div>
+    <Page>
+      <TitleBar title="Size Chart \ Charts" />
+      <Layout>
+        <Layout.Section>
+          <InlineStack align="space-between" blockAlign="center">
+            <div>
+              <Text as="h2" variant="headingLg">
+                Manage Charts
+              </Text>
+              <Text as="p" tone="subdued" variant="bodySm">
+                Combine a template with a set of available sizes, then attach
+                the chart to a product from the Products tab.
+              </Text>
+            </div>
+            <ChartFormComponent templates={templateList} chart={null} />
+          </InlineStack>
+        </Layout.Section>
 
-       <br />
-
-        <Text variant="headingLg" as="h5">
-          Existing Charts
-        </Text>
-        <br />
-        <List type='number'>
-          {charts.map(chart => (
-            <List.Item key={chart.id}>
-              <strong>{chart.title}</strong>
-              &nbsp;
-              <Link to={`/app/chart/${chart.id}`}>Edit</Link>
-            </List.Item>
-          ))}
-        </List>
-
-
-    </div>
+        <Layout.Section>
+          <ChartListComponent charts={charts} pagination={pagination} />
+        </Layout.Section>
+      </Layout>
+    </Page>
   );
 }

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Chart" ADD COLUMN "template_id" INTEGER REFERENCES "Template" ("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -2,7 +2,7 @@ import { useLoaderData } from '@remix-run/react';
 import {
   Page, Layout,
   Text,
-  InlineStack, Spinner
+  InlineStack
 } from '@shopify/polaris';
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Outlet, useLocation } from '@remix-run/react';
@@ -12,7 +12,6 @@ import { getPaginatedTemplates, deleteTemplate, saveTemplate, updateTemplate, up
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
 import { TEMPLATE_BASE_URL } from '../services/constants/routes';
 import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE,INTENT_UPDATE_SERIAL } from '../services/constants/global';
-import { useEffect, useState } from "react";
 
 export async function loader({ request }) {
   const response = await getPaginatedTemplates({ request });
@@ -49,49 +48,39 @@ export async function action({ request }) {
   }
 
   return response;
-
 }
 
 export default function SizeChartTemplates() {
   const { templates, pagination } = useLoaderData();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
   const isBaseRoute = location.pathname === TEMPLATE_BASE_URL;
-  // const isCreateRoute = location.pathname === "/app/templates";
-  // const isBaseRoute = location.pathname === "/app/templates";
 
-  useEffect(() => {
-      setLoading(false);
-  }, []);
+  if (!isBaseRoute) {
+    return <Outlet />;
+  }
 
   return (
-    <div>
-      {loading && (<div className='page-spinner'><Spinner accessibilityLabel="Spinner example" size="large" /></div>)}
-      {(!loading && isBaseRoute) && (<Page>
-        <TitleBar title="Size Chart \ Templates" />
-        <Layout>
-          <Layout.Section>
-            <InlineStack align="space-between" blockAlign="center">
-              <div>
-                <Text as="h2" variant="headingLg">
-                  Manage Templates
-                </Text>
-                <Text as="p" tone="subdued" variant="bodyXs">
-                  Save templates to create multiple sizecharts in short time.
-                </Text>
-              </div>
-              <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={null} />
-            </InlineStack>
-          </Layout.Section>
+    <Page>
+      <TitleBar title="Size Chart \ Templates" />
+      <Layout>
+        <Layout.Section>
+          <InlineStack align="space-between" blockAlign="center">
+            <div>
+              <Text as="h2" variant="headingLg">
+                Manage Templates
+              </Text>
+              <Text as="p" tone="subdued" variant="bodySm">
+                Save templates to create multiple size charts in a short time.
+              </Text>
+            </div>
+            <TemplateFormComponent templateCategories={TEMPLATE_CATEGORIES} template={null} />
+          </InlineStack>
+        </Layout.Section>
 
-          <Layout.Section>
-            <TemplateListComponent templates={templates} pagination={pagination} />
-          </Layout.Section>
-        </Layout>
-      </Page>)}
-      {(!loading && !isBaseRoute) && (
-        <Outlet />
-      )}
-    </div>
+        <Layout.Section>
+          <TemplateListComponent templates={templates} pagination={pagination} />
+        </Layout.Section>
+      </Layout>
+    </Page>
   );
 }

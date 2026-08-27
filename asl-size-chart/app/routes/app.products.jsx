@@ -1,6 +1,6 @@
-import { useLoaderData, useNavigate, Form } from '@remix-run/react';
+import { useState } from 'react';
+import { useLoaderData, useNavigate, useActionData, Form } from '@remix-run/react';
 import { getProducts, saveProductSizechart } from "../services/sizecharts.server";
-import { redirect } from '@remix-run/react';
 import {
   IndexTable,
   Card,
@@ -8,7 +8,11 @@ import {
   Page,
   useIndexResourceState,
   Pagination,
-  Button
+  Button,
+  Banner,
+  BlockStack,
+  InlineStack,
+  Badge,
 } from '@shopify/polaris';
 
 export async function loader( { request} ) {
@@ -17,19 +21,64 @@ export async function loader( { request} ) {
 }
 
 export async function action({ request }) {
+  const result = await saveProductSizechart({ request });
+  return Response.json(result);
+}
 
-  await saveProductSizechart({ request });
+function parseSizes(available_sizes) {
+  if (!available_sizes) return [];
+  try {
+    const parsed = JSON.parse(available_sizes);
+    return Array.isArray(parsed) ? parsed.map((s) => s.value ?? s) : [];
+  } catch {
+    return [];
+  }
+}
 
-  return redirect("/app/products");
+function ProductChartCell({ id, metafield, sizeCharts }) {
+  const [selectedId, setSelectedId] = useState(metafield?.value || "0");
+  const selectedChart = sizeCharts.find((chart) => String(chart.id) === String(selectedId));
+  const sizes = selectedChart ? parseSizes(selectedChart.available_sizes) : [];
+
+  return (
+    <Form method="post">
+      <input type="hidden" name="productId" value={id} />
+      <BlockStack gap="150">
+        <InlineStack gap="200" blockAlign="center">
+          <select
+            name="sizeChartId"
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+          >
+            <option key="0" value="0">Select Size Chart</option>
+            {sizeCharts.map(chart => (
+              <option key={chart.id} value={chart.id}>{chart.title}</option>
+            ))}
+          </select>
+          <button type="submit">Save</button>
+        </InlineStack>
+        {selectedChart && (
+          <InlineStack gap="100">
+            {sizes.length > 0 ? (
+              sizes.map((size, i) => <Badge key={i}>{size}</Badge>)
+            ) : (
+              <Text as="span" tone="subdued" variant="bodySm">
+                This chart has no available sizes set.
+              </Text>
+            )}
+          </InlineStack>
+        )}
+      </BlockStack>
+    </Form>
+  );
 }
 
 
 export default function SizeChartsAdmin() {
   
   const { products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+  const actionData = useActionData();
   const navigate = useNavigate();
-
-  console.log(sizeCharts);
 
   const resourceName = {
     singular: 'product',
@@ -57,16 +106,7 @@ export default function SizeChartsAdmin() {
         </IndexTable.Cell>
         <IndexTable.Cell>{title}</IndexTable.Cell>
         <IndexTable.Cell>
-          <Form method="post">
-              <input type="hidden" name="productId" value={id} />
-              <select name="sizeChartId" defaultValue={metafield?.value || ""}>
-                <option key="0" value="0">Select Size Chart</option>
-                {sizeCharts.map(chart => (
-                  <option key={chart.id} value={chart.id}>{chart.title}</option>
-                ))}
-              </select>
-              <button type="submit" style={{ marginLeft: 10 }}>Save</button>
-            </Form>
+          <ProductChartCell id={id} metafield={metafield} sizeCharts={sizeCharts} />
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Button
@@ -82,7 +122,16 @@ export default function SizeChartsAdmin() {
 
    return (
     <Page fullWidth title="Sales by product">
-      <Card>
+      <BlockStack gap="400">
+        {actionData && !actionData.success && (
+          <Banner tone="critical" title="Couldn't save size chart">
+            <p>{actionData.userErrors?.[0]?.message || "Something went wrong."}</p>
+          </Banner>
+        )}
+        {actionData?.success && (
+          <Banner tone="success">Size chart saved. Add the "Size Chart Block" to your product page template in the theme editor if you haven't already.</Banner>
+        )}
+        <Card>
         <IndexTable
         itemCount={products.length}
         selectable={false}
@@ -122,6 +171,7 @@ export default function SizeChartsAdmin() {
       </div>
 
       </Card>
+      </BlockStack>
     </Page>
 
   );

@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 // Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
@@ -45,6 +46,7 @@ model Template {
   category  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  charts    Chart[]
 }
 
 model TemplateContent {
@@ -57,3 +59,36 @@ model TemplateContent {
   updatedAt     DateTime @updatedAt
 }
 
+model Chart {
+  id              Int      @id @default(autoincrement())
+  title           String
+  available_sizes String
+  template_id     Int?
+  template        Template? @relation(fields: [template_id], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ChartContent {
+  id            Int      @id @default(autoincrement())
+  serial_no     Int
+  chart_id      Int
+  content_type  String
+  content_obj   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Setting {
+  id                Int      @id @default(autoincrement())
+  shop              String   @unique
+  unit              String   @default("in")
+  buttonLabel       String   @default("Size Chart")
+  buttonColor       String   @default("#1A1A1A")
+  buttonTextColor   String   @default("#FFFFFF")
+  buttonPosition    String   @default("bottom-right")
+  showIcon          Boolean  @default(true)
+  showOnProductPage Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

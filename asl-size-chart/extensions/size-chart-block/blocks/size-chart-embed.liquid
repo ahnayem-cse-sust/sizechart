@@ -1,0 +1,247 @@
+{%- doc -%}
+  App embed version of the Size Chart trigger. Turn this on ONCE for the
+  whole theme (Theme editor > App embeds) and it automatically shows a
+  floating "Size Chart" button on any product page whose product has a
+  `custom.size_chart_id` metafield set — no per-product or per-template
+  setup required. All appearance (label, color, position, icon) is
+  controlled from the app's Settings page, not here.
+{%- enddoc -%}
+
+{%- if request.page_type == 'product' -%}
+  {%- assign chart_id = product.metafields.custom.size_chart_id -%}
+
+  {% if chart_id %}
+    <div id="asc-embed-root-{{ block.id }}" data-asc-embed-root {{ block.shopify_attributes }}></div>
+
+    <script>
+      (function () {
+        var chartId = {{ chart_id | json }};
+        var root = document.getElementById('asc-embed-root-{{ block.id }}');
+
+        fetch('/apps/sizechart?chartId=' + encodeURIComponent(chartId))
+          .then(function (response) {
+            if (!response.ok) throw new Error('Request failed');
+            return response.json();
+          })
+          .then(function (res) {
+            if (!res.success) return;
+            var settings = res.data.settings || {};
+            if (settings.showOnProductPage === false) return;
+            renderEmbed(root, res.data, settings);
+          })
+          .catch(function () {});
+
+        function renderEmbed(root, data, settings) {
+          var blockId = 'asc-embed-' + Math.random().toString(36).slice(2);
+          var position = ['top-right','top-left','middle-right','middle-left','bottom-right','bottom-left'].indexOf(settings.buttonPosition) !== -1
+            ? settings.buttonPosition
+            : 'bottom-right';
+          var iconSvg = settings.showIcon
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 6H3M21 12H3M21 18H8"></path></svg>'
+            : '';
+
+          root.className = 'asc-embed asc-embed--' + position;
+          root.innerHTML =
+            '<button type="button" class="asc-embed-trigger" style="background:' + (settings.buttonColor || '#1a1a1a') + ';color:' + (settings.buttonTextColor || '#fff') + '" aria-haspopup="dialog" aria-controls="' + blockId + '-dialog" data-asc-open>' +
+              iconSvg +
+              '<span>' + (settings.buttonLabel || 'Size Chart') + '</span>' +
+            '</button>' +
+            '<dialog id="' + blockId + '-dialog" class="asc-dialog">' +
+              '<div class="asc-dialog__header">' +
+                '<h2 class="asc-dialog__title">' + (data.title || settings.buttonLabel || 'Size Chart') + '</h2>' +
+                '<button type="button" class="asc-dialog__close" aria-label="Close" data-asc-close>&times;</button>' +
+              '</div>' +
+              '<div class="asc-dialog__body">' + (data.html || '<p class="asc-error">This size chart has no content yet.</p>') + '</div>' +
+            '</dialog>';
+
+          var dialog = root.querySelector('dialog');
+          var openBtn = root.querySelector('[data-asc-open]');
+          var closeBtn = root.querySelector('[data-asc-close]');
+
+          function openDialog() {
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+          }
+          function closeDialog() {
+            if (typeof dialog.close === 'function') dialog.close();
+            else dialog.removeAttribute('open');
+          }
+
+          openBtn.addEventListener('click', openDialog);
+          closeBtn.addEventListener('click', closeDialog);
+          dialog.addEventListener('click', function (event) {
+            if (event.target === dialog) closeDialog();
+          });
+        }
+      })();
+    </script>
+
+    <style>
+      .asc-embed {
+        position: fixed;
+        z-index: 999;
+      }
+
+      .asc-embed--top-right {
+        top: 20px;
+        right: 20px;
+      }
+
+      .asc-embed--top-left {
+        top: 20px;
+        left: 20px;
+      }
+
+      .asc-embed--middle-right {
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+      }
+
+      .asc-embed--middle-left {
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+      }
+
+      .asc-embed--bottom-right {
+        right: 20px;
+        bottom: 20px;
+      }
+
+      .asc-embed--bottom-left {
+        left: 20px;
+        bottom: 20px;
+      }
+
+      .asc-embed-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+
+      .asc-embed-trigger:hover {
+        opacity: 0.9;
+      }
+
+      .asc-dialog {
+        width: min(560px, calc(100vw - 32px));
+        max-height: min(80vh, 720px);
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .asc-dialog::backdrop {
+        background: rgba(17, 17, 17, 0.5);
+      }
+
+      .asc-dialog__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e4e4e4;
+        position: sticky;
+        top: 0;
+        background: #fff;
+      }
+
+      .asc-dialog__title {
+        font-size: 1.125rem;
+        margin: 0;
+      }
+
+      .asc-dialog__close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 4px 8px;
+        color: #666;
+      }
+
+      .asc-dialog__body {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .asc-loading,
+      .asc-error {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .asc-sizes-heading {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #666;
+      margin: 0 0 8px;
+    }
+
+    .asc-size-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 16px;
+      }
+
+      .asc-size-pill {
+        border: 1px solid #d5d5d5;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.8125rem;
+      }
+
+      .asc-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+
+      .asc-table th,
+      .asc-table td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid #ececec;
+      }
+
+      .asc-table th {
+        font-weight: 600;
+        background: #fafafa;
+      }
+
+      .asc-block--image img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 8px 0;
+      }
+
+      .asc-block--description {
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+    </style>
+  {% endif %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Size Chart (Auto)",
+  "target": "body",
+  "settings": []
+}
+{% endschema %}

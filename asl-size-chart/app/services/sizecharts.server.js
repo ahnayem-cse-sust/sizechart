@@ -129,7 +129,6 @@ export async function getProducts({ request }) {
   
   const { edges, pageInfo } = response.data.products;
   const products = edges.map(edge => edge.node);
-  console.log(products);
   const sizeCharts = await getCharts();
   const endCursor = pageInfo.endCursor;
   const hasNextPage = pageInfo.hasNextPage;
@@ -143,18 +142,48 @@ export async function saveProductSizechart({ request }) {
     const formData = await request.formData();
     const productId = formData.get("productId");
     const sizeChartId = formData.get("sizeChartId");
-  
+
     const { admin } = await authenticate.admin(request);
-  
-    const response = await admin.graphql(`
-      mutation SetMetafield {
+
+    // Clearing the assignment: delete the metafield instead of writing an
+    // empty/invalid value to it.
+    if (!sizeChartId || sizeChartId === "0") {
+      const response = await admin.graphql(
+        `#graphql
+        mutation DeleteMetafield($input: MetafieldIdentifierInput!) {
+          metafieldDelete(input: $input) {
+            deletedId
+            userErrors {
+              field
+              message
+            }
+          }
+        }`,
+        {
+          variables: {
+            input: {
+              ownerId: productId,
+              namespace: "custom",
+              key: "size_chart_id",
+            },
+          },
+        },
+      );
+      const result = await response.json();
+      const userErrors = result?.data?.metafieldDelete?.userErrors || [];
+      return { success: userErrors.length === 0, userErrors };
+    }
+
+    const response = await admin.graphql(
+      `#graphql
+      mutation SetMetafield($ownerId: ID!, $value: String!) {
         metafieldsSet(metafields: [
           {
-            ownerId: "${productId}",
+            ownerId: $ownerId,
             namespace: "custom",
             key: "size_chart_id",
             type: "single_line_text_field",
-            value: "${sizeChartId}"
+            value: $value
           }
         ]) {
           metafields {
@@ -167,8 +196,16 @@ export async function saveProductSizechart({ request }) {
             message
           }
         }
-      }
-    `);
-    console.log(response);
-    return response;
+      }`,
+      {
+        variables: {
+          ownerId: productId,
+          value: sizeChartId,
+        },
+      },
+    );
+
+    const result = await response.json();
+    const userErrors = result?.data?.metafieldsSet?.userErrors || [];
+    return { success: userErrors.length === 0, userErrors };
 }

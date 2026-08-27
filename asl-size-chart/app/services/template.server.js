@@ -1,11 +1,25 @@
 import db from '../db.server';
 
+export async function getTemplateList() { 
+
+  const templateList = await db.template.findMany({
+      select: {
+      id: true,
+      title: true,
+    },
+  });
+
+  return Response.json({
+    templateList
+  });
+}
+
 export async function getPaginatedTemplates({ request }) {
   const PAGE_SIZE = 3;
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1", 10);
 
-  const totalCount = await db.Template.count();
+  const totalCount = await db.template.count();
 
   const templates = await db.template.findMany({
     skip: (page - 1) * PAGE_SIZE,
@@ -73,20 +87,16 @@ export async function getTemplateById(id) {
 
 export async function updateTemplateContentSerial(serial_json) {
 
-  const data = JSON.parse(serial_json)
-  data.forEach(async (d) => {
-    console.log(d);
-    let updateSerial = await db.templateContent.update({
-      where: {
-        id: d.id,
-      },
-      data: {
-        serial_no: d.serial_no,
-      },
-    });
-    console.log(updateSerial);
-  });
+  const data = JSON.parse(serial_json);
+  await Promise.all(
+    data.map((d) =>
+      db.templateContent.update({
+        where: { id: d.id },
+        data: { serial_no: d.serial_no },
+      }),
+    ),
+  );
 
-  return Response.json({ "Done": "Done" });
+  return Response.json({ success: true });
 }
 

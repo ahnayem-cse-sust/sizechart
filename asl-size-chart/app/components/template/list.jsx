@@ -5,7 +5,6 @@ import {
     Card,
     Box,
     Pagination,
-    Link,
     Button,
     Badge,
     InlineStack,
@@ -107,13 +106,12 @@ export function TemplateListComponent({ templates, pagination }) {
                         key={template.id}
                         selected={selectedResources.includes(template.id)}
                         position={index}
+                        onClick={() => navigate(TEMPLATE_CONTENTS_URL + `${template.id}`)}
                     >
                         <IndexTable.Cell>
-                            <Link to={TEMPLATE_CONTENTS_URL+`${template.id}`} removeUnderline>
-                                <Text variant="bodyMd" fontWeight="medium" as="span">
-                                    {template.title}
-                                </Text>
-                            </Link>
+                            <Text variant="bodyMd" fontWeight="medium" as="span">
+                                {template.title}
+                            </Text>
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <Badge>{template.category}</Badge>
@@ -125,7 +123,13 @@ export function TemplateListComponent({ templates, pagination }) {
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <InlineStack gap="200">
-                                <Button url={TEMPLATE_CONTENTS_URL+`${template.id}`} size="slim">View</Button>
+                                <Button
+                                    url={TEMPLATE_CONTENTS_URL+`${template.id}`}
+                                    size="slim"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    View
+                                </Button>
                                 <Button
                                     size="slim"
                                     tone="critical"

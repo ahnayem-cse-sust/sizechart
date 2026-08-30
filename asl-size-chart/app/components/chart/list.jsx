@@ -5,7 +5,6 @@ import {
     Card,
     Box,
     Pagination,
-    Link,
     Button,
     Badge,
     InlineStack,
@@ -107,13 +106,12 @@ export function ChartListComponent({ charts, pagination }) {
                         key={chart.id}
                         selected={selectedResources.includes(chart.id)}
                         position={index}
+                        onClick={() => navigate(CHART_CONTENTS_URL + `${chart.id}`)}
                     >
                         <IndexTable.Cell>
-                            <Link to={CHART_CONTENTS_URL+`${chart.id}`} removeUnderline>
-                                <Text variant="bodyMd" fontWeight="medium" as="span">
-                                    {chart.title}
-                                </Text>
-                            </Link>
+                            <Text variant="bodyMd" fontWeight="medium" as="span">
+                                {chart.title}
+                            </Text>
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             {chart.template?.title ? (
@@ -129,7 +127,13 @@ export function ChartListComponent({ charts, pagination }) {
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <InlineStack gap="200">
-                                <Button url={CHART_CONTENTS_URL+`${chart.id}`} size="slim">View</Button>
+                                <Button
+                                    url={CHART_CONTENTS_URL+`${chart.id}`}
+                                    size="slim"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    View
+                                </Button>
                                 <Button
                                     size="slim"
                                     tone="critical"

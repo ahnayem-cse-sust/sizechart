@@ -11,9 +11,9 @@ import {
     EmptyState,
 } from '@shopify/polaris';
 import { useNavigate } from "@remix-run/react";
-import { useState } from "react";
 import { INTENT,INTENT_DELETE } from '../../services/constants/global';
 import { TEMPLATE_BASE_URL, TEMPLATE_CONTENTS_URL } from '../../services/constants/routes';
+import TemplateListPreviewButton from './list_preview_button';
 
 export function TemplateListComponent({ templates, pagination }) {
     const resourceName = {
@@ -22,7 +22,6 @@ export function TemplateListComponent({ templates, pagination }) {
     };
 
     const navigate = useNavigate();
-    const [deletingId, setDeletingId] = useState(null);
 
     const { selectedResources, allResourcesSelected, handleSelectionChange } =
         useIndexResourceState(templates);
@@ -36,18 +35,6 @@ export function TemplateListComponent({ templates, pagination }) {
             method: "POST",
             body: formData,
         });
-    };
-
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this template? Any charts using it will be affected.")) return;
-        setDeletingId(id);
-        const res = await deleteOne(id);
-        if (res.ok) {
-            window.location.reload();
-        } else {
-            setDeletingId(null);
-            alert("Failed to delete.");
-        }
     };
 
     const handleBulkDelete = async () => {
@@ -123,23 +110,16 @@ export function TemplateListComponent({ templates, pagination }) {
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <InlineStack gap="200">
+                                <TemplateListPreviewButton
+                                    templateId={template.id}
+                                    templateTitle={template.title}
+                                />
                                 <Button
                                     url={TEMPLATE_CONTENTS_URL+`${template.id}`}
                                     size="slim"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    View
-                                </Button>
-                                <Button
-                                    size="slim"
-                                    tone="critical"
-                                    loading={deletingId === template.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDelete(template.id);
-                                    }}
-                                >
-                                    Delete
+                                    Customize
                                 </Button>
                             </InlineStack>
                         </IndexTable.Cell>

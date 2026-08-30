@@ -6,13 +6,13 @@ import {
   Card,
   Text,
   Page,
-  useIndexResourceState,
   Pagination,
   Button,
   Banner,
   BlockStack,
   InlineStack,
   Badge,
+  Box,
 } from '@shopify/polaris';
 
 export async function loader( { request} ) {
@@ -80,14 +80,6 @@ export default function SizeChartsAdmin() {
   const actionData = useActionData();
   const navigate = useNavigate();
 
-  const resourceName = {
-    singular: 'product',
-    plural: 'products',
-  };
-
-  const {selectedResources, allResourcesSelected, handleSelectionChange} =
-    useIndexResourceState(products);
-
   const rowMarkup = products.map(
     (
       {id, title, onlineStorePreviewUrl,metafield},
@@ -96,7 +88,6 @@ export default function SizeChartsAdmin() {
       <IndexTable.Row
         id={id}
         key={id}
-        selected={selectedResources.includes(id)}
         position={index}
       >
         <IndexTable.Cell>
@@ -121,7 +112,7 @@ export default function SizeChartsAdmin() {
   );
 
    return (
-    <Page fullWidth title="Sales by product">
+    <Page fullWidth title="Products">
       <BlockStack gap="400">
         {actionData && !actionData.success && (
           <Banner tone="critical" title="Couldn't save size chart">
@@ -131,14 +122,10 @@ export default function SizeChartsAdmin() {
         {actionData?.success && (
           <Banner tone="success">Size chart saved. Add the "Size Chart Block" to your product page template in the theme editor if you haven't already.</Banner>
         )}
-        <Card>
+        <Card padding="0">
         <IndexTable
         itemCount={products.length}
         selectable={false}
-        selectedItemsCount={
-          allResourcesSelected ? 'All' : selectedResources.length
-        }
-        onSelectionChange={handleSelectionChange}
         headings={[
           {title: 'Product ID'},
           {title: 'Product Title'},
@@ -149,26 +136,21 @@ export default function SizeChartsAdmin() {
         {rowMarkup}
       </IndexTable>
 
-      <div
-        style={{
-          maxWidth: '700px',
-          margin: 'auto',
-          border: '1px solid var(--p-color-border)'
-        }}
-      >
-        <Pagination
-          onPrevious={() => {
-            navigate(`?before=${startCursor}`);
-          }}
-          onNext={() => {
-            navigate(`?after=${endCursor}`);
-          }}
-          type="table"
-          hasNext={hasNextPage}
-          hasPrevious={hasPreviousPage}
-          label="1-50 of 8,450 orders"
-        />
-      </div>
+      <Box padding="400" borderBlockStartWidth="025" borderColor="border">
+        <InlineStack align="center">
+          <Pagination
+            onPrevious={() => {
+              navigate(`?before=${startCursor}`);
+            }}
+            onNext={() => {
+              navigate(`?after=${endCursor}`);
+            }}
+            type="table"
+            hasNext={hasNextPage}
+            hasPrevious={hasPreviousPage}
+          />
+        </InlineStack>
+      </Box>
 
       </Card>
       </BlockStack>

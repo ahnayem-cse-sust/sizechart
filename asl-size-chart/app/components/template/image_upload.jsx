@@ -7,7 +7,7 @@ import {
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 import {INTENT} from '../../services/constants/global';
-import {INTENT_SAVE_IMAGE_BLOCK} from '../../services/constants/content';
+import {INTENT_SAVE_IMAGE_BLOCK, INTENT_IMAGE_CONTENT_DELETE} from '../../services/constants/content';
 
 export default function ImageUploadComponent({ content }) {
     const [file, setFile] = useState(null);
@@ -15,13 +15,14 @@ export default function ImageUploadComponent({ content }) {
 
     const previousFileUrl = content.content_obj ? '/uploads/' + content.content_obj : null;
 
-    // console.log(content);
+    const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 
     const handleDropZoneDrop = useCallback(
         (_dropFiles, acceptedFiles, _rejectedFiles) => {
             if (acceptedFiles.length > 0) {
-                setFile(acceptedFiles[0]); // Only accept first file
-                setIsSaveDisabled(false);
+                const dropped = acceptedFiles[0]; // Only accept first file
+                setFile(dropped);
+                setIsSaveDisabled(!validImageTypes.includes(dropped.type));
             } else {
                 setIsSaveDisabled(true);
             }
@@ -49,10 +50,10 @@ export default function ImageUploadComponent({ content }) {
     };
 
     const handleBlockDelete = async (content_id) => {
-        if (!confirm("Are you sure you want to delete this table?")) return;
+        if (!confirm("Are you sure you want to delete this image?")) return;
 
         const formData = new FormData();
-        formData.append("intent", "IMAGE_CONTENT_DELETE");
+        formData.append(INTENT, INTENT_IMAGE_CONTENT_DELETE);
         formData.append("content_id", content_id);
 
         const res = await fetch("/app/templates/" + content.template_id, {
@@ -66,8 +67,6 @@ export default function ImageUploadComponent({ content }) {
             alert("Failed to delete.");
         }
     };
-
-    const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
 
     const fileUpload = (!file && !previousFileUrl) && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, .jpg and .png" />;
 
@@ -94,11 +93,7 @@ export default function ImageUploadComponent({ content }) {
             {validImageTypes.includes(file.type) ? (
                 <div style={{ width: '50%', height: '250px', overflow: 'hidden', margin: 'auto' }}>
                     <img
-                        src={
-                            validImageTypes.includes(file.type)
-                                ? window.URL.createObjectURL(file)
-                                : NoteIcon
-                        }
+                        src={window.URL.createObjectURL(file)}
                         alt="Uploaded preview"
                         style={{
                             width: '100%',

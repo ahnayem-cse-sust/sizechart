@@ -29,13 +29,38 @@
         })
         .catch(function () {});
 
+      // Mirrors app/services/utils/buttonDesign.js ICON_PATHS. This block
+      // renders a plain text-link trigger, so it only picks up the icon
+      // choice (not shape/size/border/shadow, which apply to the pill-style
+      // floating button in size-chart-embed.liquid).
+      var ICON_PATHS = {
+        list: '<path d="M21 6H3M21 12H3M21 18H8"></path>',
+        ruler: '<path d="M3 17 17 3l4 4L7 21l-4-4Z"></path><path d="m14.5 5.5 2 2"></path><path d="m11.5 8.5 2 2"></path><path d="m8.5 11.5 2 2"></path><path d="m5.5 14.5 2 2"></path>',
+        tag: '<path d="M12 2H4a2 2 0 0 0-2 2v8l10.29 10.29a1 1 0 0 0 1.42 0l8.58-8.58a1 1 0 0 0 0-1.42L12 2Z"></path><circle cx="7.5" cy="7.5" r="1.25"></circle>',
+        info: '<circle cx="12" cy="12" r="10"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path>',
+      };
+
       function renderTrigger(root, data, settings) {
         var blockId = 'asc-' + Math.random().toString(36).slice(2);
         var iconSvg = settings.showIcon
-          ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 6H3M21 12H3M21 18H8"></path></svg>'
+          ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[settings.buttonIcon] || ICON_PATHS.list) + '</svg>'
           : '';
 
+        var selectorHtml = '';
+        if (settings.sizeSelectorMode === 'app' && data.sizes && data.sizes.length) {
+          selectorHtml =
+            '<div class="asc-selector">' +
+              '<span class="asc-selector__label">Size</span>' +
+              '<div class="asc-selector__options" role="radiogroup" aria-label="Size">' +
+                data.sizes.map(function (size) {
+                  return '<button type="button" class="asc-size-option" role="radio" aria-checked="false" data-asc-size="' + escapeHtml(size) + '">' + escapeHtml(size) + '</button>';
+                }).join('') +
+              '</div>' +
+            '</div>';
+        }
+
         root.innerHTML =
+          selectorHtml +
           '<button type="button" class="asc-trigger" style="color:' + (settings.buttonColor || '#1a1a1a') + '" aria-haspopup="dialog" aria-controls="' + blockId + '-dialog" data-asc-open>' +
             iconSvg +
             '<span>' + (settings.buttonLabel || 'Size Chart') + '</span>' +
@@ -66,6 +91,48 @@
         dialog.addEventListener('click', function (event) {
           if (event.target === dialog) closeDialog();
         });
+
+        if (settings.sizeSelectorMode === 'app') {
+          setupSizeSelector(root);
+        }
+      }
+
+      function setupSizeSelector(root) {
+        var form = root.closest('form');
+        var hiddenInput = null;
+
+        if (form) {
+          hiddenInput = form.querySelector('input[name="properties[Size]"]');
+          if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'properties[Size]';
+            form.appendChild(hiddenInput);
+          }
+        } else if (window.console) {
+          console.warn('Size Chart Block: no surrounding <form> found. Place this block inside the product form (e.g. above the Buy Buttons block) so the selected size is added to the cart.');
+        }
+
+        var options = root.querySelectorAll('[data-asc-size]');
+        options.forEach(function (option) {
+          option.addEventListener('click', function () {
+            options.forEach(function (o) {
+              o.classList.remove('is-selected');
+              o.setAttribute('aria-checked', 'false');
+            });
+            option.classList.add('is-selected');
+            option.setAttribute('aria-checked', 'true');
+            if (hiddenInput) {
+              hiddenInput.value = option.getAttribute('data-asc-size');
+            }
+          });
+        });
+      }
+
+      function escapeHtml(value) {
+        var div = document.createElement('div');
+        div.textContent = value;
+        return div.innerHTML;
       }
     })();
   </script>
@@ -73,6 +140,46 @@
   <style>
     .asc-size-chart-block:empty {
       display: none;
+    }
+
+    .asc-selector {
+      margin-bottom: 12px;
+    }
+
+    .asc-selector__label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .asc-selector__options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .asc-size-option {
+      min-width: 44px;
+      padding: 8px 14px;
+      border: 1px solid #c9c9c9;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    .asc-size-option:hover {
+      border-color: #1a1a1a;
+    }
+
+    .asc-size-option.is-selected {
+      border-color: #1a1a1a;
+      background: #1a1a1a;
+      color: #fff;
     }
 
     .asc-trigger {

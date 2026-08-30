@@ -5,7 +5,7 @@
 // is served from the shop's own domain.
 import db from "../db.server";
 import { authenticate } from "../shopify.server";
-import { renderContentBlocksHtml, renderAvailableSizesHtml } from "../services/utils/render";
+import { renderContentBlocksHtml, renderAvailableSizesHtml, parseAvailableSizes } from "../services/utils/render";
 import { getSettings, toStorefrontSettings } from "../services/settings.server";
 
 export async function loader({ request }) {
@@ -19,7 +19,7 @@ export async function loader({ request }) {
 
   if (!chartId || isNaN(Number(chartId))) {
     return Response.json(
-      { success: false, message: "Missing or invalid chartId", data: { title: "", html: "", settings } },
+      { success: false, message: "Missing or invalid chartId", data: { title: "", html: "", sizes: [], settings } },
       { status: 400 },
     );
   }
@@ -30,7 +30,7 @@ export async function loader({ request }) {
 
   if (!chart) {
     return Response.json(
-      { success: false, message: "No size chart found with this id.", data: { title: "", html: "", settings } },
+      { success: false, message: "No size chart found with this id.", data: { title: "", html: "", sizes: [], settings } },
       { status: 404 },
     );
   }
@@ -49,6 +49,6 @@ export async function loader({ request }) {
   return Response.json({
     success: true,
     message: "",
-    data: { title: chart.title, html, settings },
+    data: { title: chart.title, html, sizes: parseAvailableSizes(chart.available_sizes), settings },
   });
 }

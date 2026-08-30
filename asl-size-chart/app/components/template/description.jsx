@@ -6,7 +6,8 @@ import {
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 import {INTENT} from '../../services/constants/global';
-import {INTENT_SAVE_BLOCK} from '../../services/constants/content';
+import {INTENT_SAVE_BLOCK, INTENT_CONTENT_DELETE} from '../../services/constants/content';
+import { safeJsonParse } from '../../services/utils/safeJson';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -15,7 +16,7 @@ import 'react-quill/dist/quill.snow.css';
 export default function DescriptionComponent({ content }) {
   const [ReactQuill, setReactQuill] = useState(null);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
-  const content_obj = content.content_obj ? JSON.parse(content.content_obj) : '';
+  const content_obj = safeJsonParse(content.content_obj, '');
   const [description, setDescription] = useState(content_obj);
 
 
@@ -23,7 +24,6 @@ export default function DescriptionComponent({ content }) {
     // Dynamically load Quill client-side
     import('react-quill').then((mod) => {
       setReactQuill(() => mod.default);
-      import('react-quill/dist/quill.snow.css'); // optionally import styles
     });
   }, []);
 
@@ -55,10 +55,10 @@ export default function DescriptionComponent({ content }) {
   };
 
   const handleBlockDelete = async (content_id) => {
-    if (!confirm("Are you sure you want to delete this table?")) return;
+    if (!confirm("Are you sure you want to delete this description block?")) return;
 
     const formData = new FormData();
-    formData.append("intent", "CONTENT_DELETE");
+    formData.append(INTENT, INTENT_CONTENT_DELETE);
     formData.append("content_id", content_id);
 
     const res = await fetch("/app/templates/" + content.template_id, {

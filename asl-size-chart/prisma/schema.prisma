@@ -80,15 +80,27 @@ model ChartContent {
 }
 
 model Setting {
-  id                Int      @id @default(autoincrement())
-  shop              String   @unique
-  unit              String   @default("in")
-  buttonLabel       String   @default("Size Chart")
-  buttonColor       String   @default("#1A1A1A")
-  buttonTextColor   String   @default("#FFFFFF")
-  buttonPosition    String   @default("bottom-right")
-  showIcon          Boolean  @default(true)
-  showOnProductPage Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                       Int      @id @default(autoincrement())
+  shop                     String   @unique
+  unit                     String   @default("in")
+  buttonLabel              String   @default("Size Chart")
+  buttonColor              String   @default("#1A1A1A")
+  buttonTextColor          String   @default("#FFFFFF")
+  buttonPositionVertical   String   @default("bottom")
+  buttonPositionHorizontal String   @default("right")
+  buttonTextOrientation    String   @default("horizontal")
+  buttonShapeTopLeft       String   @default("pill")
+  buttonShapeTopRight      String   @default("pill")
+  buttonShapeBottomRight   String   @default("pill")
+  buttonShapeBottomLeft    String   @default("pill")
+  buttonSize               String   @default("medium")
+  buttonBorderWidth        Int      @default(0)
+  buttonBorderColor        String   @default("#1A1A1A")
+  buttonShadow             String   @default("soft")
+  buttonIcon               String   @default("list")
+  showIcon                 Boolean  @default(true)
+  showOnProductPage        Boolean  @default(true)
+  sizeSelectorMode         String   @default("theme")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }

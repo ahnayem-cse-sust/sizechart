@@ -1,6 +1,6 @@
 import db from "../db.server";
 import { cors } from "remix-utils/cors";
-import { renderContentBlocksHtml, renderAvailableSizesHtml } from "../services/utils/render";
+import { renderContentBlocksHtml, renderAvailableSizesHtml, parseAvailableSizes } from "../services/utils/render";
 import { getSettings, toStorefrontSettings } from "../services/settings.server";
 
 export async function loader({ request }) {
@@ -17,7 +17,7 @@ export async function loader({ request }) {
       status: 400,
       success: false,
       message: "Missing or invalid chartId",
-      data: { title: "", html: "", settings },
+      data: { title: "", html: "", sizes: [], settings },
     });
     return cors(request, returnResponse);
   }
@@ -32,7 +32,7 @@ export async function loader({ request }) {
       status: 404,
       success: false,
       message: "No size chart found with this id.",
-      data: { title: "", html: "", settings },
+      data: { title: "", html: "", sizes: [], settings },
     });
     return cors(request, returnResponse);
   }
@@ -55,6 +55,7 @@ export async function loader({ request }) {
     data: {
       title: chart.title,
       html,
+      sizes: parseAvailableSizes(chart.available_sizes),
       settings,
     },
   });

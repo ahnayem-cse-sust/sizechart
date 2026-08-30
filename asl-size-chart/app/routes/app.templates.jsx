@@ -12,8 +12,11 @@ import { getPaginatedTemplates, deleteTemplate, saveTemplate, updateTemplate, up
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
 import { TEMPLATE_BASE_URL } from '../services/constants/routes';
 import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE,INTENT_UPDATE_SERIAL } from '../services/constants/global';
+import { authenticate } from '../shopify.server';
 
 export async function loader({ request }) {
+  await authenticate.admin(request);
+
   const response = await getPaginatedTemplates({ request });
   const listData = await response.json();
   const templates = listData.templates;
@@ -23,6 +26,8 @@ export async function loader({ request }) {
 
 
 export async function action({ request }) {
+  await authenticate.admin(request);
+
   const form = await request.formData();
   const intent = form.get(INTENT);
 

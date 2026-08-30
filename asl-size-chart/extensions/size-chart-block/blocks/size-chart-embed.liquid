@@ -3,8 +3,13 @@
   whole theme (Theme editor > App embeds) and it automatically shows a
   floating "Size Chart" button on any product page whose product has a
   `custom.size_chart_id` metafield set — no per-product or per-template
-  setup required. All appearance (label, color, position, icon) is
-  controlled from the app's Settings page, not here.
+  setup required. All appearance (label, color, shape per corner, size,
+  border, shadow, icon, vertical/horizontal position, text orientation) is
+  controlled from the
+  app's Settings page, not here. The SHAPE_RADIUS / SIZE_STYLES /
+  SHADOW_STYLES / ICON_PATHS maps below mirror
+  app/services/utils/buttonDesign.js — keep both in sync if those values
+  ever change.
 {%- enddoc -%}
 
 {%- if request.page_type == 'product' -%}
@@ -31,20 +36,81 @@
           })
           .catch(function () {});
 
+        // Mirrors app/services/utils/buttonDesign.js
+        var SHAPE_RADIUS = { pill: 999, rounded: 10, square: 4 };
+        var SIZE_STYLES = {
+          small: { padding: '6px 12px', fontSize: '0.75rem', iconSize: 14 },
+          medium: { padding: '10px 16px', fontSize: '0.875rem', iconSize: 16 },
+          large: { padding: '14px 22px', fontSize: '1rem', iconSize: 18 },
+        };
+        var SHADOW_STYLES = {
+          none: 'none',
+          soft: '0 2px 8px rgba(0,0,0,0.12)',
+          strong: '0 8px 24px rgba(0,0,0,0.25)',
+        };
+        var ICON_PATHS = {
+          list: '<path d="M21 6H3M21 12H3M21 18H8"></path>',
+          ruler: '<path d="M3 17 17 3l4 4L7 21l-4-4Z"></path><path d="m14.5 5.5 2 2"></path><path d="m11.5 8.5 2 2"></path><path d="m8.5 11.5 2 2"></path><path d="m5.5 14.5 2 2"></path>',
+          tag: '<path d="M12 2H4a2 2 0 0 0-2 2v8l10.29 10.29a1 1 0 0 0 1.42 0l8.58-8.58a1 1 0 0 0 0-1.42L12 2Z"></path><circle cx="7.5" cy="7.5" r="1.25"></circle>',
+          info: '<circle cx="12" cy="12" r="10"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path>',
+        };
+
         function renderEmbed(root, data, settings) {
           var blockId = 'asc-embed-' + Math.random().toString(36).slice(2);
-          var position = ['top-right','top-left','middle-right','middle-left','bottom-right','bottom-left'].indexOf(settings.buttonPosition) !== -1
-            ? settings.buttonPosition
-            : 'bottom-right';
+          var vertical = ['top','middle','bottom'].indexOf(settings.buttonPositionVertical) !== -1
+            ? settings.buttonPositionVertical
+            : 'bottom';
+          var horizontal = ['left','center','right'].indexOf(settings.buttonPositionHorizontal) !== -1
+            ? settings.buttonPositionHorizontal
+            : 'right';
+          var position = vertical + '-' + horizontal;
+
+          var sizeStyle = SIZE_STYLES[settings.buttonSize] || SIZE_STYLES.medium;
+          // CSS border-radius shorthand order: top-left, top-right,
+          // bottom-right, bottom-left — mirrors BUTTON_CORNERS in
+          // app/services/utils/buttonDesign.js.
+          function cornerRadius(shape) {
+            return (SHAPE_RADIUS[shape] != null ? SHAPE_RADIUS[shape] : SHAPE_RADIUS.pill) + 'px';
+          }
+          var radius = [
+            cornerRadius(settings.buttonShapeTopLeft),
+            cornerRadius(settings.buttonShapeTopRight),
+            cornerRadius(settings.buttonShapeBottomRight),
+            cornerRadius(settings.buttonShapeBottomLeft),
+          ].join(' ');
+          var shadow = SHADOW_STYLES[settings.buttonShadow] != null ? SHADOW_STYLES[settings.buttonShadow] : SHADOW_STYLES.soft;
+          var borderWidth = Number(settings.buttonBorderWidth) || 0;
+          var border = borderWidth > 0 ? borderWidth + 'px solid ' + (settings.buttonBorderColor || '#1a1a1a') : 'none';
+
           var iconSvg = settings.showIcon
-            ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 6H3M21 12H3M21 18H8"></path></svg>'
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="' + sizeStyle.iconSize + '" height="' + sizeStyle.iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[settings.buttonIcon] || ICON_PATHS.list) + '</svg>'
             : '';
+
+          // Mirrors app/services/utils/buttonDesign.js TEXT_ORIENTATION_STYLES
+          var isVerticalText = settings.buttonTextOrientation === 'vertical-ttb'
+            || settings.buttonTextOrientation === 'vertical-btt';
+
+          var triggerStyle =
+            'background:' + (settings.buttonColor || '#1a1a1a') + ';' +
+            'color:' + (settings.buttonTextColor || '#fff') + ';' +
+            'border-radius:' + radius + ';' +
+            'padding:' + sizeStyle.padding + ';' +
+            'font-size:' + sizeStyle.fontSize + ';' +
+            'box-shadow:' + shadow + ';' +
+            'border:' + border + ';' +
+            'flex-direction:' + (isVerticalText ? 'column' : 'row') + ';';
+
+          var labelStyle = settings.buttonTextOrientation === 'vertical-btt'
+            ? 'writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);'
+            : settings.buttonTextOrientation === 'vertical-ttb'
+              ? 'writing-mode:vertical-rl;text-orientation:mixed;'
+              : '';
 
           root.className = 'asc-embed asc-embed--' + position;
           root.innerHTML =
-            '<button type="button" class="asc-embed-trigger" style="background:' + (settings.buttonColor || '#1a1a1a') + ';color:' + (settings.buttonTextColor || '#fff') + '" aria-haspopup="dialog" aria-controls="' + blockId + '-dialog" data-asc-open>' +
+            '<button type="button" class="asc-embed-trigger" style="' + triggerStyle + '" aria-haspopup="dialog" aria-controls="' + blockId + '-dialog" data-asc-open>' +
               iconSvg +
-              '<span>' + (settings.buttonLabel || 'Size Chart') + '</span>' +
+              '<span style="' + labelStyle + '">' + (settings.buttonLabel || 'Size Chart') + '</span>' +
             '</button>' +
             '<dialog id="' + blockId + '-dialog" class="asc-dialog">' +
               '<div class="asc-dialog__header">' +
@@ -92,6 +158,12 @@
         left: 20px;
       }
 
+      .asc-embed--top-center {
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
       .asc-embed--middle-right {
         top: 50%;
         right: 20px;
@@ -104,6 +176,12 @@
         transform: translateY(-50%);
       }
 
+      .asc-embed--middle-center {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
       .asc-embed--bottom-right {
         right: 20px;
         bottom: 20px;
@@ -114,17 +192,19 @@
         bottom: 20px;
       }
 
+      .asc-embed--bottom-center {
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+      }
+
       .asc-embed-trigger {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        border: none;
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 0.875rem;
         font-family: inherit;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         cursor: pointer;
+        box-sizing: border-box;
       }
 
       .asc-embed-trigger:hover {
@@ -182,15 +262,15 @@
       }
 
       .asc-sizes-heading {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      color: #666;
-      margin: 0 0 8px;
-    }
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #666;
+        margin: 0 0 8px;
+      }
 
-    .asc-size-list {
+      .asc-size-list {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;

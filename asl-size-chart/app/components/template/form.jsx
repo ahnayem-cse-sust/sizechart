@@ -1,8 +1,6 @@
 import { Modal, TextField, Button } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 import {
-  Layout,
-  Page,
   Grid, InlineError,
   FormLayout, Text,
   Select, Form
@@ -11,7 +9,8 @@ import { INTENT,INTENT_UPDATE,INTENT_CREATE } from "../../services/constants/glo
 
 export default function TemplateFormComponent({ templateCategories, template }) {
   const [active, setActive] = useState();
-  const [modalTitle, setModalTitle] = useState(template ? 'Edit Template' : 'Create Template');
+  const [saving, setSaving] = useState(false);
+  const modalTitle = template ? 'Edit Template' : 'Create Template';
   const [title, setTitle] = useState(template ? template.title : '');
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState(template ? template.category : '');
   const [errors, setErrors] = useState({});
@@ -31,32 +30,39 @@ export default function TemplateFormComponent({ templateCategories, template }) 
 
   const handleSave = async (id) => {
 
-    const errors = {};
-    if (!title) errors.title = "Title is required";
-    if (!selectedTemplateCategory) errors.category = "Category is required";
+    const validationErrors = {};
+    if (!title) validationErrors.title = "Title is required";
+    if (!selectedTemplateCategory) validationErrors.category = "Category is required";
 
-    if (Object.keys(errors).length) {
-      setErrors(errors);
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
       return;
     }
 
+    setErrors({});
+    setSaving(true);
+
     const formData = new FormData();
     formData.append(INTENT, id ? INTENT_UPDATE : INTENT_CREATE);
-    formData.append("id", id);
+    if (id) formData.append("id", id);
     formData.append("title", title);
     formData.append("category", selectedTemplateCategory);
 
-    const res = await fetch("/app/templates", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/app/templates", {
+        method: "POST",
+        body: formData,
+      });
 
-    console.log(res);
-
-    if (res.ok) {
-      window.location.reload(); // Or use `navigate()` to refresh
-    } else {
-      alert("Failed to create template.");
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        setSaving(false);
+        alert("Failed to save template.");
+      }
+    } catch (error) {
+      setSaving(false);
+      alert("Failed to save template.");
     }
   };
 
@@ -78,56 +84,47 @@ export default function TemplateFormComponent({ templateCategories, template }) 
         title={modalTitle}
         primaryAction={{
           content: "Save",
+          loading: saving,
           onAction: () => handleSave(template?.id)
         }}
         secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
       >
         <Modal.Section>
-          <Page>
-            <Layout>
-              <Layout.Section>
-                <Form>
-                  <FormLayout>
+          <Form onSubmit={(event) => event.preventDefault()}>
+            <FormLayout>
+              <Grid>
+                <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+                  <Text variant="headingMd" as="h6">
+                    Template Title:
+                  </Text>
+                  <TextField
+                    name='title'
+                    value={title}
+                    onChange={handleTitleChange}
+                    autoComplete="off"
+                  />
+                  {errors.title && <InlineError message={errors.title} />}
+                </Grid.Cell>
+              </Grid>
 
-                    <Grid>
-                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                        <Text variant="headingMd" as="h6">
-                          Template Title:
-                        </Text>
-                        <TextField
-                          name='title'
-                          value={title}
-                          onChange={handleTitleChange}
-                          autoComplete="off"
-                        />
-                        {errors.title && <InlineError message={errors.title} />}
-                      </Grid.Cell>
-                    </Grid>
-
-                    <Grid>
-                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-                        <Text variant="headingMd" as="h6">
-                          Template Category:
-                        </Text>
-                        <Select
-                          name='category'
-                          options={templateCategories}
-                          onChange={handleSelectedCategoryChange}
-                          value={selectedTemplateCategory}
-                        />
-                        {errors.category && <InlineError message={errors.category} />}
-                      </Grid.Cell>
-                    </Grid>
-                  </FormLayout>
-                </Form>
-              </Layout.Section>
-
-            </Layout>
-          </Page>
+              <Grid>
+                <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+                  <Text variant="headingMd" as="h6">
+                    Template Category:
+                  </Text>
+                  <Select
+                    name='category'
+                    options={templateCategories}
+                    onChange={handleSelectedCategoryChange}
+                    value={selectedTemplateCategory}
+                  />
+                  {errors.category && <InlineError message={errors.category} />}
+                </Grid.Cell>
+              </Grid>
+            </FormLayout>
+          </Form>
         </Modal.Section>
       </Modal>
     </div>
   );
 }
-
-

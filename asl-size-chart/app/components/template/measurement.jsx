@@ -7,11 +7,15 @@ import {
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 import * as content_constants from '../../services/constants/content';
+import { INTENT } from '../../services/constants/global';
+import { safeJsonParse } from '../../services/utils/safeJson';
 
 
 export default function MeasurementComponent({ content }) {
-  const content_array = JSON.parse(content.content_obj);
-  const [sizeTable, setSizeTable] = useState(content_array);
+  const content_array = safeJsonParse(content.content_obj, []);
+  const [sizeTable, setSizeTable] = useState(
+    content_array.length > 0 ? content_array : [[""]],
+  );
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +52,7 @@ export default function MeasurementComponent({ content }) {
 
     setLoading(true);
     const formData = new FormData();
-    formData.append("intent", content_constants.INTENT_SAVE_BLOCK);
+    formData.append(INTENT, content_constants.INTENT_SAVE_BLOCK);
     formData.append("content_id", content_id);
     formData.append("content_obj", JSON.stringify(sizeTable));
 
@@ -71,7 +75,7 @@ export default function MeasurementComponent({ content }) {
     if (!confirm("Are you sure you want to delete this table?")) return;
 
     const formData = new FormData();
-    formData.append("intent", content_constants.INTENT_CONTENT_DELETE);
+    formData.append(INTENT, content_constants.INTENT_CONTENT_DELETE);
     formData.append("content_id", content_id);
 
     const res = await fetch("/app/templates/" + content.template_id, {
@@ -89,10 +93,9 @@ export default function MeasurementComponent({ content }) {
 
   return (
     <div>
-      {loading && (<div className='component-spinner'><div  className='spin'><Spinner accessibilityLabel="Spinner example" size="large" /></div></div>)}
+      {loading && (<div className='component-spinner'><div  className='spin'><Spinner accessibilityLabel="Saving size table" size="large" /></div></div>)}
       
         <Grid>
-          <input type="hidden" name="sizeTableData" value={JSON.stringify(sizeTable)} />
           <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
             <InlineStack align="space-between" blockAlign="center">
               <Text as="h2" variant="headingLg">

@@ -12,8 +12,11 @@ import { getPaginatedCharts, deleteChart, saveChart, updateChart } from '../serv
 import { CHART_BASE_URL } from '../services/constants/routes';
 import { INTENT,INTENT_DELETE,INTENT_CREATE,INTENT_UPDATE } from '../services/constants/global';
 import { getTemplateList} from '../services/template.server';
+import { authenticate } from '../shopify.server';
 
 export async function loader({ request }) {
+  await authenticate.admin(request);
+
   const response = await getPaginatedCharts({ request });
   const listData = await response.json();
   const charts = listData.charts; 
@@ -27,6 +30,8 @@ export async function loader({ request }) {
 
 
 export async function action({ request }) {
+  await authenticate.admin(request);
+
   const form = await request.formData();
   const intent = form.get(INTENT);
 

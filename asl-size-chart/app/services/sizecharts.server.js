@@ -171,7 +171,11 @@ export async function saveProductSizechart({ request }) {
       );
       const result = await response.json();
       const userErrors = result?.data?.metafieldDelete?.userErrors || [];
-      return { success: userErrors.length === 0, userErrors };
+      const graphqlErrors = result?.errors || [];
+      return {
+        success: userErrors.length === 0 && graphqlErrors.length === 0,
+        userErrors: userErrors.length ? userErrors : graphqlErrors,
+      };
     }
 
     const response = await admin.graphql(
@@ -207,5 +211,9 @@ export async function saveProductSizechart({ request }) {
 
     const result = await response.json();
     const userErrors = result?.data?.metafieldsSet?.userErrors || [];
-    return { success: userErrors.length === 0, userErrors };
+    const graphqlErrors = result?.errors || [];
+    return {
+      success: userErrors.length === 0 && graphqlErrors.length === 0,
+      userErrors: userErrors.length ? userErrors : graphqlErrors,
+    };
 }

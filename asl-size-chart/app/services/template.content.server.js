@@ -1,12 +1,13 @@
 import db from "../db.server";
 import * as content_constants from './constants/content';
 import * as upload_util from "./utils/upload";
+import { INTENT } from './constants/global';
 
 const moduleName = 'Template-Content';
 
 export async function contentFactory({ request }) {
   const form = await request.formData();
-  const intent = form.get(content_constants.INTENT);
+  const intent = form.get(INTENT);
 
   let response;
 
@@ -73,9 +74,19 @@ async function addBlockByTemplateId(content_type, template_id) {
     content_obj = '';
   }
 
+  // New blocks should go to the end of the list, not always serial_no 1 —
+  // otherwise every block added after the first ties on serial_no and the
+  // display order becomes dependent on incidental row order until the next
+  // manual drag-reorder.
+  const lastBlock = await db.templateContent.findFirst({
+    where: { template_id: Number(template_id) },
+    orderBy: { serial_no: 'desc' },
+  });
+  const nextSerial = (lastBlock?.serial_no ?? 0) + 1;
+
   const templateContents = await db.templateContent.create({
     data: {
-      serial_no: 1,
+      serial_no: nextSerial,
       template_id: Number(template_id),
       content_type: content_type,
       content_obj: content_obj,

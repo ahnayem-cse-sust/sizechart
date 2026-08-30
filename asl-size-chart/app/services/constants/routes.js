@@ -1,6 +1,3 @@
-export const BASE_URL = '';
-export const API_URL = '';
-
 export const TEMPLATE_BASE_URL = "/app/templates";
 export const CHART_BASE_URL = "/app/charts";
 

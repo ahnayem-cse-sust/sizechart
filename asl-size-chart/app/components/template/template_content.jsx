@@ -14,7 +14,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { Card, Button } from '@shopify/polaris';
-import { useEffect } from 'react';
 import * as content_constants from '../../services/constants/content';
 import * as global_constants from '../../services/constants/global';
 import MeasurementComponent from './measurement';
@@ -34,9 +33,6 @@ const DraggableItem = ({ id, children }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} >
-      {/* <div style={{ position: 'relative', top: 8, left: 8, zIndex: 10 }}>
-        <Button icon={DragHandleIcon} size="micro" {...listeners} />
-      </div> */}
       {children({ listeners })}
     </div>
   );
@@ -57,50 +53,46 @@ const ContentBlock = ({ item, listeners }) => {
 
 export default function TemplateContentComponent({ templateContents }) {
   const [items, setItems] = useState(templateContents);
-  const [loaded, setLoaded] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor));
 
-  useEffect(() => {
-    if (loaded) {
-      let serialArray = [];
-      let serial = 0;
-      items.forEach(element => {
-        serialArray.push({
-          id: element.id,
-          serial_no: ++serial
-        });
-      });
+  const persistOrder = async (reordered, previous) => {
+    const serialArray = reordered.map((item, index) => ({
+      id: item.id,
+      serial_no: index + 1,
+    }));
 
-      const formData = new FormData();
-      formData.append(global_constants.INTENT, global_constants.INTENT_UPDATE_SERIAL);
-      formData.append("serial_json", JSON.stringify(serialArray));
+    const formData = new FormData();
+    formData.append(global_constants.INTENT, global_constants.INTENT_UPDATE_SERIAL);
+    formData.append("serial_json", JSON.stringify(serialArray));
 
-      fetch("/app/templates", {
+    try {
+      const res = await fetch("/app/templates", {
         method: "POST",
         body: formData,
-      }).then(res => {
-        console.log(res);
-        if (res.ok) {
-          console.log("Serial updated successfully");
-          window.location.reload();
-        } else {
-          console.log("Something went wrong!! Serial not updated.")
-          // window.location.reload();
-        }
       });
+      if (!res.ok) throw new Error("Request failed");
+      // Local state already reflects the new order — no reload needed.
+    } catch (error) {
+      // Roll back the optimistic reorder so the UI doesn't drift from
+      // what's actually saved.
+      setItems(previous);
+      alert("Couldn't save the new block order. Please try again.");
     }
-
-  }, [items]);
+  };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      setItems((items) => arrayMove(items, oldIndex, newIndex));
-    }
-    setLoaded(true);
+    // Dropped outside any sortable target, or dropped back in place.
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((item) => item.id === active.id);
+    const newIndex = items.findIndex((item) => item.id === over.id);
+    const previous = items;
+    const reordered = arrayMove(items, oldIndex, newIndex);
+
+    setItems(reordered);
+    persistOrder(reordered, previous);
   };
 
   return (

@@ -83,21 +83,32 @@ export function renderContentBlocksHtml(contents = []) {
 }
 
 /**
- * Renders the "Available sizes" pill list for a chart, if any sizes were
- * configured on it.
+ * Parses a chart's `available_sizes` JSON column into a plain array of
+ * size label strings, regardless of whether entries are stored as plain
+ * strings or `{ value }` objects.
  */
-export function renderAvailableSizesHtml(available_sizes) {
-  if (!available_sizes) return "";
+export function parseAvailableSizes(available_sizes) {
+  if (!available_sizes) return [];
   let sizes;
   try {
     sizes = JSON.parse(available_sizes);
   } catch {
-    return "";
+    return [];
   }
-  if (!Array.isArray(sizes) || sizes.length === 0) return "";
+  if (!Array.isArray(sizes)) return [];
+  return sizes.map((s) => String(s?.value ?? s));
+}
+
+/**
+ * Renders the "Available sizes" pill list for a chart, if any sizes were
+ * configured on it.
+ */
+export function renderAvailableSizesHtml(available_sizes) {
+  const sizes = parseAvailableSizes(available_sizes);
+  if (sizes.length === 0) return "";
 
   const items = sizes
-    .map((s) => `<li class="asc-size-pill">${escapeHtml(s.value ?? s)}</li>`)
+    .map((s) => `<li class="asc-size-pill">${escapeHtml(s)}</li>`)
     .join("");
   return `<div class="asc-block asc-block--sizes"><h3 class="asc-sizes-heading">Available sizes</h3><ul class="asc-size-list">${items}</ul></div>`;
 }

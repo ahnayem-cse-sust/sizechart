@@ -5,7 +5,7 @@ import {
   List,
   ButtonGroup,
   Button,
-  TextField
+  TextField,
 } from "@shopify/polaris";
 import { XIcon } from "@shopify/polaris-icons";
 
@@ -24,13 +24,21 @@ export default function AvailableSizeComponent({ sizeList, setSizeList }) {
   };
 
   const addSize = () => {
-    if (newSize.trim() === "") {
+    const trimmed = newSize.trim();
+    if (trimmed === "") {
       setErrorNewSize("Size cannot be empty");
-    } else {
-      setErrorNewSize(null);
-      setSizeList([...sizeList, { value: newSize }]);
-      setNewSize('');
+      return;
     }
+    const isDuplicate = sizeList.some(
+      (row) => row.value.trim().toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setErrorNewSize("This size has already been added");
+      return;
+    }
+    setErrorNewSize(null);
+    setSizeList([...sizeList, { value: trimmed }]);
+    setNewSize('');
   };
 
   const removeSize = (index) => {
@@ -56,7 +64,7 @@ export default function AvailableSizeComponent({ sizeList, setSizeList }) {
                   <Button
                     icon={XIcon}
                     onClick={() => removeSize(index)}
-                    plain
+                    variant="plain"
                   />
                 </span>
 
@@ -70,6 +78,12 @@ export default function AvailableSizeComponent({ sizeList, setSizeList }) {
           <TextField
             value={newSize}
             onChange={(val) => handleNewSize(val)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addSize();
+              }
+            }}
             autoComplete="off"
             error={errorNewSize}
           />

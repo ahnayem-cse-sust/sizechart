@@ -1,78 +1,54 @@
-import { Modal, TextField, Button } from "@shopify/polaris";
+import { Modal, Button, BlockStack } from "@shopify/polaris";
 import { useState, useCallback } from "react";
-import {
-  Layout,
-  Page,
-  Grid,
-  FormLayout, Text,
-  Select, Form
-} from "@shopify/polaris";
 import { CONTENT_TYPE_DESCRIPTION, CONTENT_TYPE_IMAGE, CONTENT_TYPE_TABLE } from "../../services/constants/content";
+import { safeJsonParse } from "../../services/utils/safeJson";
 
 
 const DescriptionPreview = ({ content }) => {
-  let description = content.content_obj;
-  description = description.slice(1);
-  description = description.slice(0, -1);
-  return (
-    <div>
-      <br />
-      <div
-        dangerouslySetInnerHTML={{ __html: description }}
-      >
-        {/* {description} */}
-        {/* {content.content_obj} */}
-      </div>
-      <br />
-    </div>
-  );
+  const description = safeJsonParse(content.content_obj, content.content_obj || "");
+  return <div dangerouslySetInnerHTML={{ __html: description }} />;
 };
 
 const MeasurementPreview = ({ content }) => {
-  const content_array = JSON.parse(content.content_obj);
-  const [sizeTable, setSizeTable] = useState(content_array);
+  const sizeTable = safeJsonParse(content.content_obj, []);
+  if (sizeTable.length === 0) return null;
   return (
-    <div>
-      <div className='measurement-table'>
-        <table style={{ width: '100%' }}>
+    <div className='measurement-table'>
+      <table style={{ width: '100%' }}>
+        <tbody>
           {sizeTable.map((row, rIdx) => (
-            <tr key={rIdx} gap="2">
+            <tr key={rIdx}>
               {row.map((cell, cIdx) => (
-                <td>
+                <td key={cIdx}>
                   {cell}
-                  {/* <TextField
-                    key={cIdx}
-                    labelHidden
-                    readOnly
-                    value={cell}
-                    onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                  /> */}
                 </td>
               ))}
             </tr>
           ))}
-        </table>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 };
 
 const ImagePreview = ({ content }) => {
+  if (!content.content_obj) return null;
   return (
-    <div>
-      Image
+    <div style={{ padding: '12px 0' }}>
+      <img
+        src={'/uploads/' + content.content_obj}
+        alt="Size chart"
+        style={{ maxWidth: '100%', borderRadius: 8 }}
+      />
     </div>
   );
 };
-
-
 
 
 export default function TemplatePreviewComponent({ template, templateContents }) {
   const [active, setActive] = useState();
 
   const toggleModal = useCallback(() => setActive((prev) => !prev), []);
-
 
   return (
     <div>
@@ -91,24 +67,17 @@ export default function TemplatePreviewComponent({ template, templateContents })
         title="Size Guides"
       >
         <Modal.Section>
-          <Page>
-            <Layout>
-              <Layout.Section>
-                {templateContents.map((content, index) => (
-                  <div key={content.id}>
-                    {content.content_type === CONTENT_TYPE_DESCRIPTION && (<DescriptionPreview content={content} />)}
-                    {content.content_type === CONTENT_TYPE_IMAGE && (<ImagePreview content={content} />)}
-                    {content.content_type === CONTENT_TYPE_TABLE && (<MeasurementPreview content={content} />)}
-                  </div>
-                ))}
-
-              </Layout.Section>
-            </Layout>
-          </Page>
+          <BlockStack gap="400">
+            {templateContents.map((content) => (
+              <div key={content.id}>
+                {content.content_type === CONTENT_TYPE_DESCRIPTION && (<DescriptionPreview content={content} />)}
+                {content.content_type === CONTENT_TYPE_IMAGE && (<ImagePreview content={content} />)}
+                {content.content_type === CONTENT_TYPE_TABLE && (<MeasurementPreview content={content} />)}
+              </div>
+            ))}
+          </BlockStack>
         </Modal.Section>
       </Modal>
     </div>
   );
 }
-
-

@@ -4,6 +4,7 @@ import {
     Popover, ActionList
 } from "@shopify/polaris";
 import * as content_constants from '../../services/constants/content';
+import { INTENT } from '../../services/constants/global';
 
 export default function BlockButtonComponent({ btnText, templateId }) {
     const [popoverActive, setPopoverActive] = useState(false);
@@ -19,10 +20,10 @@ export default function BlockButtonComponent({ btnText, templateId }) {
         </Button>
     );
 
-    const addBlock = async (contentType,templateId) => {
+    const addBlock = async (contentType) => {
 
         const formData = new FormData();
-        formData.append("intent", content_constants.INTENT_ADD_BLOCK);
+        formData.append(INTENT, content_constants.INTENT_ADD_BLOCK);
         formData.append("template_id", templateId);
         formData.append("content_type", contentType);
 
@@ -34,7 +35,7 @@ export default function BlockButtonComponent({ btnText, templateId }) {
         if (res.ok) {
             window.location.reload(); // Or use `navigate()` to refresh
         } else {
-            alert("Failed to add sizetable.");
+            alert("Failed to add block.");
         }
     }
 
@@ -49,9 +50,9 @@ export default function BlockButtonComponent({ btnText, templateId }) {
                 <ActionList
                     actionRole="menuitem"
                     items={[
-                        { content: 'Advanced Table', onAction: () => addBlock(content_constants.CONTENT_TYPE_TABLE,templateId) },
-                        { content: 'Text', onAction: () => addBlock(content_constants.CONTENT_TYPE_DESCRIPTION,templateId) },
-                        { content: 'Image', onAction: () => addBlock(content_constants.CONTENT_TYPE_IMAGE,templateId) }
+                        { content: 'Advanced Table', onAction: () => addBlock(content_constants.CONTENT_TYPE_TABLE) },
+                        { content: 'Text', onAction: () => addBlock(content_constants.CONTENT_TYPE_DESCRIPTION) },
+                        { content: 'Image', onAction: () => addBlock(content_constants.CONTENT_TYPE_IMAGE) }
                     ]}
                 />
             </Popover>

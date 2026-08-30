@@ -18,8 +18,11 @@ import { getTemplateList } from "../services/template.server";
 import { CHART_BASE_URL } from "../services/constants/routes";
 import { CONTENT_TYPE_DESCRIPTION, CONTENT_TYPE_TABLE, CONTENT_TYPE_IMAGE } from "../services/constants/content";
 import ChartFormComponent from "../components/chart/form";
+import { authenticate } from "../shopify.server";
 
-export async function loader({ params }) {
+export async function loader({ request, params }) {
+  await authenticate.admin(request);
+
   const id = Number(params.id);
   const chartResponse = await getChartById(id);
   const { chart } = await chartResponse.json();

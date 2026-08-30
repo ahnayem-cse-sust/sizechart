@@ -112,7 +112,7 @@ export default function ChartFormComponent({ templates, chart }) {
         secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
       >
         <Modal.Section>
-          <Form>
+          <Form onSubmit={(event) => event.preventDefault()}>
             <FormLayout>
               <TextField
                 label="Chart title"

@@ -15,7 +15,7 @@ export async function getTemplateList() {
 }
 
 export async function getPaginatedTemplates({ request }) {
-  const PAGE_SIZE = 3;
+  const PAGE_SIZE = 10;
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1", 10);
 
@@ -31,22 +31,39 @@ export async function getPaginatedTemplates({ request }) {
     templates,
     pagination: {
       currentPage: page,
-      totalPages: Math.ceil(totalCount / PAGE_SIZE),
+      totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)),
     },
   });
 }
 
 export async function saveTemplate({ title, category }) {
+  if (!title || !category) {
+    return Response.json(
+      { error: "Title and category are required" },
+      { status: 400 },
+    );
+  }
+
   const response = await db.template.create({
     data: {
       "title": title,
       "category": category,
     }
   });
-  return response;
+  return Response.json({ template: response });
 }
 
 export async function updateTemplate(id, { title, category }) {
+  if (isNaN(id)) {
+    return Response.json({ error: "Invalid ID" }, { status: 400 });
+  }
+  if (!title || !category) {
+    return Response.json(
+      { error: "Title and category are required" },
+      { status: 400 },
+    );
+  }
+
   const response = await db.template.update({
     where: { id },
     data: {
@@ -54,7 +71,7 @@ export async function updateTemplate(id, { title, category }) {
       "category": category,
     }
   });
-  return response;
+  return Response.json({ template: response });
 }
 
 export async function deleteTemplate(id) {
@@ -99,4 +116,3 @@ export async function updateTemplateContentSerial(serial_json) {
 
   return Response.json({ success: true });
 }
-

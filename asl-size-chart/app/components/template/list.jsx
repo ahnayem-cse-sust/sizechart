@@ -66,6 +66,14 @@ export function TemplateListComponent({ templates, pagination }) {
 
     return (
         <Card padding="0">
+            <style>{`
+                .asc-template-title {
+                    cursor: pointer;
+                }
+                .asc-template-title:hover {
+                    text-decoration: underline;
+                }
+            `}</style>
             <IndexTable
                 resourceName={resourceName}
                 itemCount={templates.length}
@@ -93,12 +101,20 @@ export function TemplateListComponent({ templates, pagination }) {
                         key={template.id}
                         selected={selectedResources.includes(template.id)}
                         position={index}
-                        onClick={() => navigate(TEMPLATE_CONTENTS_URL + `${template.id}`)}
+                        onClick={() => {}}
                     >
                         <IndexTable.Cell>
-                            <Text variant="bodyMd" fontWeight="medium" as="span">
-                                {template.title}
-                            </Text>
+                            <span
+                                className="asc-template-title"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    navigate(TEMPLATE_CONTENTS_URL + `${template.id}`);
+                                }}
+                            >
+                                <Text variant="bodyMd" fontWeight="medium" as="span">
+                                    {template.title}
+                                </Text>
+                            </span>
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <Badge>{template.category}</Badge>

@@ -13,6 +13,7 @@ import TemplateFormComponent from '../components/template/form';
 import TemplatePreviewComponent from '../components/template/template_preview';
 import BlockButtonComponent from '../components/template/block_button';
 import TemplateContentComponent from '../components/template/template_content';
+import EditableTitleComponent from '../components/template/editable_title';
 import { getAllTemplateContent, contentFactory } from '../services/template.content.server';
 
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
@@ -43,7 +44,13 @@ export default function TemplateView() {
     const { template, templateContents } = useLoaderData();
 
     return (
-        <Page backAction={{ content: "Templates", url: TEMPLATE_BASE_URL }} title={template.title}>
+        <Page
+            backAction={{ content: "Templates", url: TEMPLATE_BASE_URL }}
+            title={template.title}
+            primaryAction={
+                <TemplatePreviewComponent template={template} templateContents={templateContents} />
+            }
+        >
             <TitleBar title={`Size Chart \\ ${template.title}`} />
             <BlockStack gap="400">
                 <Card>
@@ -59,12 +66,7 @@ export default function TemplateView() {
                 </Card>
                 <Card>
                     <BlockStack gap="400">
-                        <InlineStack align="space-between" blockAlign="center">
-                            <Text variant="heading2xl" as="h3">
-                                {template.title} Size Guide
-                            </Text>
-                            <TemplatePreviewComponent template={template} templateContents={templateContents} />
-                        </InlineStack>
+                        <EditableTitleComponent template={template} suffix=" Size Guide" />
                         <TemplateContentComponent templateContents={templateContents} />
                         <Box>
                             <BlockButtonComponent btnText={'+ Add New Block'} templateId={template.id} />

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
     Grid,
     DropZone,
@@ -6,48 +6,44 @@ import {
     InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import {INTENT} from '../../services/constants/global';
-import {INTENT_SAVE_IMAGE_BLOCK, INTENT_IMAGE_CONTENT_DELETE} from '../../services/constants/content';
+import { INTENT } from '../../services/constants/global';
+import { CONTENT_TYPE_IMAGE, INTENT_IMAGE_CONTENT_DELETE } from '../../services/constants/content';
 
-export default function ImageUploadComponent({ content }) {
+export default function ImageUploadComponent({ content, onFieldChange }) {
     const [file, setFile] = useState(null);
-    const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+    const [invalidType, setInvalidType] = useState(false);
+    const isFirstRender = useRef(true);
 
     const previousFileUrl = content.content_obj ? '/uploads/' + content.content_obj : null;
 
     const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+
+    // Report a newly chosen file up to the page whenever it changes, so the
+    // single top-level Save button can persist it. A block with no newly
+    // picked file has nothing to report — the previously saved image stays
+    // as-is.
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        if (file && validImageTypes.includes(file.type)) {
+            onFieldChange?.(content.id, CONTENT_TYPE_IMAGE, file);
+        }
+    }, [file]);
 
     const handleDropZoneDrop = useCallback(
         (_dropFiles, acceptedFiles, _rejectedFiles) => {
             if (acceptedFiles.length > 0) {
                 const dropped = acceptedFiles[0]; // Only accept first file
                 setFile(dropped);
-                setIsSaveDisabled(!validImageTypes.includes(dropped.type));
+                setInvalidType(!validImageTypes.includes(dropped.type));
             } else {
-                setIsSaveDisabled(true);
+                setInvalidType(true);
             }
         },
         []
     );
-
-    const handleBlockSave = async (content_id) => {
-        const formData = new FormData();
-        formData.append(INTENT, INTENT_SAVE_IMAGE_BLOCK);
-        formData.append("content_id", content_id);
-        formData.append("content_obj", file);
-
-        const res = await fetch("/app/templates/" + content.template_id, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (res.ok) {
-            alert("Successfully saved.");
-            setIsSaveDisabled(true);
-        } else {
-            alert("Failed to save.");
-        }
-    };
 
     const handleBlockDelete = async (content_id) => {
         if (!confirm("Are you sure you want to delete this image?")) return;
@@ -123,13 +119,6 @@ export default function ImageUploadComponent({ content }) {
                     </Text>
                     <ButtonGroup>
                         <Button
-                            disabled={isSaveDisabled}
-                            variant="primary"
-                            onClick={() => handleBlockSave(content.id)}
-                        >
-                            Save
-                        </Button>
-                        <Button
                             tone="critical"
                             icon={DeleteIcon}
                             onClick={() => handleBlockDelete(content.id)}
@@ -147,10 +136,11 @@ export default function ImageUploadComponent({ content }) {
                     {uploadedFiles}
                     {fileUpload}
                 </DropZone>
+                {invalidType && (
+                    <Text tone="critical" as="p">Uploaded file format not supported — this won't be saved.</Text>
+                )}
             </Grid.Cell>
         </Grid>
 
     );
 }
-
-

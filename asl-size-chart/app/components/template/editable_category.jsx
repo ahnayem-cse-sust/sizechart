@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import {
     InlineStack,
-    TextField,
+    Select,
     Text,
     Button,
     Box,
@@ -10,34 +10,33 @@ import {
 import { EditIcon, CheckIcon, XIcon } from "@shopify/polaris-icons";
 import { INTENT, INTENT_UPDATE } from "../../services/constants/global";
 
-export default function EditableTitleComponent({ template, suffix = "", label = "" }) {
+export default function EditableCategoryComponent({ template, templateCategories }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [title, setTitle] = useState(template.title);
+    const [category, setCategory] = useState(template.category);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        setTitle(template.title);
-    }, [template.title]);
+        setCategory(template.category);
+    }, [template.category]);
 
     const startEditing = useCallback(() => {
-        setTitle(template.title);
+        setCategory(template.category);
         setError("");
         setIsEditing(true);
-    }, [template.title]);
+    }, [template.category]);
 
     const cancelEditing = useCallback(() => {
-        setTitle(template.title);
+        setCategory(template.category);
         setError("");
         setIsEditing(false);
-    }, [template.title]);
+    }, [template.category]);
 
-    const handleTitleChange = useCallback((value) => setTitle(value), []);
+    const handleCategoryChange = useCallback((value) => setCategory(value), []);
 
     const handleSave = async () => {
-        const trimmed = title.trim();
-        if (!trimmed) {
-            setError("Title is required");
+        if (!category) {
+            setError("Category is required");
             return;
         }
 
@@ -47,8 +46,8 @@ export default function EditableTitleComponent({ template, suffix = "", label = 
         const formData = new FormData();
         formData.append(INTENT, INTENT_UPDATE);
         formData.append("id", template.id);
-        formData.append("title", trimmed);
-        formData.append("category", template.category);
+        formData.append("title", template.title);
+        formData.append("category", category);
 
         try {
             const res = await fetch("/app/templates", {
@@ -60,39 +59,22 @@ export default function EditableTitleComponent({ template, suffix = "", label = 
                 window.location.reload();
             } else {
                 setSaving(false);
-                setError("Failed to update title.");
+                setError("Failed to update category.");
             }
         } catch (error) {
             setSaving(false);
-            setError("Failed to update title.");
+            setError("Failed to update category.");
         }
     };
-
-    const handleKeyDown = useCallback(
-        (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                handleSave();
-            } else if (event.key === "Escape") {
-                cancelEditing();
-            }
-        },
-        [cancelEditing, title],
-    );
 
     if (!isEditing) {
         return (
             <InlineStack gap="150" blockAlign="center">
-                {label && (
-                    <Text variant="headingSm" as="h3" tone="subdued">{label}</Text>
-                )}
-                <Text variant={label ? "bodyMd" : "heading2xl"} as={label ? "span" : "h3"}>
-                    {template.title}
-                    {suffix}
-                </Text>
+                <Text variant="headingSm" as="h3" tone="subdued">Category:</Text>
+                <Text as="span">{template.category}</Text>
                 <Button
                     icon={EditIcon}
-                    accessibilityLabel="Edit title"
+                    accessibilityLabel="Edit category"
                     variant="tertiary"
                     onClick={startEditing}
                 />
@@ -103,20 +85,19 @@ export default function EditableTitleComponent({ template, suffix = "", label = 
     return (
         <Box minWidth="260px">
             <InlineStack gap="150" blockAlign="center" wrap={false}>
-                <div style={{ minWidth: "220px" }} onKeyDown={handleKeyDown}>
-                    <TextField
+                <div style={{ minWidth: "220px" }}>
+                    <Select
                         labelHidden
-                        label="Title"
-                        value={title}
-                        onChange={handleTitleChange}
-                        autoComplete="off"
-                        autoFocus
+                        label="Category"
+                        options={templateCategories}
+                        value={category}
+                        onChange={handleCategoryChange}
                         disabled={saving}
                     />
                 </div>
                 <Button
                     icon={CheckIcon}
-                    accessibilityLabel="Save title"
+                    accessibilityLabel="Save category"
                     variant="primary"
                     loading={saving}
                     onClick={handleSave}

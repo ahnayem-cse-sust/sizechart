@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Grid,
   Text,
   Button,
-  TextField, ButtonGroup, InlineStack, Spinner
+  TextField, ButtonGroup, InlineStack
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 import * as content_constants from '../../services/constants/content';
@@ -11,26 +11,33 @@ import { INTENT } from '../../services/constants/global';
 import { safeJsonParse } from '../../services/utils/safeJson';
 
 
-export default function MeasurementComponent({ content }) {
+export default function MeasurementComponent({ content, onFieldChange }) {
   const content_array = safeJsonParse(content.content_obj, []);
   const [sizeTable, setSizeTable] = useState(
     content_array.length > 0 ? content_array : [[""]],
   );
-  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const isFirstRender = useRef(true);
+
+  // Report the current draft up to the page whenever it changes, so the
+  // single top-level Save button can persist it. Skip the initial mount so
+  // we don't mark this block dirty before the user has touched it.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    onFieldChange?.(content.id, content_constants.CONTENT_TYPE_TABLE, sizeTable);
+  }, [sizeTable]);
 
   const addSizeTableRow = () => {
     setSizeTable([...sizeTable, new Array(sizeTable[0].length).fill("")]);
-    setIsSaveDisabled(false);
   }
 
   const addSizeTableColumn = () => {
-    setIsSaveDisabled(false);
     setSizeTable(sizeTable.map(row => [...row, ""]));
   }
 
   const updateSizeTableCell = (rIdx, cIdx, val) => {
-    setIsSaveDisabled(false);
     setSizeTable(sizeTable.map((row, rowIndex) =>
       rowIndex === rIdx
         ? row.map((cell, colIndex) => (colIndex === cIdx ? val : cell))
@@ -40,36 +47,11 @@ export default function MeasurementComponent({ content }) {
 
   const removeSizeTableRow = (i) => {
     setSizeTable(sizeTable.filter((_, idx) => idx !== i));
-    setIsSaveDisabled(false);
   }
 
   const removeSizeTableColumn = (i) => {
     setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
-    setIsSaveDisabled(false);
   }
-
-  const handleBlockSave = async (content_id) => {
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append(INTENT, content_constants.INTENT_SAVE_BLOCK);
-    formData.append("content_id", content_id);
-    formData.append("content_obj", JSON.stringify(sizeTable));
-
-    const res = await fetch("/app/templates/" + content.template_id, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      // alert("Successfully saved.");
-      setIsSaveDisabled(true);
-      setLoading(false);
-    } else {
-      alert("Failed to save.");
-      setLoading(false);
-    }
-  };
 
   const handleBlockDelete = async (content_id) => {
     if (!confirm("Are you sure you want to delete this table?")) return;
@@ -93,8 +75,6 @@ export default function MeasurementComponent({ content }) {
 
   return (
     <div>
-      {loading && (<div className='component-spinner'><div  className='spin'><Spinner accessibilityLabel="Saving size table" size="large" /></div></div>)}
-      
         <Grid>
           <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
             <InlineStack align="space-between" blockAlign="center">
@@ -102,13 +82,6 @@ export default function MeasurementComponent({ content }) {
                 Size Measurement:
               </Text>
               <ButtonGroup>
-                <Button
-                  disabled={isSaveDisabled}
-                  variant="primary"
-                  onClick={() => handleBlockSave(content.id)}
-                >
-                  Save
-                </Button>
                 <Button
                   tone="critical"
                   icon={DeleteIcon}
@@ -187,5 +160,3 @@ export default function MeasurementComponent({ content }) {
     </div>
   );
 }
-
-

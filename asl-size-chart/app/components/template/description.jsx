@@ -1,24 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Grid,
   Text, ButtonGroup, Button,
   InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import {INTENT} from '../../services/constants/global';
-import {INTENT_SAVE_BLOCK, INTENT_CONTENT_DELETE} from '../../services/constants/content';
+import { INTENT } from '../../services/constants/global';
+import { CONTENT_TYPE_DESCRIPTION, INTENT_CONTENT_DELETE } from '../../services/constants/content';
 import { safeJsonParse } from '../../services/utils/safeJson';
 
 import 'react-quill/dist/quill.snow.css';
 
 
 
-export default function DescriptionComponent({ content }) {
+export default function DescriptionComponent({ content, onFieldChange }) {
   const [ReactQuill, setReactQuill] = useState(null);
-  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const content_obj = safeJsonParse(content.content_obj, '');
   const [description, setDescription] = useState(content_obj);
-
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     // Dynamically load Quill client-side
@@ -27,31 +26,19 @@ export default function DescriptionComponent({ content }) {
     });
   }, []);
 
+  // Report the current draft up to the page whenever it changes, so the
+  // single top-level Save button can persist it. Skip the initial mount so
+  // we don't mark this block dirty before the user has touched it.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    onFieldChange?.(content.id, CONTENT_TYPE_DESCRIPTION, description);
+  }, [description]);
+
   const handleDescriptionChange = (value) => {
     setDescription(value);
-    if (value !== content_obj) {
-      setIsSaveDisabled(false);
-    }
-  };
-
-  const handleBlockSave = async (content_id) => {
-
-    const formData = new FormData();
-    formData.append(INTENT, INTENT_SAVE_BLOCK);
-    formData.append("content_id", content_id);
-    formData.append("content_obj", JSON.stringify(description));
-
-    const res = await fetch("/app/templates/" + content.template_id, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      alert("Successfully saved.");
-      setIsSaveDisabled(true);
-    } else {
-      alert("Failed to save.");
-    }
   };
 
   const handleBlockDelete = async (content_id) => {
@@ -84,13 +71,6 @@ export default function DescriptionComponent({ content }) {
             </Text>
             <ButtonGroup>
               <Button
-                disabled={isSaveDisabled}
-                variant="primary"
-                onClick={() => handleBlockSave(content.id)}
-              >
-                Save
-              </Button>
-              <Button
                 tone="critical"
                 icon={DeleteIcon}
                 onClick={() => handleBlockDelete(content.id)}
@@ -120,5 +100,3 @@ export default function DescriptionComponent({ content }) {
     </div>
   );
 }
-
-

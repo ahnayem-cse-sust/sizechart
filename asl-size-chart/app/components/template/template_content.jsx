@@ -38,20 +38,20 @@ const DraggableItem = ({ id, children }) => {
   );
 };
 
-const ContentBlock = ({ item, listeners }) => {
+const ContentBlock = ({ item, listeners, onFieldChange }) => {
   return (
     <Card>
       <div>
         <span style={{ cursor: 'move' }}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
       </div>
-      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} />}
-      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} />}
-      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} />}
+      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} onFieldChange={onFieldChange} />}
+      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} onFieldChange={onFieldChange} />}
+      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} onFieldChange={onFieldChange} />}
     </Card>
   );
 };
 
-export default function TemplateContentComponent({ templateContents }) {
+export default function TemplateContentComponent({ templateContents, onFieldChange }) {
   const [items, setItems] = useState(templateContents);
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -102,7 +102,7 @@ export default function TemplateContentComponent({ templateContents }) {
           <DraggableItem key={item.id} id={item.id}>
 
             {({ listeners }) => (
-              <ContentBlock item={item} listeners={listeners} />
+              <ContentBlock item={item} listeners={listeners} onFieldChange={onFieldChange} />
             )}
           </DraggableItem>
         ))}

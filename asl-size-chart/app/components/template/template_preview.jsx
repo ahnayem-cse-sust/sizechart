@@ -17,7 +17,7 @@ export default function TemplatePreviewComponent({ template, templateContents })
           setActive(true);
         }}
       >
-        Preview
+        Desktop Preview
       </Button>
       <Modal
         open={active}

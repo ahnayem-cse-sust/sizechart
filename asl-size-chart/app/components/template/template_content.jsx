@@ -12,7 +12,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, Button } from '@shopify/polaris';
+import { Card, Button, BlockStack } from '@shopify/polaris';
 import * as content_constants from '../../services/constants/content';
 import * as global_constants from '../../services/constants/global';
 import MeasurementComponent from './measurement';
@@ -40,12 +40,14 @@ const DraggableItem = ({ id, children }) => {
 const ContentBlock = ({ item, listeners, onFieldChange, onDeleteBlock }) => {
   return (
     <Card>
-      <div>
-        <span style={{ cursor: 'move' }}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
-      </div>
-      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
-      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
-      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+      <BlockStack gap="200">
+        <div className="asc-block-drag-handle">
+          <Button icon={DragHandleIcon} size="micro" variant="tertiary" accessibilityLabel="Drag to reorder" {...listeners} />
+        </div>
+        {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+        {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+        {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+      </BlockStack>
     </Card>
   );
 };

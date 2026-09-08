@@ -8,6 +8,7 @@ import {
     BlockStack,
     InlineStack,
     Box,
+    Divider,
     InlineError,
 } from "@shopify/polaris";
 import { EditIcon, CheckIcon, XIcon } from "@shopify/polaris-icons";
@@ -18,6 +19,7 @@ import BlockButtonComponent from '../components/template/block_button';
 import TemplateContentComponent from '../components/template/template_content';
 import TemplateDetailsComponent from '../components/template/template_details';
 import TemplateContentBlocks from '../components/template/content_blocks_preview';
+import MobilePreview from '../components/template/mobile_preview';
 import { getAllTemplateContent, contentFactory } from '../services/template.content.server';
 
 import { TEMPLATE_CATEGORIES } from '../services/utils/defines';
@@ -361,81 +363,125 @@ export default function TemplateView() {
                     : undefined,
             }}
             title={template.title}
-            primaryAction={
-                <TemplatePreviewComponent template={template} templateContents={templateContents} />
-            }
             secondaryActions={
-                isEditing ? (
-                    <BlockStack gap="150" inlineAlign="end">
-                        <InlineStack gap="200">
-                            <Button
-                                icon={XIcon}
-                                onClick={handleCancel}
-                                disabled={saving}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                icon={CheckIcon}
-                                variant="primary"
-                                disabled={!isDirty}
-                                loading={saving}
-                                onClick={handleSaveAll}
-                            >
-                                Save
-                            </Button>
-                        </InlineStack>
-                        {error && <InlineError message={error} />}
-                    </BlockStack>
-                ) : (
-                    <Button
-                        icon={EditIcon}
-                        onClick={handleStartEditing}
-                    >
-                        Edit
-                    </Button>
-                )
+                <InlineStack gap="200" blockAlign="center">
+                    <TemplatePreviewComponent template={template} templateContents={templateContents} />
+                    {isEditing ? (
+                        <BlockStack gap="150" inlineAlign="end">
+                            <InlineStack gap="200">
+                                <Button
+                                    icon={XIcon}
+                                    onClick={handleCancel}
+                                    disabled={saving}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    icon={CheckIcon}
+                                    variant="primary"
+                                    disabled={!isDirty}
+                                    loading={saving}
+                                    onClick={handleSaveAll}
+                                >
+                                    Save
+                                </Button>
+                            </InlineStack>
+                            {error && <InlineError message={error} />}
+                        </BlockStack>
+                    ) : (
+                        <Button
+                            icon={EditIcon}
+                            onClick={handleStartEditing}
+                        >
+                            Edit
+                        </Button>
+                    )}
+                </InlineStack>
             }
         >
             <TitleBar title={`Size Chart \\ ${template.title}`} />
-            <BlockStack gap="400">
-                <Card>
+            <style>{`
+                .asc-template-layout {
+                    display: flex;
+                    gap: 16px;
+                    align-items: flex-start;
+                }
+                .asc-template-layout__details {
+                    flex: 0 0 70%;
+                    max-width: 70%;
+                }
+                .asc-template-layout__preview {
+                    flex: 0 0 30%;
+                    max-width: 30%;
+                    position: sticky;
+                    top: 16px;
+                }
+                @media (max-width: 900px) {
+                    .asc-template-layout {
+                        flex-direction: column;
+                    }
+                    .asc-template-layout__details,
+                    .asc-template-layout__preview {
+                        flex: 1 1 100%;
+                        max-width: 100%;
+                        position: static;
+                    }
+                }
+            `}</style>
+            <div className="asc-template-layout">
+                <div className="asc-template-layout__details">
                     <BlockStack gap="400">
-                        <BlockStack gap="200">
-                            <Text variant="headingMd" as="h2">Template Details</Text>
-                            <TemplateDetailsComponent
-                                template={template}
-                                templateCategories={TEMPLATE_CATEGORIES}
-                                isEditing={isEditing}
-                                title={titleDraft}
-                                category={categoryDraft}
-                                onTitleChange={setTitleDraft}
-                                onCategoryChange={setCategoryDraft}
-                            />
-                        </BlockStack>
-                        <Text variant="heading2xl" as="h3">
-                            {template.title} Size Guide
-                        </Text>
-                        {isEditing ? (
-                            <>
-                                <TemplateContentComponent
-                                    items={contentItems}
-                                    setItems={setContentItems}
-                                    onFieldChange={handleBlockFieldChange}
-                                    onDeleteBlock={handleDeleteBlock}
-                                />
-                                <Box>
-                                    <BlockButtonComponent btnText={'+ Add New Block'} onAddBlock={handleAddBlock} />
-                                </Box>
-                            </>
-                        ) : templateContents.length > 0 ? (
-                            <TemplateContentBlocks templateContents={templateContents} />
-                        ) : (
-                            <Text as="p" tone="subdued">No content blocks added yet.</Text>
-                        )}
+                        <Card>
+                            <BlockStack gap="400">
+                                <BlockStack gap="200">
+                                    <Text variant="headingMd" as="h2">Template Details</Text>
+                                    <TemplateDetailsComponent
+                                        template={template}
+                                        templateCategories={TEMPLATE_CATEGORIES}
+                                        isEditing={isEditing}
+                                        title={titleDraft}
+                                        category={categoryDraft}
+                                        onTitleChange={setTitleDraft}
+                                        onCategoryChange={setCategoryDraft}
+                                    />
+                                </BlockStack>
+                                <Divider />
+                                <Text variant="headingLg" as="h3">
+                                    {template.title} Size Guide
+                                </Text>
+                                {isEditing ? (
+                                    <>
+                                        <TemplateContentComponent
+                                            items={contentItems}
+                                            setItems={setContentItems}
+                                            onFieldChange={handleBlockFieldChange}
+                                            onDeleteBlock={handleDeleteBlock}
+                                        />
+                                        <Box>
+                                            <BlockButtonComponent btnText={'+ Add New Block'} onAddBlock={handleAddBlock} />
+                                        </Box>
+                                    </>
+                                ) : templateContents.length > 0 ? (
+                                    <TemplateContentBlocks templateContents={templateContents} />
+                                ) : (
+                                    <Text as="p" tone="subdued">No content blocks added yet.</Text>
+                                )}
+                            </BlockStack>
+                        </Card>
                     </BlockStack>
-                </Card>
-            </BlockStack>
+                </div>
+                <div className="asc-template-layout__preview">
+                    <BlockStack gap="300">
+                        <Text variant="headingSm" as="h3" tone="subdued">Mobile preview</Text>
+                        <Card>
+                            <MobilePreview
+                                title={isEditing ? titleDraft : template.title}
+                                contentItems={isEditing ? contentItems : templateContents}
+                            />
+                        </Card>
+                    </BlockStack>
+                </div>
+            </div>
         </Page>
     );
 }

@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
-    Grid,
     DropZone,
-    Text, ButtonGroup, Button,
-    InlineStack
+    Text,
+    Button,
+    InlineStack,
+    BlockStack,
 } from "@shopify/polaris";
-import { DeleteIcon } from "@shopify/polaris-icons";
+import { DeleteIcon, ImageIcon } from "@shopify/polaris-icons";
 import { CONTENT_TYPE_IMAGE } from '../../services/constants/content';
 
 export default function ImageUploadComponent({ content, onFieldChange, onDeleteBlock }) {
@@ -51,83 +52,51 @@ export default function ImageUploadComponent({ content, onFieldChange, onDeleteB
         onDeleteBlock?.(content_id, CONTENT_TYPE_IMAGE);
     };
 
-    const fileUpload = (!file && !previousFileUrl) && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, .jpg and .png" />;
-
-    const previousFile = (!file && previousFileUrl) && (
-        <div style={{ padding: '25px' }}>
-            <div style={{ width: '50%', height: '250px', overflow: 'hidden', margin: 'auto' }}>
-                <img
-                    src={previousFileUrl}
-                    alt="Uploaded preview"
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        borderRadius: 'var(--p-border-radius-base)',
-                    }}
-                />
-            </div>
-            <DropZone.FileUpload actionTitle="Change" actionHint="Accepts .gif, .jpeg, and .png" />
-        </div>
-    );
-
-    const uploadedFiles = file && (
-        <div style={{ padding: '25px' }}>
-            {validImageTypes.includes(file.type) ? (
-                <div style={{ width: '50%', height: '250px', overflow: 'hidden', margin: 'auto' }}>
-                    <img
-                        src={window.URL.createObjectURL(file)}
-                        alt="Uploaded preview"
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: 'var(--p-border-radius-base)',
-                        }}
-                    />
-                </div>
-            ) : (
-                <div>
-                    <Text alignment='center' tone="critical" variant="headingMd" as="h6">Uploaded file format not supported.</Text>
-                </div>
-            )}
-            <DropZone.FileUpload actionTitle="Change" actionHint="Accepts .gif, .jpeg, and .png" />
-        </div>
-    );
+    const currentImageUrl = file && validImageTypes.includes(file.type)
+        ? window.URL.createObjectURL(file)
+        : previousFileUrl;
+    const hasImage = Boolean(currentImageUrl);
 
     return (
+        <BlockStack gap="300">
+            <InlineStack align="space-between" blockAlign="center">
+                <Text as="h2" variant="headingSm">
+                    Image
+                </Text>
+                <Button
+                    tone="critical"
+                    icon={DeleteIcon}
+                    variant="tertiary"
+                    accessibilityLabel="Delete image block"
+                    onClick={() => handleBlockDelete(content.id)}
+                />
+            </InlineStack>
 
-
-        <Grid>
-            <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
-                <InlineStack align="space-between" blockAlign="center">
-                    <Text as="h2" variant="headingLg">
-                        Upload Image:
-                    </Text>
-                    <ButtonGroup>
-                        <Button
-                            tone="critical"
-                            icon={DeleteIcon}
-                            onClick={() => handleBlockDelete(content.id)}
-                        ></Button>
-                    </ButtonGroup>
-
-                </InlineStack>
-            </Grid.Cell>
-            <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
-
-                <DropZone
-                    allowMultiple={false}
-                    onDrop={handleDropZoneDrop}>
-                    {previousFile}
-                    {uploadedFiles}
-                    {fileUpload}
+            {hasImage ? (
+                <BlockStack gap="300">
+                    <div className="asc-image-preview">
+                        <img src={currentImageUrl} alt="Size guide upload preview" />
+                    </div>
+                    <DropZone
+                        allowMultiple={false}
+                        onDrop={handleDropZoneDrop}
+                        variableHeight
+                        outline={false}
+                    >
+                        <div className="asc-image-replace">
+                            <Button icon={ImageIcon}>Replace image</Button>
+                        </div>
+                    </DropZone>
+                </BlockStack>
+            ) : (
+                <DropZone allowMultiple={false} onDrop={handleDropZoneDrop}>
+                    <DropZone.FileUpload actionTitle="Upload image" actionHint="Accepts .gif, .jpeg, and .png" />
                 </DropZone>
-                {invalidType && (
-                    <Text tone="critical" as="p">Uploaded file format not supported — this won't be saved.</Text>
-                )}
-            </Grid.Cell>
-        </Grid>
+            )}
 
+            {invalidType && (
+                <Text tone="critical" as="p">Uploaded file format not supported — this won't be saved.</Text>
+            )}
+        </BlockStack>
     );
 }

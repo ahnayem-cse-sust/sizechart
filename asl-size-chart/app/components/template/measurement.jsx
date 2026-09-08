@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Grid,
   Text,
   Button,
-  TextField, ButtonGroup, InlineStack
+  TextField,
+  ButtonGroup,
+  InlineStack,
+  BlockStack,
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 import * as content_constants from '../../services/constants/content';
@@ -59,91 +61,72 @@ export default function MeasurementComponent({ content, onFieldChange, onDeleteB
     onDeleteBlock?.(content_id, content_constants.CONTENT_TYPE_TABLE);
   };
 
+  const columnCount = sizeTable[0].length;
 
   return (
-    <div>
-        <Grid>
-          <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
-            <InlineStack align="space-between" blockAlign="center">
-              <Text as="h2" variant="headingLg">
-                Size Measurement:
-              </Text>
-              <ButtonGroup>
-                <Button
-                  tone="critical"
-                  icon={DeleteIcon}
-                  onClick={() => handleBlockDelete(content.id)}
-                ></Button>
-              </ButtonGroup>
+    <BlockStack gap="300">
+      <InlineStack align="space-between" blockAlign="center">
+        <Text as="h2" variant="headingSm">
+          Size measurement
+        </Text>
+        <Button
+          tone="critical"
+          icon={DeleteIcon}
+          variant="tertiary"
+          accessibilityLabel="Delete table block"
+          onClick={() => handleBlockDelete(content.id)}
+        />
+      </InlineStack>
 
-            </InlineStack>
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
-            <div className='measurement-table'>
-              <table style={{ width: '100%' }}>
-                <tbody>
-                {sizeTable.map((row, rIdx) => (
-                  <tr key={`row-${rIdx}`}>
-                    {row.map((cell, cIdx) => (
-                      <td key={`cell-${rIdx}-${cIdx}`}>
-                        <TextField
-                          // key={cIdx}
-                          labelHidden
-                          value={cell}
-                          onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                        />
-                      </td>
-                    ))}
-                  </tr>
+      <div className="asc-measurement-table">
+        <table>
+          <tbody>
+            {sizeTable.map((row, rIdx) => (
+              <tr key={`row-${rIdx}`}>
+                {row.map((cell, cIdx) => (
+                  <td key={`cell-${rIdx}-${cIdx}`}>
+                    <TextField
+                      labelHidden
+                      label={`Row ${rIdx + 1}, column ${cIdx + 1}`}
+                      value={cell}
+                      onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                    />
+                  </td>
                 ))}
-                </tbody>
-              </table>
-            </div>
-          </Grid.Cell>
-
-          <Grid.Cell columnSpan={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1 }}>
-            <table className='sz-chart-col-btn'>
-              <tbody>
-              <tr>
-                <td>
-                  <div>
-                    <Button icon={PlusIcon} onClick={addSizeTableColumn}>
-                    </Button>
-                    {sizeTable[0].length > 1 && (
-                      <Button
-                        tone="critical"
-                        icon={MinusIcon}
-                        onClick={() => removeSizeTableColumn(sizeTable[0].length - 1)}
-                      >
-                      </Button>
-                    )}
-                  </div>
-                </td>
               </tr>
-              </tbody>
-            </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 11, sm: 11, md: 11, lg: 11, xl: 11 }}>
-            <table className='sz-chart-row-btn'>
-              <tbody>
-              <tr>
-                <th colSpan={sizeTable[0].length}>
-                  <Button icon={PlusIcon} onClick={addSizeTableRow}></Button>
-                  {sizeTable.length > 1 && (
-                    <Button
-                      tone="critical"
-                      icon={MinusIcon}
-                      onClick={() => removeSizeTableRow(sizeTable.length - 1)}
-                    >
-                    </Button>
-                  )}
-                </th>
-              </tr>
-              </tbody>
-            </table>
-          </Grid.Cell>
-        </Grid>
-    </div>
+      <InlineStack align="space-between" blockAlign="center">
+        <ButtonGroup>
+          <Button icon={PlusIcon} onClick={addSizeTableColumn}>Add column</Button>
+          {columnCount > 1 && (
+            <Button
+              tone="critical"
+              variant="tertiary"
+              icon={MinusIcon}
+              onClick={() => removeSizeTableColumn(columnCount - 1)}
+            >
+              Remove column
+            </Button>
+          )}
+        </ButtonGroup>
+        <ButtonGroup>
+          <Button icon={PlusIcon} onClick={addSizeTableRow}>Add row</Button>
+          {sizeTable.length > 1 && (
+            <Button
+              tone="critical"
+              variant="tertiary"
+              icon={MinusIcon}
+              onClick={() => removeSizeTableRow(sizeTable.length - 1)}
+            >
+              Remove row
+            </Button>
+          )}
+        </ButtonGroup>
+      </InlineStack>
+    </BlockStack>
   );
 }

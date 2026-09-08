@@ -53,23 +53,87 @@
   border-color: transparent !important;
 }
 
-.sz-chart-col-btn {
-  height: 100%;
-  background-color: rgb(233, 237, 237);
-  text-align: center;
-  width: min-content;
-  transform: translateX(-45%);
-  border-top-right-radius: 15px;
-  border-bottom-right-radius: 15px;
+.asc-measurement-table {
+  overflow-x: auto;
+  border: 1px solid var(--p-color-border-secondary, #e3e3e3);
+  border-radius: var(--p-border-radius-200, 8px);
 }
 
-.sz-chart-row-btn {
+.asc-measurement-table table {
   width: 100%;
-  background-color: rgb(233, 237, 237);
+  border-collapse: collapse;
+}
+
+.asc-measurement-table td {
+  border: 1px solid var(--p-color-border-secondary, #e3e3e3);
+  padding: 0;
+  min-width: 96px;
+}
+
+.asc-measurement-table tr:first-child td {
+  background-color: var(--p-color-bg-surface-secondary, #f6f6f7);
+}
+
+.asc-measurement-table input {
   text-align: center;
-  transform: translateY(-45%);
-  border-bottom-right-radius: 15px;
-  border-bottom-left-radius: 15px;
+}
+
+.asc-image-preview {
+  width: 100%;
+  max-height: 320px;
+  overflow: hidden;
+  border-radius: var(--p-border-radius-200, 8px);
+  border: 1px solid var(--p-color-border-secondary, #e3e3e3);
+  background-color: var(--p-color-bg-surface-secondary, #f6f6f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.asc-image-preview img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.asc-image-replace {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.asc-description-editor {
+  border: 1px solid var(--p-color-border-secondary, #e3e3e3);
+  border-radius: var(--p-border-radius-200, 8px);
+  overflow: hidden;
+}
+
+.asc-description-editor .ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid var(--p-color-border-secondary, #e3e3e3);
+  background-color: var(--p-color-bg-surface-secondary, #f6f6f7);
+}
+
+.asc-description-editor .ql-container.ql-snow {
+  border: none;
+  min-height: 220px;
+  font-size: 14px;
+}
+
+.asc-description-editor .ql-editor {
+  min-height: 220px;
+}
+
+.asc-block-drag-handle {
+  display: flex;
+  justify-content: center;
+  cursor: move;
+  margin: -4px 0 0;
+  opacity: 0.6;
+}
+
+.asc-block-drag-handle:hover {
+  opacity: 1;
 }
 
 .mr-top-10 {

@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Grid,
-  Text, ButtonGroup, Button,
-  InlineStack
+  Text,
+  Button,
+  InlineStack,
+  BlockStack,
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 import { CONTENT_TYPE_DESCRIPTION } from '../../services/constants/content';
 import { safeJsonParse } from '../../services/utils/safeJson';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 
 
@@ -20,7 +21,7 @@ export default function DescriptionComponent({ content, onFieldChange, onDeleteB
 
   useEffect(() => {
     // Dynamically load Quill client-side
-    import('react-quill').then((mod) => {
+    import('react-quill-new').then((mod) => {
       setReactQuill(() => mod.default);
     });
   }, []);
@@ -55,41 +56,31 @@ export default function DescriptionComponent({ content, onFieldChange, onDeleteB
 
 
   return (
-    <div>
-      <Grid>
-        <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
-          <InlineStack align="space-between" blockAlign="center">
-            <Text as="h2" variant="headingLg">
-              Description:
-            </Text>
-            <ButtonGroup>
-              <Button
-                tone="critical"
-                icon={DeleteIcon}
-                onClick={() => handleBlockDelete(content.id)}
-              ></Button>
-            </ButtonGroup>
+    <BlockStack gap="300">
+      <InlineStack align="space-between" blockAlign="center">
+        <Text as="h2" variant="headingSm">
+          Description
+        </Text>
+        <Button
+          tone="critical"
+          icon={DeleteIcon}
+          variant="tertiary"
+          accessibilityLabel="Delete description block"
+          onClick={() => handleBlockDelete(content.id)}
+        />
+      </InlineStack>
 
-          </InlineStack>
-        </Grid.Cell>
-        <Grid.Cell columnSpan={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
-
-          <div>
-            {ReactQuill ? (
-              <ReactQuill
-                value={description}
-                onChange={handleDescriptionChange}
-                theme="snow"
-                style={{ height: '300px', marginBottom: '10px' }}
-              />
-            ) : (
-              <p>Loading editor...</p>
-            )}
-          </div>
-        </Grid.Cell>
-      </Grid>
-      <br />
-      <br />
-    </div>
+      <div className="asc-description-editor">
+        {ReactQuill ? (
+          <ReactQuill
+            value={description}
+            onChange={handleDescriptionChange}
+            theme="snow"
+          />
+        ) : (
+          <Text as="p" tone="subdued">Loading editor…</Text>
+        )}
+      </div>
+    </BlockStack>
   );
 }

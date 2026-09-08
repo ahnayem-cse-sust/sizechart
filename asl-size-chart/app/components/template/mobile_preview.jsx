@@ -1,4 +1,4 @@
-import { Box, Text, BlockStack } from "@shopify/polaris";
+import { Text } from "@shopify/polaris";
 import TemplateContentBlocks from "./content_blocks_preview";
 
 /**
@@ -11,59 +11,22 @@ import TemplateContentBlocks from "./content_blocks_preview";
  */
 export default function MobilePreview({ title, contentItems }) {
   return (
-    <BlockStack gap="300" inlineAlign="center">
-      <Text as="h3" variant="headingSm" tone="subdued">
-        Mobile preview
-      </Text>
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 300,
-          border: "10px solid #1a1a1a",
-          borderRadius: 32,
-          background: "#1a1a1a",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-        }}
-      >
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: 22,
-            overflow: "hidden",
-          }}
-        >
-          {/* Status bar */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "10px 18px 4px",
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#1a1a1a",
-            }}
-          >
-            <span>9:41</span>
-            <span>●●●●</span>
+    <div className="asc-editorial" style={{ display: "flex", justifyContent: "center" }}>
+      <div className="asc-phone-edge">
+        <div className="asc-phone-notch" />
+        <div className="asc-phone-screen">
+          <div className="asc-phone-storefront-header">
+            <p className="asc-editorial-font" style={{ fontSize: 11, fontWeight: 600, margin: 0 }}>
+              Store
+            </p>
+            <span style={{ fontSize: 10, color: "var(--muted)" }}>≡</span>
           </div>
-
-          {/* Scrollable "screen" content */}
-          <div
-            style={{
-              height: 480,
-              overflowY: "auto",
-              padding: "12px 16px 24px",
-            }}
-          >
-            <Box paddingBlockEnd="300">
-              <Text as="h2" variant="headingMd">
-                {title || "Untitled"} Size Guide
-              </Text>
-            </Box>
-
+          <div className="asc-phone-body">
+            <h2 className="asc-editorial-font" style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.25, margin: "0 0 8px" }}>
+              {title || "Untitled"} Size Guide
+            </h2>
             {contentItems.length > 0 ? (
-              <div style={{ fontSize: 13 }}>
+              <div style={{ fontSize: 11 }}>
                 <TemplateContentBlocks templateContents={contentItems} />
               </div>
             ) : (
@@ -73,7 +36,8 @@ export default function MobilePreview({ title, contentItems }) {
             )}
           </div>
         </div>
+        <div className="asc-phone-scrollbar" />
       </div>
-    </BlockStack>
+    </div>
   );
 }

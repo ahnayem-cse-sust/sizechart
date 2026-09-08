@@ -1,17 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLoaderData, useBeforeUnload, useBlocker } from '@remix-run/react';
 import {
-    Card,
     Text,
     Page,
-    Button,
     BlockStack,
-    InlineStack,
     Box,
-    Divider,
     InlineError,
 } from "@shopify/polaris";
-import { EditIcon, CheckIcon, XIcon } from "@shopify/polaris-icons";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { getTemplateById } from '../services/template.server';
 import TemplatePreviewComponent from '../components/template/template_preview';
@@ -85,6 +80,7 @@ function isTempId(id) {
 export default function TemplateView() {
     const { template, templateContents } = useLoaderData();
     const [isEditing, setIsEditing] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
     const [titleDraft, setTitleDraft] = useState(template.title);
     const [categoryDraft, setCategoryDraft] = useState(template.category);
     const [saving, setSaving] = useState(false);
@@ -362,41 +358,42 @@ export default function TemplateView() {
                     }
                     : undefined,
             }}
-            title={template.title}
             secondaryActions={
-                <InlineStack gap="200" blockAlign="center">
-                    <TemplatePreviewComponent template={template} templateContents={templateContents} />
-                    {isEditing ? (
-                        <BlockStack gap="150" inlineAlign="end">
-                            <InlineStack gap="200">
-                                <Button
-                                    icon={XIcon}
-                                    onClick={handleCancel}
-                                    disabled={saving}
+                <div className="asc-editorial">
+                    <BlockStack gap="150" inlineAlign="end">
+                        <div className="asc-header-actions">
+                            {isEditing ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="asc-pill-btn"
+                                        onClick={handleCancel}
+                                        disabled={saving}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="asc-pill-btn asc-pill-btn--dark"
+                                        onClick={handleSaveAll}
+                                        disabled={!isDirty || saving}
+                                    >
+                                        {saving ? "Saving…" : "Save"}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="asc-pill-btn asc-pill-btn--dark"
+                                    onClick={handleStartEditing}
                                 >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    icon={CheckIcon}
-                                    variant="primary"
-                                    disabled={!isDirty}
-                                    loading={saving}
-                                    onClick={handleSaveAll}
-                                >
-                                    Save
-                                </Button>
-                            </InlineStack>
-                            {error && <InlineError message={error} />}
-                        </BlockStack>
-                    ) : (
-                        <Button
-                            icon={EditIcon}
-                            onClick={handleStartEditing}
-                        >
-                            Edit
-                        </Button>
-                    )}
-                </InlineStack>
+                                    Edit
+                                </button>
+                            )}
+                        </div>
+                        {error && <InlineError message={error} />}
+                    </BlockStack>
+                </div>
             }
         >
             <TitleBar title={`Size Chart \\ ${template.title}`} />
@@ -428,58 +425,65 @@ export default function TemplateView() {
                     }
                 }
             `}</style>
-            <div className="asc-template-layout">
-                <div className="asc-template-layout__details">
-                    <BlockStack gap="400">
-                        <Card>
-                            <BlockStack gap="400">
-                                <BlockStack gap="200">
-                                    <Text variant="headingMd" as="h2">Template Details</Text>
-                                    <TemplateDetailsComponent
-                                        template={template}
-                                        templateCategories={TEMPLATE_CATEGORIES}
-                                        isEditing={isEditing}
-                                        title={titleDraft}
-                                        category={categoryDraft}
-                                        onTitleChange={setTitleDraft}
-                                        onCategoryChange={setCategoryDraft}
-                                    />
-                                </BlockStack>
-                                <Divider />
-                                <Text variant="headingLg" as="h3">
+            <div className="asc-editorial">
+                <TemplatePreviewComponent
+                    template={template}
+                    templateContents={templateContents}
+                    open={previewOpen}
+                    onClose={() => setPreviewOpen(false)}
+                />
+                <div className="asc-template-layout">
+                    <div className="asc-template-layout__details">
+                        <div className="asc-panel">
+                            <div className="asc-details-block">
+                                <p className="asc-eyebrow">Template Details</p>
+                                <TemplateDetailsComponent
+                                    template={template}
+                                    templateCategories={TEMPLATE_CATEGORIES}
+                                    isEditing={isEditing}
+                                    title={titleDraft}
+                                    category={categoryDraft}
+                                    onTitleChange={setTitleDraft}
+                                    onCategoryChange={setCategoryDraft}
+                                />
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+                                <h1 className="asc-editorial-font" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
                                     {template.title} Size Guide
-                                </Text>
-                                {isEditing ? (
-                                    <>
-                                        <TemplateContentComponent
-                                            items={contentItems}
-                                            setItems={setContentItems}
-                                            onFieldChange={handleBlockFieldChange}
-                                            onDeleteBlock={handleDeleteBlock}
-                                        />
-                                        <Box>
-                                            <BlockButtonComponent btnText={'+ Add New Block'} onAddBlock={handleAddBlock} />
-                                        </Box>
-                                    </>
-                                ) : templateContents.length > 0 ? (
-                                    <TemplateContentBlocks templateContents={templateContents} />
-                                ) : (
-                                    <Text as="p" tone="subdued">No content blocks added yet.</Text>
-                                )}
-                            </BlockStack>
-                        </Card>
-                    </BlockStack>
-                </div>
-                <div className="asc-template-layout__preview">
-                    <BlockStack gap="300">
-                        <Text variant="headingSm" as="h3" tone="subdued">Mobile preview</Text>
-                        <Card>
-                            <MobilePreview
-                                title={isEditing ? titleDraft : template.title}
-                                contentItems={isEditing ? contentItems : templateContents}
-                            />
-                        </Card>
-                    </BlockStack>
+                                </h1>
+                                <button
+                                    type="button"
+                                    className="asc-pill-btn"
+                                    onClick={() => setPreviewOpen(true)}
+                                >
+                                    Desktop Preview
+                                </button>
+                            </div>
+                            {isEditing ? (
+                                <BlockStack gap="400">
+                                    <TemplateContentComponent
+                                        items={contentItems}
+                                        setItems={setContentItems}
+                                        onFieldChange={handleBlockFieldChange}
+                                        onDeleteBlock={handleDeleteBlock}
+                                    />
+                                    <Box>
+                                        <BlockButtonComponent btnText={'+ Add New Block'} onAddBlock={handleAddBlock} />
+                                    </Box>
+                                </BlockStack>
+                            ) : templateContents.length > 0 ? (
+                                <TemplateContentBlocks templateContents={templateContents} />
+                            ) : (
+                                <Text as="p" tone="subdued">No content blocks added yet.</Text>
+                            )}
+                        </div>
+                    </div>
+                    <div className="asc-template-layout__preview">
+                        <MobilePreview
+                            title={isEditing ? titleDraft : template.title}
+                            contentItems={isEditing ? contentItems : templateContents}
+                        />
+                    </div>
                 </div>
             </div>
         </Page>

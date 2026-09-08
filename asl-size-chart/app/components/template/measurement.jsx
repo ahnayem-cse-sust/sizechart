@@ -3,7 +3,6 @@ import {
   Text,
   Button,
   TextField,
-  ButtonGroup,
   InlineStack,
   BlockStack,
 } from "@shopify/polaris";
@@ -78,55 +77,54 @@ export default function MeasurementComponent({ content, onFieldChange, onDeleteB
         />
       </InlineStack>
 
-      <div className="asc-measurement-table">
-        <table>
-          <tbody>
-            {sizeTable.map((row, rIdx) => (
-              <tr key={`row-${rIdx}`}>
-                {row.map((cell, cIdx) => (
-                  <td key={`cell-${rIdx}-${cIdx}`}>
-                    <TextField
-                      labelHidden
-                      label={`Row ${rIdx + 1}, column ${cIdx + 1}`}
-                      value={cell}
-                      onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                    />
-                  </td>
+      <div className="asc-table-editor">
+        <div className="asc-table-editor__row">
+          <div className="asc-measurement-table">
+            <table>
+              <tbody>
+                {sizeTable.map((row, rIdx) => (
+                  <tr key={`row-${rIdx}`}>
+                    {row.map((cell, cIdx) => (
+                      <td key={`cell-${rIdx}-${cIdx}`}>
+                        <TextField
+                          labelHidden
+                          label={`Row ${rIdx + 1}, column ${cIdx + 1}`}
+                          value={cell}
+                          onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                        />
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </tbody>
+            </table>
+          </div>
 
-      <InlineStack align="space-between" blockAlign="center">
-        <ButtonGroup>
-          <Button icon={PlusIcon} onClick={addSizeTableColumn}>Add column</Button>
-          {columnCount > 1 && (
-            <Button
-              tone="critical"
-              variant="tertiary"
-              icon={MinusIcon}
-              onClick={() => removeSizeTableColumn(columnCount - 1)}
-            >
-              Remove column
-            </Button>
-          )}
-        </ButtonGroup>
-        <ButtonGroup>
-          <Button icon={PlusIcon} onClick={addSizeTableRow}>Add row</Button>
+          <div className="asc-table-editor__col-controls">
+            <Button icon={PlusIcon} accessibilityLabel="Add column" onClick={addSizeTableColumn} />
+            {columnCount > 1 && (
+              <Button
+                tone="critical"
+                icon={MinusIcon}
+                accessibilityLabel="Remove column"
+                onClick={() => removeSizeTableColumn(columnCount - 1)}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="asc-table-editor__row-controls">
+          <Button icon={PlusIcon} accessibilityLabel="Add row" onClick={addSizeTableRow} />
           {sizeTable.length > 1 && (
             <Button
               tone="critical"
-              variant="tertiary"
               icon={MinusIcon}
+              accessibilityLabel="Remove row"
               onClick={() => removeSizeTableRow(sizeTable.length - 1)}
-            >
-              Remove row
-            </Button>
+            />
           )}
-        </ButtonGroup>
-      </InlineStack>
+        </div>
+      </div>
     </BlockStack>
   );
 }

@@ -1,8 +1,6 @@
 import {
-    InlineStack,
     TextField,
     Select,
-    Text,
     Box,
     BlockStack,
 } from "@shopify/polaris";
@@ -18,21 +16,17 @@ export default function TemplateDetailsComponent({
 }) {
     if (!isEditing) {
         return (
-            <BlockStack gap="150">
-                <InlineStack gap="150" blockAlign="center">
-                    <Text variant="headingSm" as="h3" tone="subdued">Title:</Text>
-                    <Text as="span">{template.title}</Text>
-                </InlineStack>
-                <InlineStack gap="150" blockAlign="center">
-                    <Text variant="headingSm" as="h3" tone="subdued">Category:</Text>
-                    <Text as="span">{template.category}</Text>
-                </InlineStack>
-            </BlockStack>
+            <dl className="asc-details-grid">
+                <dt>Title</dt>
+                <dd>{template.title}</dd>
+                <dt>Category</dt>
+                <dd>{template.category}</dd>
+            </dl>
         );
     }
 
     return (
-        <Box maxWidth="360px">
+        <Box maxWidth="360px" paddingBlockStart="300">
             <BlockStack gap="300">
                 <TextField
                     label="Title"

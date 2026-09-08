@@ -5,15 +5,14 @@ import {
   InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import { INTENT } from '../../services/constants/global';
-import { CONTENT_TYPE_DESCRIPTION, INTENT_CONTENT_DELETE } from '../../services/constants/content';
+import { CONTENT_TYPE_DESCRIPTION } from '../../services/constants/content';
 import { safeJsonParse } from '../../services/utils/safeJson';
 
 import 'react-quill/dist/quill.snow.css';
 
 
 
-export default function DescriptionComponent({ content, onFieldChange }) {
+export default function DescriptionComponent({ content, onFieldChange, onDeleteBlock }) {
   const [ReactQuill, setReactQuill] = useState(null);
   const content_obj = safeJsonParse(content.content_obj, '');
   const [description, setDescription] = useState(content_obj);
@@ -37,27 +36,21 @@ export default function DescriptionComponent({ content, onFieldChange }) {
     onFieldChange?.(content.id, CONTENT_TYPE_DESCRIPTION, description);
   }, [description]);
 
-  const handleDescriptionChange = (value) => {
+  // ReactQuill also calls onChange once on mount as it normalizes the
+  // initial HTML (e.g. '' becomes '<p><br></p>') — that's Quill itself, not
+  // the user, and `source` is 'api'/'silent' for it (only 'user' for real
+  // typing). Ignoring non-user sources stops the block — and therefore the
+  // page's Save button — from being marked dirty before anything was typed.
+  const handleDescriptionChange = (value, _delta, source) => {
+    if (source !== 'user') return;
     setDescription(value);
   };
 
-  const handleBlockDelete = async (content_id) => {
+  // The actual delete request is deferred until the page-level Save button
+  // is pressed — here we just remove it from the working draft.
+  const handleBlockDelete = (content_id) => {
     if (!confirm("Are you sure you want to delete this description block?")) return;
-
-    const formData = new FormData();
-    formData.append(INTENT, INTENT_CONTENT_DELETE);
-    formData.append("content_id", content_id);
-
-    const res = await fetch("/app/templates/" + content.template_id, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      window.location.reload(); // Or use `navigate()` to refresh
-    } else {
-      alert("Failed to delete.");
-    }
+    onDeleteBlock?.(content_id, CONTENT_TYPE_DESCRIPTION);
   };
 
 

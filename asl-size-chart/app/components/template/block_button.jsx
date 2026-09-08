@@ -4,9 +4,8 @@ import {
     Popover, ActionList
 } from "@shopify/polaris";
 import * as content_constants from '../../services/constants/content';
-import { INTENT } from '../../services/constants/global';
 
-export default function BlockButtonComponent({ btnText, templateId }) {
+export default function BlockButtonComponent({ btnText, onAddBlock }) {
     const [popoverActive, setPopoverActive] = useState(false);
 
     const togglePopoverActive = useCallback(
@@ -20,24 +19,12 @@ export default function BlockButtonComponent({ btnText, templateId }) {
         </Button>
     );
 
-    const addBlock = async (contentType) => {
-
-        const formData = new FormData();
-        formData.append(INTENT, content_constants.INTENT_ADD_BLOCK);
-        formData.append("template_id", templateId);
-        formData.append("content_type", contentType);
-
-        const res = await fetch("/app/templates/" + templateId, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to add block.");
-        }
-    }
+    // Adding a block is purely local now — it's only persisted to the
+    // server when the page-level Save button is pressed.
+    const addBlock = (contentType) => {
+        onAddBlock?.(contentType);
+        setPopoverActive(false);
+    };
 
     return (
         <div>

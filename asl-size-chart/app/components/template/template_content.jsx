@@ -12,7 +12,6 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
 import { Card, Button } from '@shopify/polaris';
 import * as content_constants from '../../services/constants/content';
 import * as global_constants from '../../services/constants/global';
@@ -38,28 +37,37 @@ const DraggableItem = ({ id, children }) => {
   );
 };
 
-const ContentBlock = ({ item, listeners, onFieldChange }) => {
+const ContentBlock = ({ item, listeners, onFieldChange, onDeleteBlock }) => {
   return (
     <Card>
       <div>
         <span style={{ cursor: 'move' }}><Button icon={DragHandleIcon} size="micro" {...listeners} /></span>
       </div>
-      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} onFieldChange={onFieldChange} />}
-      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} onFieldChange={onFieldChange} />}
-      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} onFieldChange={onFieldChange} />}
+      {item.content_type === content_constants.CONTENT_TYPE_TABLE && <MeasurementComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+      {item.content_type === content_constants.CONTENT_TYPE_DESCRIPTION && <DescriptionComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
+      {item.content_type === content_constants.CONTENT_TYPE_IMAGE && <ImageUploadComponent content={item} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />}
     </Card>
   );
 };
 
-export default function TemplateContentComponent({ templateContents, onFieldChange }) {
-  const [items, setItems] = useState(templateContents);
+// `items`/`setItems` are owned by the parent page now (rather than local
+// state here) so that adding/removing blocks — which the parent handles
+// locally until Save — is reflected immediately without a page reload.
+export default function TemplateContentComponent({ items, setItems, onFieldChange, onDeleteBlock }) {
   const sensors = useSensors(useSensor(PointerSensor));
 
   const persistOrder = async (reordered, previous) => {
-    const serialArray = reordered.map((item, index) => ({
-      id: item.id,
-      serial_no: index + 1,
-    }));
+    // Blocks the user just added aren't persisted yet (no real id), so
+    // there's nothing on the server to reorder for them — they'll simply
+    // land at the end once Save creates them.
+    const serialArray = reordered
+      .filter((item) => typeof item.id === 'number')
+      .map((item) => ({
+        id: item.id,
+        serial_no: reordered.indexOf(item) + 1,
+      }));
+
+    if (serialArray.length === 0) return;
 
     const formData = new FormData();
     formData.append(global_constants.INTENT, global_constants.INTENT_UPDATE_SERIAL);
@@ -102,7 +110,7 @@ export default function TemplateContentComponent({ templateContents, onFieldChan
           <DraggableItem key={item.id} id={item.id}>
 
             {({ listeners }) => (
-              <ContentBlock item={item} listeners={listeners} onFieldChange={onFieldChange} />
+              <ContentBlock item={item} listeners={listeners} onFieldChange={onFieldChange} onDeleteBlock={onDeleteBlock} />
             )}
           </DraggableItem>
         ))}

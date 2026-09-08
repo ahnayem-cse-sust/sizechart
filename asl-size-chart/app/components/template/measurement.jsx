@@ -7,11 +7,10 @@ import {
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 import * as content_constants from '../../services/constants/content';
-import { INTENT } from '../../services/constants/global';
 import { safeJsonParse } from '../../services/utils/safeJson';
 
 
-export default function MeasurementComponent({ content, onFieldChange }) {
+export default function MeasurementComponent({ content, onFieldChange, onDeleteBlock }) {
   const content_array = safeJsonParse(content.content_obj, []);
   const [sizeTable, setSizeTable] = useState(
     content_array.length > 0 ? content_array : [[""]],
@@ -53,23 +52,11 @@ export default function MeasurementComponent({ content, onFieldChange }) {
     setSizeTable(sizeTable.map(row => row.filter((_, idx) => idx !== i)));
   }
 
-  const handleBlockDelete = async (content_id) => {
+  // The actual delete request is deferred until the page-level Save button
+  // is pressed — here we just remove it from the working draft.
+  const handleBlockDelete = (content_id) => {
     if (!confirm("Are you sure you want to delete this table?")) return;
-
-    const formData = new FormData();
-    formData.append(INTENT, content_constants.INTENT_CONTENT_DELETE);
-    formData.append("content_id", content_id);
-
-    const res = await fetch("/app/templates/" + content.template_id, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      window.location.reload(); // Or use `navigate()` to refresh
-    } else {
-      alert("Failed to delete.");
-    }
+    onDeleteBlock?.(content_id, content_constants.CONTENT_TYPE_TABLE);
   };
 
 

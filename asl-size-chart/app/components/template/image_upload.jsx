@@ -6,10 +6,9 @@ import {
     InlineStack
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import { INTENT } from '../../services/constants/global';
-import { CONTENT_TYPE_IMAGE, INTENT_IMAGE_CONTENT_DELETE } from '../../services/constants/content';
+import { CONTENT_TYPE_IMAGE } from '../../services/constants/content';
 
-export default function ImageUploadComponent({ content, onFieldChange }) {
+export default function ImageUploadComponent({ content, onFieldChange, onDeleteBlock }) {
     const [file, setFile] = useState(null);
     const [invalidType, setInvalidType] = useState(false);
     const isFirstRender = useRef(true);
@@ -45,23 +44,11 @@ export default function ImageUploadComponent({ content, onFieldChange }) {
         []
     );
 
-    const handleBlockDelete = async (content_id) => {
+    // The actual delete request is deferred until the page-level Save
+    // button is pressed — here we just remove it from the working draft.
+    const handleBlockDelete = (content_id) => {
         if (!confirm("Are you sure you want to delete this image?")) return;
-
-        const formData = new FormData();
-        formData.append(INTENT, INTENT_IMAGE_CONTENT_DELETE);
-        formData.append("content_id", content_id);
-
-        const res = await fetch("/app/templates/" + content.template_id, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (res.ok) {
-            window.location.reload(); // Or use `navigate()` to refresh
-        } else {
-            alert("Failed to delete.");
-        }
+        onDeleteBlock?.(content_id, CONTENT_TYPE_IMAGE);
     };
 
     const fileUpload = (!file && !previousFileUrl) && <DropZone.FileUpload actionTitle="Upload" actionHint="Accepts .gif, .jpeg, .jpg and .png" />;

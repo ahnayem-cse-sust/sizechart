@@ -5,13 +5,10 @@ import {
     Card,
     Box,
     Pagination,
-    Button,
-    Badge,
     InlineStack,
     EmptyState,
 } from '@shopify/polaris';
 import { useNavigate } from "@remix-run/react";
-import { useState } from "react";
 import { INTENT,INTENT_DELETE } from '../../services/constants/global';
 import { CHART_BASE_URL, CHART_CONTENTS_URL } from '../../services/constants/routes';
 
@@ -22,9 +19,8 @@ export function ChartListComponent({ charts, pagination }) {
     };
 
     const navigate = useNavigate();
-    const [deletingId, setDeletingId] = useState(null);
 
-    const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
+    const { selectedResources, allResourcesSelected, handleSelectionChange } =
         useIndexResourceState(charts);
 
     const deleteOne = async (id) => {
@@ -36,18 +32,6 @@ export function ChartListComponent({ charts, pagination }) {
             method: "POST",
             body: formData,
         });
-    };
-
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this chart?")) return;
-        setDeletingId(id);
-        const res = await deleteOne(id);
-        if (res.ok) {
-            window.location.reload();
-        } else {
-            setDeletingId(null);
-            alert("Failed to delete.");
-        }
     };
 
     const handleBulkDelete = async () => {
@@ -79,6 +63,14 @@ export function ChartListComponent({ charts, pagination }) {
 
     return (
         <Card padding="0">
+            <style>{`
+                .asc-chart-title {
+                    cursor: pointer;
+                }
+                .asc-chart-title:hover {
+                    text-decoration: underline;
+                }
+            `}</style>
             <IndexTable
                 resourceName={resourceName}
                 itemCount={charts.length}
@@ -89,9 +81,7 @@ export function ChartListComponent({ charts, pagination }) {
                 onSelectionChange={handleSelectionChange}
                 headings={[
                     { title: "Title" },
-                    { title: "Template" },
-                    { title: "Created" },
-                    { title: "Actions" },
+                    { title: "Created on" },
                 ]}
                 promotedBulkActions={[
                     {
@@ -109,43 +99,16 @@ export function ChartListComponent({ charts, pagination }) {
                         onClick={() => navigate(CHART_CONTENTS_URL + `${chart.id}`)}
                     >
                         <IndexTable.Cell>
-                            <Text variant="bodyMd" fontWeight="medium" as="span">
-                                {chart.title}
-                            </Text>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                            {chart.template?.title ? (
-                                <Badge>{chart.template.title}</Badge>
-                            ) : (
-                                <Text as="span" tone="subdued">No template</Text>
-                            )}
+                            <span className="asc-chart-title">
+                                <Text variant="bodyMd" fontWeight="medium" as="span">
+                                    {chart.title}
+                                </Text>
+                            </span>
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                             <Text as="span" tone="subdued">
                                 {new Date(chart.createdAt).toLocaleDateString()}
                             </Text>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                            <InlineStack gap="200">
-                                <Button
-                                    url={CHART_CONTENTS_URL+`${chart.id}`}
-                                    size="slim"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    View
-                                </Button>
-                                <Button
-                                    size="slim"
-                                    tone="critical"
-                                    loading={deletingId === chart.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDelete(chart.id);
-                                    }}
-                                >
-                                    Delete
-                                </Button>
-                            </InlineStack>
                         </IndexTable.Cell>
                     </IndexTable.Row>
                 ))}

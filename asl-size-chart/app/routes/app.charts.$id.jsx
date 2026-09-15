@@ -1,23 +1,21 @@
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useLoaderData, useBeforeUnload, useBlocker } from '@remix-run/react';
 import {
-  Page,
-  Layout,
-  Card,
   Text,
+  Page,
   BlockStack,
-  InlineStack,
-  Badge,
-  Box,
-  Divider,
-  EmptyState,
+  InlineError,
 } from "@shopify/polaris";
-import { useLoaderData } from "@remix-run/react";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { getChartById } from "../services/chart.server";
 import { getAllTemplateContent } from "../services/template.content.server";
 import { getTemplateList } from "../services/template.server";
 import { CHART_BASE_URL } from "../services/constants/routes";
-import { CONTENT_TYPE_DESCRIPTION, CONTENT_TYPE_TABLE, CONTENT_TYPE_IMAGE } from "../services/constants/content";
-import ChartFormComponent from "../components/chart/form";
+import { INTENT, INTENT_UPDATE } from "../services/constants/global";
+import ChartDetailsComponent from "../components/chart/chart_details";
+import TemplateContentBlocks from "../components/template/content_blocks_preview";
+import MobilePreview from "../components/template/mobile_preview";
+import TemplatePreviewComponent from "../components/template/template_preview";
 import { authenticate } from "../shopify.server";
 
 export async function loader({ request, params }) {
@@ -44,162 +42,272 @@ export async function loader({ request, params }) {
   return Response.json({ chart, templateList, templateContents });
 }
 
-function DescriptionPreview({ content }) {
-  let description = content.content_obj || "";
+function parseSizeList(chart) {
+  if (!chart?.available_sizes) return [];
   try {
-    description = JSON.parse(description);
+    const parsed = JSON.parse(chart.available_sizes);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    // already a plain string
+    return [];
   }
-  return <div dangerouslySetInnerHTML={{ __html: description }} />;
-}
-
-function TablePreview({ content }) {
-  let rows = [];
-  try {
-    rows = JSON.parse(content.content_obj);
-  } catch {
-    rows = [];
-  }
-  if (!rows.length) return null;
-  const [header, ...body] = rows;
-  return (
-    <Box overflowX="scroll">
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            {header.map((cell, i) => (
-              <th key={i} style={{ textAlign: "left", padding: "8px", borderBottom: "1px solid var(--p-color-border)" }}>
-                {cell}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {body.map((row, ri) => (
-            <tr key={ri}>
-              {row.map((cell, ci) => (
-                <td key={ci} style={{ padding: "8px", borderBottom: "1px solid var(--p-color-border-subdued)" }}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Box>
-  );
-}
-
-function ImagePreview({ content }) {
-  if (!content.content_obj) return null;
-  return (
-    <img
-      src={`/uploads/${content.content_obj}`}
-      alt="Size chart"
-      style={{ maxWidth: "100%", borderRadius: 8 }}
-    />
-  );
 }
 
 export default function ChartView() {
   const { chart, templateList, templateContents } = useLoaderData();
+  const [isEditing, setIsEditing] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(chart.title);
+  const [templateIdDraft, setTemplateIdDraft] = useState(String(chart.template_id ?? ''));
+  const [sizeListDraft, setSizeListDraft] = useState(() => parseSizeList(chart));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // Set right before the post-save `window.location.reload()` so the
+  // beforeunload guard below doesn't mistake that intentional reload for
+  // someone abandoning unsaved changes and pop the "leave site?" prompt.
+  const skipUnloadWarningRef = useRef(false);
+
+  const baselineTitle = (chart.title || '').trim();
+  const baselineTemplateId = String(chart.template_id ?? '');
+  const baselineSizeList = parseSizeList(chart);
+
+  const isDirty = isEditing && (
+    titleDraft.trim() !== baselineTitle ||
+    templateIdDraft !== baselineTemplateId ||
+    JSON.stringify(sizeListDraft) !== JSON.stringify(baselineSizeList)
+  );
+
+  const resetDraftState = () => {
+    setTitleDraft(baselineTitle);
+    setTemplateIdDraft(baselineTemplateId);
+    setSizeListDraft(baselineSizeList);
+    setError("");
+  };
+
+  const handleStartEditing = () => {
+    resetDraftState();
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    if (isDirty && !window.confirm("You have unsaved changes. Discard them?")) {
+      return;
+    }
+    resetDraftState();
+    setIsEditing(false);
+  };
+
+  // Warn on hard navigations: refresh, closing the tab, typing a new URL,
+  // or any link that causes a full page load.
+  useBeforeUnload(
+    useCallback((event) => {
+      if (isDirty && !skipUnloadWarningRef.current) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    }, [isDirty])
+  );
+
+  // Warn on in-app (client-side) navigations too — the browser Back/Forward
+  // buttons, or any Remix Link/navigate call while changes are unsaved.
+  const blocker = useBlocker(
+    useCallback(
+      ({ currentLocation, nextLocation }) =>
+        isDirty && currentLocation.pathname !== nextLocation.pathname,
+      [isDirty]
+    )
+  );
+
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    if (window.confirm("You have unsaved changes. Leave this page without saving?")) {
+      blocker.proceed();
+    } else {
+      blocker.reset();
+    }
+  }, [blocker]);
+
+  const handleSaveAll = async () => {
+    const trimmedTitle = titleDraft.trim();
+    if (!trimmedTitle) {
+      setError("Title is required");
+      return;
+    }
+    if (!templateIdDraft) {
+      setError("Template is required");
+      return;
+    }
+    if (!sizeListDraft.length) {
+      setError("Add at least one available size");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append(INTENT, INTENT_UPDATE);
+      formData.append("id", chart.id);
+      formData.append("title", trimmedTitle);
+      formData.append("templateId", templateIdDraft);
+      formData.append("sizeList", JSON.stringify(sizeListDraft));
+
+      const res = await fetch(CHART_BASE_URL, { method: "POST", body: formData });
+
+      if (res.ok) {
+        skipUnloadWarningRef.current = true;
+        window.location.reload();
+      } else {
+        setSaving(false);
+        setError("Failed to save chart. Please try again.");
+      }
+    } catch (err) {
+      setSaving(false);
+      setError("Failed to save chart. Please try again.");
+    }
+  };
+
+  const templateOptions = templateList.map((template) => ({
+    label: template.title,
+    value: String(template.id),
+  }));
 
   return (
     <Page
-      backAction={{ content: "Charts", url: CHART_BASE_URL }}
-      title={chart.title}
-      titleMetadata={<Badge tone="success">Active</Badge>}
+      backAction={{
+        content: "Charts",
+        url: CHART_BASE_URL,
+        onAction: isDirty
+          ? () => {
+              if (window.confirm("You have unsaved changes. Leave this page without saving?")) {
+                window.location.href = CHART_BASE_URL;
+              }
+            }
+          : undefined,
+      }}
+      secondaryActions={
+        <div className="asc-editorial">
+          <BlockStack gap="150" inlineAlign="end">
+            <div className="asc-header-actions">
+              {isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    className="asc-pill-btn"
+                    onClick={handleCancel}
+                    disabled={saving}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="asc-pill-btn asc-pill-btn--dark"
+                    onClick={handleSaveAll}
+                    disabled={!isDirty || saving}
+                  >
+                    {saving ? "Saving…" : "Save"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="asc-pill-btn asc-pill-btn--dark"
+                  onClick={handleStartEditing}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
+            {error && <InlineError message={error} />}
+          </BlockStack>
+        </div>
+      }
     >
       <TitleBar title={`Size Chart \\ ${chart.title}`} />
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <InlineStack align="space-between" blockAlign="center">
-                <Text as="h2" variant="headingMd">
-                  Chart details
-                </Text>
-                <ChartFormComponent templates={templateList} chart={chart} />
-              </InlineStack>
-              <Divider />
-              <InlineStack gap="600">
-                <BlockStack gap="100">
-                  <Text as="span" tone="subdued" variant="bodySm">
-                    Template
-                  </Text>
-                  <Text as="span" variant="bodyMd" fontWeight="medium">
-                    {chart.template?.title || "No template linked"}
-                  </Text>
-                </BlockStack>
-                <BlockStack gap="100">
-                  <Text as="span" tone="subdued" variant="bodySm">
-                    Available sizes
-                  </Text>
-                  <InlineStack gap="100">
-                    {(() => {
-                      let sizes = [];
-                      try {
-                        sizes = JSON.parse(chart.available_sizes || "[]");
-                      } catch {
-                        sizes = [];
-                      }
-                      return sizes.length ? (
-                        sizes.map((s, i) => <Badge key={i}>{s.value ?? s}</Badge>)
-                      ) : (
-                        <Text as="span" tone="subdued">
-                          None set
-                        </Text>
-                      );
-                    })()}
-                  </InlineStack>
-                </BlockStack>
-              </InlineStack>
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <Text as="h2" variant="headingMd">
-                Storefront preview
-              </Text>
-              <Text as="p" tone="subdued" variant="bodySm">
-                This is the content merchants will see on the product page,
-                pulled live from the "{chart.template?.title}" template. To
-                change the content itself, edit the template.
-              </Text>
-              {templateContents.length === 0 ? (
-                <EmptyState
-                  heading="This template has no content yet"
-                  image=""
+      <style>{`
+                .asc-template-layout {
+                    display: flex;
+                    gap: 16px;
+                    align-items: flex-start;
+                }
+                .asc-template-layout__details {
+                    flex: 0 0 70%;
+                    max-width: 70%;
+                }
+                .asc-template-layout__preview {
+                    flex: 0 0 30%;
+                    max-width: 30%;
+                    position: sticky;
+                    top: 16px;
+                }
+                @media (max-width: 900px) {
+                    .asc-template-layout {
+                        flex-direction: column;
+                    }
+                    .asc-template-layout__details,
+                    .asc-template-layout__preview {
+                        flex: 1 1 100%;
+                        max-width: 100%;
+                        position: static;
+                    }
+                }
+            `}</style>
+      <div className="asc-editorial">
+        <TemplatePreviewComponent
+          template={{ title: chart.title }}
+          templateContents={templateContents}
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+        />
+        <div className="asc-template-layout">
+          <div className="asc-template-layout__details">
+            <div className="asc-panel">
+              <div className="asc-details-block">
+                <p className="asc-eyebrow">Chart Details</p>
+                <ChartDetailsComponent
+                  chart={chart}
+                  templateOptions={templateOptions}
+                  isEditing={isEditing}
+                  title={titleDraft}
+                  templateId={templateIdDraft}
+                  sizeList={sizeListDraft}
+                  onTitleChange={setTitleDraft}
+                  onTemplateChange={setTemplateIdDraft}
+                  onSizeListChange={setSizeListDraft}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+                <h1 className="asc-editorial-font" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
+                  {chart.title} Size Guide
+                </h1>
+                <button
+                  type="button"
+                  className="asc-pill-btn asc-pill-btn--dark"
+                  onClick={() => setPreviewOpen(true)}
                 >
-                  <Text as="p" tone="subdued">
-                    Add blocks to the linked template to see a preview here.
-                  </Text>
-                </EmptyState>
+                  Desktop Preview
+                </button>
+              </div>
+              {templateContents.length > 0 ? (
+                <TemplateContentBlocks templateContents={templateContents} />
               ) : (
-                <BlockStack gap="400">
-                  {templateContents.map((content) => (
-                    <div key={content.id}>
-                      {content.content_type === CONTENT_TYPE_DESCRIPTION && (
-                        <DescriptionPreview content={content} />
-                      )}
-                      {content.content_type === CONTENT_TYPE_TABLE && (
-                        <TablePreview content={content} />
-                      )}
-                      {content.content_type === CONTENT_TYPE_IMAGE && (
-                        <ImagePreview content={content} />
-                      )}
-                    </div>
-                  ))}
-                </BlockStack>
+                <Text as="p" tone="subdued">
+                  {chart.template?.title
+                    ? "This template has no content yet."
+                    : "No template linked yet."}
+                </Text>
               )}
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-      </Layout>
+            </div>
+          </div>
+          <div className="asc-template-layout__preview">
+            <MobilePreview title={chart.title} contentItems={templateContents} />
+          </div>
+        </div>
+      </div>
     </Page>
   );
 }

@@ -67,9 +67,12 @@
 }
 
 /* First row of the size table reads as a header: shaded background and
-   bold values, even though it's just a regular editable row like the rest. */
+   bold values, even though it's just a regular editable row like the rest.
+   font-weight on the td itself covers the read-only preview (plain text);
+   the input rule covers the editable version inside the template editor. */
 .measurement-table .sz-chart-header-row td {
   background-color: rgb(246, 245, 248);
+  font-weight: 600;
 }
 
 .measurement-table .sz-chart-header-row input {
@@ -471,24 +474,7 @@
 /* Desktop preview modal chrome */
 .asc-desktop-chrome {
   border-radius: 10px;
-  border: 1px solid var(--line);
   overflow: hidden;
-}
-
-.asc-desktop-chrome-bar {
-  height: 36px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--canvas);
-  border-bottom: 1px solid var(--line);
-}
-
-.asc-chrome-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
 }
 .sz-chart-col-btn {
   border-collapse: collapse;

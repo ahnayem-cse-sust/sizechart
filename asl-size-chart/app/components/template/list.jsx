@@ -5,7 +5,6 @@ import {
     Card,
     Box,
     Pagination,
-    Button,
     Badge,
     InlineStack,
     EmptyState,
@@ -13,7 +12,6 @@ import {
 import { useNavigate } from "@remix-run/react";
 import { INTENT,INTENT_DELETE } from '../../services/constants/global';
 import { TEMPLATE_BASE_URL, TEMPLATE_CONTENTS_URL } from '../../services/constants/routes';
-import TemplateListPreviewButton from './list_preview_button';
 
 export function TemplateListComponent({ templates, pagination }) {
     const resourceName = {
@@ -85,8 +83,7 @@ export function TemplateListComponent({ templates, pagination }) {
                 headings={[
                     { title: "Title" },
                     { title: "Category" },
-                    { title: "Created" },
-                    { title: "Actions" },
+                    { title: "Created on" },
                 ]}
                 promotedBulkActions={[
                     {
@@ -101,7 +98,7 @@ export function TemplateListComponent({ templates, pagination }) {
                         key={template.id}
                         selected={selectedResources.includes(template.id)}
                         position={index}
-                        onClick={() => {}}
+                        onClick={() => navigate(TEMPLATE_CONTENTS_URL + `${template.id}`)}
                     >
                         <IndexTable.Cell>
                             <span
@@ -123,21 +120,6 @@ export function TemplateListComponent({ templates, pagination }) {
                             <Text as="span" tone="subdued">
                                 {new Date(template.createdAt).toLocaleDateString()}
                             </Text>
-                        </IndexTable.Cell>
-                        <IndexTable.Cell>
-                            <InlineStack gap="200">
-                                <TemplateListPreviewButton
-                                    templateId={template.id}
-                                    templateTitle={template.title}
-                                />
-                                <Button
-                                    url={TEMPLATE_CONTENTS_URL+`${template.id}`}
-                                    size="slim"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    Customize
-                                </Button>
-                            </InlineStack>
                         </IndexTable.Cell>
                     </IndexTable.Row>
                 ))}

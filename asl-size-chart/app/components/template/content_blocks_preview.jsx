@@ -15,7 +15,7 @@ export const MeasurementPreview = ({ content }) => {
       <table style={{ width: '100%', tableLayout: 'fixed' }}>
         <tbody>
           {sizeTable.map((row, rIdx) => (
-            <tr key={rIdx}>
+            <tr key={rIdx} className={rIdx === 0 ? 'sz-chart-header-row' : undefined}>
               {row.map((cell, cIdx) => (
                 <td key={cIdx}>
                   {cell}

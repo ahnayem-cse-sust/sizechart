@@ -1,4 +1,5 @@
 import { Modal, TextField, Button } from "@shopify/polaris";
+import { PlusIcon } from "@shopify/polaris-icons";
 import { useState, useCallback } from "react";
 import {
   Grid, InlineError,
@@ -71,11 +72,12 @@ export default function TemplateFormComponent({ templateCategories, template }) 
       <Button
         size="slim"
         variant="primary"
+        icon={!template ? PlusIcon : undefined}
         onClick={() => {
           setActive(true);
         }}
       >
-        {!template && "Create Template"}
+        {!template && "Add Template"}
         {template && "Edit"}
       </Button>
       <Modal

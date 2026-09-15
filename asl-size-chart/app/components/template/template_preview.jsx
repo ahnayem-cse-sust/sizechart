@@ -2,12 +2,13 @@ import { Modal } from "@shopify/polaris";
 import TemplateContentBlocks from "./content_blocks_preview";
 
 
-export default function TemplatePreviewComponent({ template, templateContents, open, onClose }) {
+export default function TemplatePreviewComponent({ template, templateContents, open, onClose, primaryAction }) {
   return (
     <Modal
       open={open}
       onClose={onClose}
       title="Size Guides"
+      primaryAction={primaryAction}
     >
       <Modal.Section>
         <div className="asc-editorial">

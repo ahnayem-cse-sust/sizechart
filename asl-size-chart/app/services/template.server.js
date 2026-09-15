@@ -1,16 +1,64 @@
 import db from '../db.server';
+import { CONTENT_TYPE_IMAGE } from './constants/content';
 
-export async function getTemplateList() { 
+export async function getTemplateList() {
 
   const templateList = await db.template.findMany({
-      select: {
+    select: {
       id: true,
       title: true,
+      category: true,
     },
+    orderBy: { createdAt: 'desc' },
   });
 
+  const templateIds = templateList.map((t) => t.id);
+
+  // One representative image per template (its first image block, by
+  // display order) so the create-chart picker can show a real thumbnail
+  // instead of a generic placeholder.
+  const imageContents = templateIds.length
+    ? await db.templateContent.findMany({
+        where: { template_id: { in: templateIds }, content_type: CONTENT_TYPE_IMAGE },
+        orderBy: [{ template_id: 'asc' }, { serial_no: 'asc' }],
+        select: { template_id: true, content_obj: true },
+      })
+    : [];
+
+  const firstImageByTemplateId = {};
+  for (const content of imageContents) {
+    if (!(content.template_id in firstImageByTemplateId) && content.content_obj) {
+      firstImageByTemplateId[content.template_id] = content.content_obj;
+    }
+  }
+
+  const templateListWithThumbnail = templateList.map((template) => ({
+    ...template,
+    thumbnail: firstImageByTemplateId[template.id] || null,
+  }));
+
+  // Group by category so the create-chart picker can lead with a
+  // category-level thumbnail (borrowed from any template in that category
+  // that has an image) before drilling into individual templates.
+  const categoriesByName = {};
+  for (const template of templateListWithThumbnail) {
+    if (!categoriesByName[template.category]) {
+      categoriesByName[template.category] = {
+        category: template.category,
+        thumbnail: null,
+        templates: [],
+      };
+    }
+    const bucket = categoriesByName[template.category];
+    bucket.templates.push(template);
+    if (!bucket.thumbnail && template.thumbnail) {
+      bucket.thumbnail = template.thumbnail;
+    }
+  }
+
   return Response.json({
-    templateList
+    templateList: templateListWithThumbnail,
+    categories: Object.values(categoriesByName),
   });
 }
 

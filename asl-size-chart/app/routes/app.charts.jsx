@@ -24,8 +24,9 @@ export async function loader({ request }) {
   const templatesResponse = await getTemplateList();
   const templates = await templatesResponse.json();
   const templateList = templates.templateList;
+  const categories = templates.categories;
 
-  return Response.json({ charts, pagination, templateList });
+  return Response.json({ charts, pagination, templateList, categories });
 }
 
 
@@ -58,7 +59,7 @@ export async function action({ request }) {
 }
 
 export default function Charts() {
-  const { charts, pagination, templateList } = useLoaderData();
+  const { charts, pagination, templateList, categories } = useLoaderData();
   const location = useLocation();
   const isBaseRoute = location.pathname === CHART_BASE_URL;
 
@@ -81,7 +82,7 @@ export default function Charts() {
                 the chart to a product from the Products tab.
               </Text>
             </div>
-            <ChartFormComponent templates={templateList} chart={null} />
+            <ChartFormComponent templates={templateList} categories={categories} chart={null} />
           </InlineStack>
         </Layout.Section>
 

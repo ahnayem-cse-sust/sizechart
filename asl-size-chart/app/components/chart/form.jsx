@@ -1,26 +1,15 @@
 import { Modal, TextField, Button } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 import {
-  Layout,
-  Page,
-  Grid, InlineError,
-  FormLayout, Text,
-  Select, Form
+  Text,
+  FormLayout, Form
 } from "@shopify/polaris";
+import { ArrowLeftIcon } from "@shopify/polaris-icons";
 import { INTENT,INTENT_UPDATE,INTENT_CREATE } from "../../services/constants/global";
-import AvailableSizeComponent from "./available_size";
+import TemplatePickerComponent from "./template_picker";
+import TemplateContentBlocks from "../template/content_blocks_preview";
 
-function parseSizeList(chart) {
-  if (!chart?.available_sizes) return [{ value: "XL" }, { value: "L" }];
-  try {
-    const parsed = JSON.parse(chart.available_sizes);
-    return Array.isArray(parsed) && parsed.length ? parsed : [{ value: "XL" }, { value: "L" }];
-  } catch {
-    return [{ value: "XL" }, { value: "L" }];
-  }
-}
-
-export default function ChartFormComponent({ templates, chart }) {
+export default function ChartFormComponent({ templates, categories, chart }) {
   const [active, setActive] = useState();
   const [saving, setSaving] = useState(false);
   const modalTitle = chart ? 'Edit Chart' : 'Create Chart';
@@ -29,31 +18,47 @@ export default function ChartFormComponent({ templates, chart }) {
     chart ? String(chart.template_id ?? '') : ''
   );
   const [errors, setErrors] = useState({});
-  const [sizeList, setSizeList] = useState(parseSizeList(chart));
-  const templateList = templates.map((template) => ({
-    label: template.title,
-    value: String(template.id),
-  }));
 
-  const toggleModal = useCallback(() => setActive((prev) => !prev), []);
+  // Previewing a template takes over the whole modal (its own header/footer
+  // actions) rather than sitting inline in the form — see below.
+  const [previewLoadingId, setPreviewLoadingId] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
+
+  const toggleModal = useCallback(() => {
+    setActive((prev) => !prev);
+    setPreviewData(null);
+  }, []);
 
   const handleTitleChange = useCallback((value) => {
     setTitle(value);
   }, []);
 
-  const handleSelectedTemplateChange = useCallback(
-    (value) => {
-      setSelectedTemplate(value);
-    },
-    [],
-  );
+  const handlePreview = async (template) => {
+    setPreviewLoadingId(template.id);
+    try {
+      const res = await fetch(`/app/template-preview/${template.id}`);
+      if (!res.ok) throw new Error("Failed to load preview");
+      const data = await res.json();
+      setPreviewData(data);
+    } catch {
+      alert("Couldn't load a preview for this template.");
+    } finally {
+      setPreviewLoadingId(null);
+    }
+  };
+
+  const backFromPreview = () => setPreviewData(null);
+
+  const chooseFromPreview = () => {
+    if (previewData) setSelectedTemplate(String(previewData.template.id));
+    setPreviewData(null);
+  };
 
   const handleSave = async (id) => {
 
     const validationErrors = {};
     if (!title) validationErrors.title = "Title is required";
     if (!selectedTemplate) validationErrors.template = "Template is required";
-    if (!sizeList.length) validationErrors.sizes = "Add at least one available size";
 
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -68,7 +73,9 @@ export default function ChartFormComponent({ templates, chart }) {
     if (id) formData.append("id", id);
     formData.append("title", title);
     formData.append("templateId", selectedTemplate);
-    formData.append("sizeList", JSON.stringify(sizeList));
+    // Available sizes aren't collected here — they're added afterwards from
+    // the chart's own edit page, once the chart exists.
+    formData.append("sizeList", JSON.stringify([]));
 
     try {
       const res = await fetch("/app/charts", {
@@ -103,42 +110,58 @@ export default function ChartFormComponent({ templates, chart }) {
       <Modal
         open={active}
         onClose={toggleModal}
-        title={modalTitle}
-        primaryAction={{
-          content: "Save",
-          loading: saving,
-          onAction: () => handleSave(chart?.id)
-        }}
-        secondaryActions={[{ content: "Cancel", onAction: toggleModal }]}
+        title={previewData ? previewData.template.title : modalTitle}
+        primaryAction={
+          previewData
+            ? { content: "Use this template", onAction: chooseFromPreview }
+            : { content: "Save", loading: saving, onAction: () => handleSave(chart?.id) }
+        }
+        secondaryActions={previewData ? [] : [{ content: "Cancel", onAction: toggleModal }]}
       >
-        <Modal.Section>
-          <Form onSubmit={(event) => event.preventDefault()}>
-            <FormLayout>
-              <TextField
-                label="Chart title"
-                name='title'
-                value={title}
-                onChange={handleTitleChange}
-                autoComplete="off"
-                placeholder="e.g. Women's Tops"
-                error={errors.title}
-              />
+        {previewData ? (
+          <Modal.Section>
+            <div style={{ marginBottom: 12 }}>
+              <Button variant="plain" icon={ArrowLeftIcon} onClick={backFromPreview}>
+                Back
+              </Button>
+            </div>
+            <div className="asc-editorial">
+              <div className="asc-desktop-chrome">
+                <div style={{ padding: 24, background: "#fff" }}>
+                  <TemplateContentBlocks templateContents={previewData.templateContents} />
+                </div>
+              </div>
+            </div>
+          </Modal.Section>
+        ) : (
+          <Modal.Section>
+            <Form onSubmit={(event) => event.preventDefault()}>
+              <FormLayout>
+                <TextField
+                  label="Chart title"
+                  name='title'
+                  value={title}
+                  onChange={handleTitleChange}
+                  autoComplete="off"
+                  placeholder="e.g. Women's Tops"
+                  error={errors.title}
+                />
 
-              <Select
-                label="Template"
-                name='template'
-                options={[{ label: 'Select a template', value: '', disabled: true }, ...templateList]}
-                onChange={handleSelectedTemplateChange}
-                value={selectedTemplate}
-                error={errors.template}
-                helpText="The content shown on the storefront comes from this template."
-              />
-
-              <AvailableSizeComponent sizeList={sizeList} setSizeList={setSizeList} />
-              {errors.sizes && <InlineError message={errors.sizes} />}
-            </FormLayout>
-          </Form>
-        </Modal.Section>
+                <TemplatePickerComponent
+                  categories={categories}
+                  value={selectedTemplate}
+                  onChange={setSelectedTemplate}
+                  onPreview={handlePreview}
+                  previewLoadingId={previewLoadingId}
+                  error={errors.template}
+                />
+                <Text as="p" tone="subdued">
+                  Available sizes can be added once the chart is created, from its edit page.
+                </Text>
+              </FormLayout>
+            </Form>
+          </Modal.Section>
+        )}
       </Modal>
     </div>
   );

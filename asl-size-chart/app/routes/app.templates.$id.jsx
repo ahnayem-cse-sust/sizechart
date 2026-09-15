@@ -453,7 +453,7 @@ export default function TemplateView() {
                                 </h1>
                                 <button
                                     type="button"
-                                    className="asc-pill-btn"
+                                    className="asc-pill-btn asc-pill-btn--dark"
                                     onClick={() => setPreviewOpen(true)}
                                 >
                                     Desktop Preview

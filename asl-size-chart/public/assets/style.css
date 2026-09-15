@@ -26,6 +26,15 @@
   background-color: rgb(246, 245, 248);
 }
 
+/* Read-only preview (details page, desktop preview modal, mobile preview) —
+   table-layout: fixed above makes every column share the table's width
+   equally; give plain-text cells room and let long values wrap instead of
+   overflowing their now-fixed column width. */
+.measurement-table--preview td {
+  padding: 8px 10px;
+  word-break: break-word;
+}
+
 .measurement-table input {
   border: none;
   outline: none;
@@ -51,6 +60,55 @@
   outline: none !important;
   box-shadow: none !important;
   border-color: transparent !important;
+}
+
+.measurement-table table {
+  margin: 0;
+}
+
+/* First row of the size table reads as a header: shaded background and
+   bold values, even though it's just a regular editable row like the rest. */
+.measurement-table .sz-chart-header-row td {
+  background-color: rgb(246, 245, 248);
+}
+
+.measurement-table .sz-chart-header-row input {
+  font-weight: 600;
+}
+
+/* The TextField's own field background sits on top of the <td> and would
+   otherwise hide the header row's shading — keep it transparent so the
+   header background actually shows through. */
+.measurement-table .Polaris-TextField__Backdrop {
+  background: transparent;
+  border: none;
+}
+
+/* Table + row/column controls, laid out as a 2x2 grid so the column
+   control's height is bound to the table row only (not the row control
+   below it), and every edge touching the table has zero gap. */
+.sz-chart-table-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: stretch;
+  gap: 0;
+}
+
+.sz-chart-table-grid .sz-chart-table-cell {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.sz-chart-table-grid .sz-chart-col-btn {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.sz-chart-table-grid .sz-chart-row-btn {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .asc-measurement-table {
@@ -221,11 +279,11 @@
 }
 
 .asc-eyebrow {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink);
   margin: 0;
 }
 
@@ -431,4 +489,64 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
+}
+.sz-chart-col-btn {
+  border-collapse: collapse;
+  margin: 0;
+  /* Grid item spans only row 1 of .sz-chart-table-grid, so its grid area
+     is exactly the table's height (not the row control beneath it).
+     height: 100% makes the table element itself (and its single row/cell)
+     actually fill that area — some browsers won't grow a table's row to
+     fill a stretched height unless height is set explicitly. */
+  height: 100%;
+}
+
+.sz-chart-col-btn tbody,
+.sz-chart-col-btn tr {
+  height: 100%;
+}
+
+.sz-chart-col-btn td {
+  height: 100%;
+  padding: 0;
+}
+
+.sz-chart-col-btn td > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: 10px 8px;
+  background-color: rgb(246, 245, 248);
+  border: 1px solid rgb(205, 202, 202);
+  /* Inner side (left) touches the table, so it stays square; only the
+     outer (right) corners are rounded. */
+  border-radius: 0 12px 12px 0;
+}
+
+.sz-chart-row-btn {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.sz-chart-row-btn th {
+  padding: 0;
+}
+
+.sz-chart-row-btn th > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 10px;
+  background-color: rgb(246, 245, 248);
+  border: 1px solid rgb(205, 202, 202);
+  /* Inner side (top) touches the table, so it stays square; only the
+     outer (bottom) corners are rounded. */
+  border-radius: 0 0 12px 12px;
 }

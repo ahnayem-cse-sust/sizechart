@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Text,
   Button,
-  TextField,
-  InlineStack,
-  BlockStack,
+  TextField, ButtonGroup, InlineStack
 } from "@shopify/polaris";
 import { PlusIcon, MinusIcon, DeleteIcon } from "@shopify/polaris-icons";
 import * as content_constants from '../../services/constants/content';
@@ -60,71 +58,86 @@ export default function MeasurementComponent({ content, onFieldChange, onDeleteB
     onDeleteBlock?.(content_id, content_constants.CONTENT_TYPE_TABLE);
   };
 
-  const columnCount = sizeTable[0].length;
 
   return (
-    <BlockStack gap="300">
-      <InlineStack align="space-between" blockAlign="center">
-        <Text as="h2" variant="headingSm">
-          Size measurement
-        </Text>
-        <Button
-          tone="critical"
-          icon={DeleteIcon}
-          variant="tertiary"
-          accessibilityLabel="Delete table block"
-          onClick={() => handleBlockDelete(content.id)}
-        />
-      </InlineStack>
+    <div>
+        <InlineStack align="space-between" blockAlign="center">
+          <Text as="h2" variant="headingLg">
+            Size Measurement:
+          </Text>
+          <ButtonGroup>
+            <Button
+              tone="critical"
+              icon={DeleteIcon}
+              onClick={() => handleBlockDelete(content.id)}
+            ></Button>
+          </ButtonGroup>
+        </InlineStack>
 
-      <div className="asc-table-editor">
-        <div className="asc-table-editor__row">
-          <div className="asc-measurement-table">
-            <table>
+        <div className="sz-chart-table-grid">
+          <div className='measurement-table sz-chart-table-cell'>
+            <table style={{ width: '100%' }}>
               <tbody>
-                {sizeTable.map((row, rIdx) => (
-                  <tr key={`row-${rIdx}`}>
-                    {row.map((cell, cIdx) => (
-                      <td key={`cell-${rIdx}-${cIdx}`}>
-                        <TextField
-                          labelHidden
-                          label={`Row ${rIdx + 1}, column ${cIdx + 1}`}
-                          value={cell}
-                          onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+              {sizeTable.map((row, rIdx) => (
+                <tr key={`row-${rIdx}`} className={rIdx === 0 ? 'sz-chart-header-row' : undefined}>
+                  {row.map((cell, cIdx) => (
+                    <td key={`cell-${rIdx}-${cIdx}`}>
+                      <TextField
+                        labelHidden
+                        label={`Row ${rIdx + 1}, column ${cIdx + 1}`}
+                        value={cell}
+                        onChange={(val) => updateSizeTableCell(rIdx, cIdx, val)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>
 
-          <div className="asc-table-editor__col-controls">
-            <Button icon={PlusIcon} accessibilityLabel="Add column" onClick={addSizeTableColumn} />
-            {columnCount > 1 && (
-              <Button
-                tone="critical"
-                icon={MinusIcon}
-                accessibilityLabel="Remove column"
-                onClick={() => removeSizeTableColumn(columnCount - 1)}
-              />
-            )}
-          </div>
-        </div>
+          <table className='sz-chart-col-btn'>
+            <tbody>
+            <tr>
+              <td>
+                <div>
+                  <Button icon={PlusIcon} onClick={addSizeTableColumn}>
+                  </Button>
+                  {sizeTable[0].length > 1 && (
+                    <Button
+                      tone="critical"
+                      icon={MinusIcon}
+                      onClick={() => removeSizeTableColumn(sizeTable[0].length - 1)}
+                    >
+                    </Button>
+                  )}
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
 
-        <div className="asc-table-editor__row-controls">
-          <Button icon={PlusIcon} accessibilityLabel="Add row" onClick={addSizeTableRow} />
-          {sizeTable.length > 1 && (
-            <Button
-              tone="critical"
-              icon={MinusIcon}
-              accessibilityLabel="Remove row"
-              onClick={() => removeSizeTableRow(sizeTable.length - 1)}
-            />
-          )}
+          <table className='sz-chart-row-btn'>
+            <tbody>
+            <tr>
+              <th colSpan={sizeTable[0].length}>
+                <div>
+                  <Button icon={PlusIcon} onClick={addSizeTableRow}></Button>
+                  {sizeTable.length > 1 && (
+                    <Button
+                      tone="critical"
+                      icon={MinusIcon}
+                      onClick={() => removeSizeTableRow(sizeTable.length - 1)}
+                    >
+                    </Button>
+                  )}
+                </div>
+              </th>
+            </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </BlockStack>
+    </div>
   );
 }
+

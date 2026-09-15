@@ -11,8 +11,8 @@ export const MeasurementPreview = ({ content }) => {
   const sizeTable = safeJsonParse(content.content_obj, []);
   if (sizeTable.length === 0) return null;
   return (
-    <div className='measurement-table'>
-      <table style={{ width: '100%' }}>
+    <div className='measurement-table measurement-table--preview'>
+      <table style={{ width: '100%', tableLayout: 'fixed' }}>
         <tbody>
           {sizeTable.map((row, rIdx) => (
             <tr key={rIdx}>

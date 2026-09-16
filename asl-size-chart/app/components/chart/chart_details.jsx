@@ -1,6 +1,5 @@
 import {
     TextField,
-    Select,
     Box,
     BlockStack,
     Badge,
@@ -11,13 +10,10 @@ import AvailableSizeComponent from "./available_size";
 
 export default function ChartDetailsComponent({
     chart,
-    templateOptions,
     isEditing,
     title,
-    templateId,
     sizeList,
     onTitleChange,
-    onTemplateChange,
     onSizeListChange,
 }) {
     if (!isEditing) {
@@ -31,8 +27,6 @@ export default function ChartDetailsComponent({
             <dl className="asc-details-grid">
                 <dt>Title</dt>
                 <dd>{chart.title}</dd>
-                <dt>Template</dt>
-                <dd>{chart.template?.title || "No template linked"}</dd>
                 <dt>Available sizes</dt>
                 <dd>
                     {savedSizes.length ? (
@@ -57,13 +51,6 @@ export default function ChartDetailsComponent({
                     value={title}
                     onChange={onTitleChange}
                     autoComplete="off"
-                />
-                <Select
-                    label="Template"
-                    options={[{ label: "Select a template", value: "", disabled: true }, ...templateOptions]}
-                    value={templateId}
-                    onChange={onTemplateChange}
-                    helpText="The content shown on the storefront comes from this template."
                 />
                 <AvailableSizeComponent sizeList={sizeList} setSizeList={onSizeListChange} />
             </BlockStack>

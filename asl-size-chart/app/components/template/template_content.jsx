@@ -55,7 +55,9 @@ const ContentBlock = ({ item, listeners, onFieldChange, onDeleteBlock }) => {
 // `items`/`setItems` are owned by the parent page now (rather than local
 // state here) so that adding/removing blocks — which the parent handles
 // locally until Save — is reflected immediately without a page reload.
-export default function TemplateContentComponent({ items, setItems, onFieldChange, onDeleteBlock }) {
+// `reorderUrl` lets this same editor be reused for charts (which persist
+// reordering to their own detail route instead of the templates list).
+export default function TemplateContentComponent({ items, setItems, onFieldChange, onDeleteBlock, reorderUrl = "/app/templates" }) {
   const sensors = useSensors(useSensor(PointerSensor));
 
   const persistOrder = async (reordered, previous) => {
@@ -76,7 +78,7 @@ export default function TemplateContentComponent({ items, setItems, onFieldChang
     formData.append("serial_json", JSON.stringify(serialArray));
 
     try {
-      const res = await fetch("/app/templates", {
+      const res = await fetch(reorderUrl, {
         method: "POST",
         body: formData,
       });

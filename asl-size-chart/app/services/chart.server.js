@@ -1,4 +1,5 @@
 import db from '../db.server';
+import { cloneTemplateContentIntoChart } from './chart.content.server';
 
 export async function getPaginatedCharts({ request }) {
   const PAGE_SIZE = 10;
@@ -51,6 +52,10 @@ export async function saveChart({ title, templateId, sizeList }) {
       available_sizes: normalizeSizeList(sizeList),
     },
   });
+
+  // Give the new chart its own copy of the template's current content, so
+  // it's immediately editable/customizable rather than starting empty.
+  await cloneTemplateContentIntoChart(Number(templateId), response.id);
 
   return Response.json({ chart: response });
 }

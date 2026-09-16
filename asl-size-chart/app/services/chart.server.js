@@ -12,7 +12,6 @@ export async function getPaginatedCharts({ request }) {
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
     orderBy: { createdAt: "desc" },
-    include: { template: { select: { id: true, title: true } } },
   });
 
   return Response.json({
@@ -31,7 +30,6 @@ export async function getChartById(id) {
 
   const chart = await db.chart.findFirst({
     where: { id },
-    include: { template: true },
   });
 
   return Response.json({ chart });
@@ -57,19 +55,25 @@ export async function saveChart({ title, templateId, sizeList }) {
   // it's immediately editable/customizable rather than starting empty.
   await cloneTemplateContentIntoChart(Number(templateId), response.id);
 
-  return Response.json({ chart: response });
+  // The template was only ever a one-time starting point. Once its content
+  // has been cloned, sever the link entirely — the chart is now fully
+  // independent, and neither future template edits nor future chart edits
+  // should ever propagate to the other.
+  const detachedChart = await db.chart.update({
+    where: { id: response.id },
+    data: { template_id: null },
+  });
+
+  return Response.json({ chart: detachedChart });
 }
 
-export async function updateChart(id, { title, templateId, sizeList }) {
+export async function updateChart(id, { title, sizeList }) {
   if (isNaN(id)) {
     return Response.json({ error: "Invalid ID" }, { status: 400 });
   }
 
   const data = {};
   if (title !== undefined) data.title = title;
-  if (templateId !== undefined && templateId !== null && templateId !== "") {
-    data.template_id = Number(templateId);
-  }
   if (sizeList !== undefined) data.available_sizes = normalizeSizeList(sizeList);
 
   const response = await db.chart.update({

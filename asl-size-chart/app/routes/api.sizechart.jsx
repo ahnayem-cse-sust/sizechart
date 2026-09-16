@@ -24,7 +24,6 @@ export async function loader({ request }) {
 
   const chart = await db.chart.findFirst({
     where: { id: Number(chartId) },
-    include: { template: true },
   });
 
   if (!chart) {
@@ -37,16 +36,16 @@ export async function loader({ request }) {
     return cors(request, returnResponse);
   }
 
-  const templateContents = chart.template_id
-    ? await db.templateContent.findMany({
-        where: { template_id: chart.template_id },
-        orderBy: { serial_no: "asc" },
-      })
-    : [];
+  // A chart's displayed content is its own (ChartContent) — independent of
+  // whatever template it may originally have been created from.
+  const chartContents = await db.chartContent.findMany({
+    where: { chart_id: chart.id },
+    orderBy: { serial_no: "asc" },
+  });
 
   const html =
     renderAvailableSizesHtml(chart.available_sizes) +
-    renderContentBlocksHtml(templateContents);
+    renderContentBlocksHtml(chartContents);
 
   returnResponse = Response.json({
     status: 200,

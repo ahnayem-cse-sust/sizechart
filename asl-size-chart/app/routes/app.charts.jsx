@@ -47,7 +47,7 @@ export async function action({ request }) {
                  , sizeList: form.get("sizeList") });
       break;
     case INTENT_UPDATE:
-      response = await updateChart(Number(form.get("id")), { title: form.get("title"), templateId: form.get("templateId"), sizeList: form.get("sizeList") });
+      response = await updateChart(Number(form.get("id")), { title: form.get("title"), sizeList: form.get("sizeList") });
       break;
 
     default:

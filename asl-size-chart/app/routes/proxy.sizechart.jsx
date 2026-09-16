@@ -35,16 +35,16 @@ export async function loader({ request }) {
     );
   }
 
-  const templateContents = chart.template_id
-    ? await db.templateContent.findMany({
-        where: { template_id: chart.template_id },
-        orderBy: { serial_no: "asc" },
-      })
-    : [];
+  // A chart's displayed content is its own (ChartContent) — independent of
+  // whatever template it may originally have been created from.
+  const chartContents = await db.chartContent.findMany({
+    where: { chart_id: chart.id },
+    orderBy: { serial_no: "asc" },
+  });
 
   const html =
     renderAvailableSizesHtml(chart.available_sizes) +
-    renderContentBlocksHtml(templateContents);
+    renderContentBlocksHtml(chartContents);
 
   return Response.json({
     success: true,

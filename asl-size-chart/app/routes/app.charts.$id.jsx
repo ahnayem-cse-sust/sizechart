@@ -9,7 +9,7 @@ import {
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { getChartById } from "../services/chart.server";
-import { getAllTemplateContent } from "../services/template.content.server";
+import { getAllChartContent, chartContentFactory } from "../services/chart.content.server";
 import { CHART_BASE_URL } from "../services/constants/routes";
 import { INTENT, INTENT_UPDATE } from "../services/constants/global";
 import ChartDetailsComponent from "../components/chart/chart_details";
@@ -41,14 +41,20 @@ export async function loader({ request, params }) {
     throw new Response("Not found", { status: 404 });
   }
 
-  let templateContents = [];
-  if (chart.template_id) {
-    const contentResponse = await getAllTemplateContent(chart.template_id);
-    const contentData = await contentResponse.json();
-    templateContents = contentData.templateContents || [];
-  }
+  // A chart's content is its own (ChartContent, keyed by chart_id) —
+  // independent of whatever template it may have originally been created
+  // from. See chart.server.js: creation clones the template's content once,
+  // then clears the link entirely.
+  const chartContents = await getAllChartContent(id);
 
-  return Response.json({ chart, templateContents });
+  return Response.json({ chart, chartContents });
+}
+
+// POST /app/charts/:id — mirrors app.templates.$id.jsx's own action, but for
+// a chart's own content blocks (add/save/delete/reorder).
+export async function action({ request }) {
+  await authenticate.admin(request);
+  return await chartContentFactory({ request });
 }
 
 function parseSizeList(chart) {
@@ -88,7 +94,7 @@ function isTempId(id) {
 }
 
 export default function ChartView() {
-  const { chart, templateContents } = useLoaderData();
+  const { chart, chartContents } = useLoaderData();
   const [isEditing, setIsEditing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [titleDraft, setTitleDraft] = useState(chart.title);
@@ -96,13 +102,10 @@ export default function ChartView() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Working copy of the linked template's content blocks while editing.
-  // IMPORTANT: this content belongs to the template (TemplateContent.template_id),
-  // not to the chart — editing it here edits the shared template, so changes
-  // are visible on every other chart that also uses this template. There's
-  // a note about this in the UI below; it's a consequence of the current
-  // data model (one template can back many charts), not a bug.
-  const [contentItems, setContentItems] = useState(templateContents);
+  // Working copy of THIS chart's own content blocks. Fully independent of
+  // any template — editing and saving here only ever touches this chart's
+  // ChartContent rows, never the template it may once have been cloned from.
+  const [contentItems, setContentItems] = useState(chartContents);
   const [pendingDeletes, setPendingDeletes] = useState([]);
   const [dirtyBlockIds, setDirtyBlockIds] = useState(() => new Set());
   const blockDraftsRef = useRef({});
@@ -126,7 +129,7 @@ export default function ChartView() {
   const resetDraftState = () => {
     setTitleDraft(baselineTitle);
     setSizeListDraft(baselineSizeList);
-    setContentItems(templateContents);
+    setContentItems(chartContents);
     setPendingDeletes([]);
     setDirtyBlockIds(new Set());
     blockDraftsRef.current = {};
@@ -186,12 +189,12 @@ export default function ChartView() {
   const handleAddBlock = useCallback((contentType) => {
     const newItem = {
       id: makeTempId(),
-      template_id: chart.template_id,
+      chart_id: chart.id,
       content_type: contentType,
       content_obj: defaultContentFor(contentType),
     };
     setContentItems((prev) => [...prev, newItem]);
-  }, [chart.template_id]);
+  }, [chart.id]);
 
   const handleDeleteBlock = useCallback((contentId, contentType) => {
     delete blockDraftsRef.current[contentId];
@@ -240,13 +243,11 @@ export default function ChartView() {
       setError("Title is required");
       return;
     }
-    if (!sizeListDraft.length) {
-      setError("Add at least one available size");
-      return;
-    }
 
     setSaving(true);
     setError("");
+
+    const chartContentUrl = "/app/charts/" + chart.id;
 
     try {
       // Newly added blocks don't exist on the server yet. Create them
@@ -258,17 +259,17 @@ export default function ChartView() {
 
         const addFormData = new FormData();
         addFormData.append(INTENT, INTENT_ADD_BLOCK);
-        addFormData.append("template_id", chart.template_id);
+        addFormData.append("chart_id", chart.id);
         addFormData.append("content_type", item.content_type);
 
-        const addRes = await fetch("/app/templates/" + chart.template_id, {
+        const addRes = await fetch(chartContentUrl, {
           method: "POST",
           body: addFormData,
         });
         if (!addRes.ok) {
           throw new Error("Failed to create a new block");
         }
-        const { templateContents: created } = await addRes.json();
+        const { chartContents: created } = await addRes.json();
         idMap[item.id] = created.id;
       }
 
@@ -298,7 +299,7 @@ export default function ChartView() {
           blockFormData.append("content_obj", JSON.stringify(draft.value));
         }
         requests.push(
-          fetch("/app/templates/" + chart.template_id, { method: "POST", body: blockFormData })
+          fetch(chartContentUrl, { method: "POST", body: blockFormData })
         );
       });
 
@@ -310,7 +311,7 @@ export default function ChartView() {
         );
         deleteFormData.append("content_id", id);
         requests.push(
-          fetch("/app/templates/" + chart.template_id, { method: "POST", body: deleteFormData })
+          fetch(chartContentUrl, { method: "POST", body: deleteFormData })
         );
       });
 
@@ -416,7 +417,7 @@ export default function ChartView() {
       <div className="asc-editorial">
         <TemplatePreviewComponent
           template={{ title: chart.title }}
-          templateContents={isEditing ? contentItems : templateContents}
+          templateContents={isEditing ? contentItems : chartContents}
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
         />
@@ -446,45 +447,30 @@ export default function ChartView() {
                   Desktop Preview
                 </button>
               </div>
-              {isEditing && chart.template_id && (
-                <Box paddingBlockEnd="300">
-                  <Text as="p" tone="subdued">
-                    This content belongs to the linked template — changes here also apply to any other chart using it.
-                  </Text>
-                </Box>
-              )}
-              {isEditing && !chart.template_id && (
-                <Box paddingBlockEnd="300">
-                  <Text as="p" tone="critical">
-                    This chart has no linked template, so content can't be added here.
-                  </Text>
-                </Box>
-              )}
-              {isEditing && chart.template_id ? (
+              {isEditing ? (
                 <BlockStack gap="400">
                   <TemplateContentComponent
                     items={contentItems}
                     setItems={setContentItems}
                     onFieldChange={handleBlockFieldChange}
                     onDeleteBlock={handleDeleteBlock}
+                    reorderUrl={"/app/charts/" + chart.id}
                   />
                   <Box>
                     <BlockButtonComponent btnText={'+ Add New Block'} onAddBlock={handleAddBlock} />
                   </Box>
                 </BlockStack>
-              ) : isEditing ? null : templateContents.length > 0 ? (
-                <TemplateContentBlocks templateContents={templateContents} />
+              ) : chartContents.length > 0 ? (
+                <TemplateContentBlocks templateContents={chartContents} />
               ) : (
-                <Text as="p" tone="subdued">
-                  {chart.template_id ? "This template has no content yet." : "No template linked yet."}
-                </Text>
+                <Text as="p" tone="subdued">No content blocks added yet.</Text>
               )}
             </div>
           </div>
           <div className="asc-template-layout__preview">
             <MobilePreview
               title={isEditing ? titleDraft : chart.title}
-              contentItems={isEditing ? contentItems : templateContents}
+              contentItems={isEditing ? contentItems : chartContents}
             />
           </div>
         </div>

@@ -1,20 +1,35 @@
 import { authenticate } from "../shopify.server";
 import { getCharts } from "./sizecharts.crud";
 
-async function getNext({admin},after,first){
+// Fields mirroring what Shopify's own Products list shows: thumbnail,
+// status, inventory, type, and vendor — plus the metafield this app uses to
+// track which size chart a product has assigned.
+const PRODUCT_FIELDS = `
+  id
+  title
+  status
+  totalInventory
+  productType
+  vendor
+  onlineStorePreviewUrl
+  featuredImage {
+    url
+    altText
+  }
+  metafield(namespace: "custom", key: "size_chart_id") {
+    value
+  }
+`;
+
+async function getNext({ admin }, after, first, query) {
   const queryRequest = await admin.graphql(
       `#graphql
-        query getProducts($first: Int!, $after: String) {
-          products(first: $first, after: $after) {
+        query getProducts($first: Int!, $after: String, $query: String) {
+          products(first: $first, after: $after, query: $query) {
             edges {
               cursor
               node {
-                id
-                title
-                onlineStorePreviewUrl
-                metafield(namespace: "custom", key: "size_chart_id") {
-                  value
-                }
+                ${PRODUCT_FIELDS}
               }
             }
             pageInfo {
@@ -29,6 +44,7 @@ async function getNext({admin},after,first){
         variables: {
           first,
           after,
+          query,
         },
       }
     ); 
@@ -36,20 +52,15 @@ async function getNext({admin},after,first){
     return await queryRequest.json();
 }
 
-async function getPrevious({admin},before,last){
+async function getPrevious({ admin }, before, last, query) {
   const queryRequest = await admin.graphql(
       `#graphql
-        query getProducts($last: Int!, $before: String) {
-          products(last: $last, before: $before) {
+        query getProducts($last: Int!, $before: String, $query: String) {
+          products(last: $last, before: $before, query: $query) {
             edges {
               cursor
               node {
-                id
-                title 
-                onlineStorePreviewUrl
-                metafield(namespace: "custom", key: "size_chart_id") {
-                  value
-                }
+                ${PRODUCT_FIELDS}
               }
             }
             pageInfo {
@@ -64,6 +75,7 @@ async function getPrevious({admin},before,last){
         variables: {
           last,
           before,
+          query,
         },
       }
     ); 
@@ -71,20 +83,15 @@ async function getPrevious({admin},before,last){
     return await queryRequest.json();
 }
 
-async function getFirst({admin},first){
+async function getFirst({ admin }, first, query) {
   const queryRequest = await admin.graphql(
       `#graphql
-        query getProducts($first: Int!) {
-          products(first: $first) {
+        query getProducts($first: Int!, $query: String) {
+          products(first: $first, query: $query) {
             edges {
               cursor
               node {
-                id
-                title 
-                onlineStorePreviewUrl
-                metafield(namespace: "custom", key: "size_chart_id") {
-                  value
-                }
+                ${PRODUCT_FIELDS}
               }
             }
             pageInfo {
@@ -97,7 +104,8 @@ async function getFirst({admin},first){
         }`,
       {
         variables: {
-          first
+          first,
+          query,
         },
       }
     ); 
@@ -109,19 +117,38 @@ async function getFirst({admin},first){
 export async function getProducts({ request }) {
   const url = new URL(request.url);
   const after = url.searchParams.get('after'); // Cursor for pagination
-  const first = 5;
+  const before = url.searchParams.get('before');
+  const search = url.searchParams.get('search') || '';
+  const status = (url.searchParams.get('status') || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const productType = url.searchParams.get('productType') || '';
+  const vendor = url.searchParams.get('vendor') || '';
+
+  // Shopify's search syntax: unqualified terms already match title (among
+  // other fields); the rest are field-qualified clauses, ANDed together by
+  // just separating them with spaces. Multiple statuses are ORed within
+  // their own clause.
+  const clauses = [];
+  if (search) clauses.push(`title:*${search}*`);
+  if (status.length) clauses.push(`(${status.map((s) => `status:${s.toLowerCase()}`).join(' OR ')})`);
+  if (productType) clauses.push(`product_type:*${productType}*`);
+  if (vendor) clauses.push(`vendor:*${vendor}*`);
+  const query = clauses.length ? clauses.join(' ') : null;
+
+  const first = 10;
 
   const { admin } = await authenticate.admin(request);
   let response;
 
   if(after){
-    response = await getNext({admin}, after, first);
+    response = await getNext({admin}, after, first, query);
   } else{
-    const before = url.searchParams.get('before');
     if(before){
-      response = await getPrevious({admin}, before, first);
+      response = await getPrevious({admin}, before, first, query);
     } else{
-      response = await getFirst({admin},first);
+      response = await getFirst({admin}, first, query);
     }
   }  
     
@@ -135,7 +162,15 @@ export async function getProducts({ request }) {
   const startCursor = pageInfo.startCursor;
   const hasPreviousPage = pageInfo.hasPreviousPage;
 
-  return Response.json({ products, sizeCharts, hasNextPage, endCursor, hasPreviousPage, startCursor });
+  return Response.json({
+    products,
+    sizeCharts,
+    hasNextPage,
+    endCursor,
+    hasPreviousPage,
+    startCursor,
+    filters: { search, status, productType, vendor },
+  });
 }
 
 export async function saveProductSizechart({ request }) {

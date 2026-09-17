@@ -10,34 +10,61 @@
   SHADOW_STYLES / ICON_PATHS maps below mirror
   app/services/utils/buttonDesign.js — keep both in sync if those values
   ever change.
+
+  If the product itself has no chart assigned, falls back to the first
+  collection the product belongs to that has its own `custom.size_chart_id`
+  metafield set (assigned from the app's Collections page), so a whole
+  collection can share one size chart without setting it on every product.
 {%- enddoc -%}
 
 {%- if request.page_type == 'product' -%}
   {%- assign chart_id = product.metafields.custom.size_chart_id -%}
+  {%- unless chart_id -%}
+    {%- for collection in product.collections -%}
+      {%- assign collection_chart_id = collection.metafields.custom.size_chart_id -%}
+      {%- if collection_chart_id -%}
+        {%- assign chart_id = collection_chart_id -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endunless -%}
 
-  {% if chart_id %}
-    <div id="asc-embed-root-{{ block.id }}" data-asc-embed-root {{ block.shopify_attributes }}></div>
+  {% comment %}
+    Always render the container + script once we're on a product page,
+    even if chart_id came back blank. Liquid's product.collections only
+    includes collections published to the Online Store channel, so a
+    chart assigned to an unpublished (or POS-only) collection would never
+    be found here — the script below asks the app to double-check via the
+    Admin API (which has no such restriction) whenever the local lookup
+    came up empty.
+  {% endcomment %}
+  <div id="asc-embed-root-{{ block.id }}" data-asc-embed-root {{ block.shopify_attributes }}></div>
 
-    <script>
-      (function () {
-        var chartId = {{ chart_id | json }};
-        var root = document.getElementById('asc-embed-root-{{ block.id }}');
+  <script>
+    (function () {
+      var chartId = {{ chart_id | json }};
+      var productId = {{ product.id | json }};
+      var root = document.getElementById('asc-embed-root-{{ block.id }}');
 
-        fetch('/apps/sizechart?chartId=' + encodeURIComponent(chartId))
-          .then(function (response) {
-            if (!response.ok) throw new Error('Request failed');
-            return response.json();
-          })
-          .then(function (res) {
-            if (!res.success) return;
-            var settings = res.data.settings || {};
-            if (settings.showOnProductPage === false) return;
-            renderEmbed(root, res.data, settings);
-          })
-          .catch(function () {});
+      var query = chartId
+        ? 'chartId=' + encodeURIComponent(chartId)
+        : 'productId=' + encodeURIComponent(productId);
 
-        // Mirrors app/services/utils/buttonDesign.js
-        var SHAPE_RADIUS = { pill: 999, rounded: 10, square: 4 };
+      fetch('/apps/sizechart?' + query)
+        .then(function (response) {
+          if (!response.ok) throw new Error('Request failed');
+          return response.json();
+        })
+        .then(function (res) {
+          if (!res.success) return;
+          var settings = res.data.settings || {};
+          if (settings.showOnProductPage === false) return;
+          renderEmbed(root, res.data, settings);
+        })
+        .catch(function () {});
+
+      // Mirrors app/services/utils/buttonDesign.js
+      var SHAPE_RADIUS = { pill: 999, rounded: 10, square: 4 };
         var SIZE_STYLES = {
           small: { padding: '6px 12px', fontSize: '0.75rem', iconSize: 14 },
           medium: { padding: '10px 16px', fontSize: '0.875rem', iconSize: 16 },
@@ -315,7 +342,6 @@
         line-height: 1.5;
       }
     </style>
-  {% endif %}
 {%- endif -%}
 
 {% schema %}

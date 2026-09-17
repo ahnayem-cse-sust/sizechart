@@ -38,8 +38,15 @@ const STATUS_BADGE = {
   ARCHIVED: { tone: "subdued", label: "Archived" },
 };
 
-function ProductChartCell({ id, metafield, sizeCharts }) {
-  const [selectedId, setSelectedId] = useState(metafield?.value || "0");
+function ProductChartCell({ id, metafield, inheritedFrom, sizeCharts }) {
+  // If the product has no chart of its own but belongs to a collection
+  // that does, pre-select that chart so the row reflects what actually
+  // shows on the storefront — but don't treat it as if the product
+  // already has its own assignment: saving with no change here will
+  // write it as the product's own metafield (an explicit override that
+  // no longer depends on the collection).
+  const effectiveValue = metafield?.value || inheritedFrom?.value || "0";
+  const [selectedId, setSelectedId] = useState(effectiveValue);
 
   const options = [
     { label: "No size chart", value: "0" },
@@ -49,19 +56,26 @@ function ProductChartCell({ id, metafield, sizeCharts }) {
   return (
     <Form method="post">
       <input type="hidden" name="productId" value={id} />
-      <InlineStack gap="200" blockAlign="center" wrap={false}>
-        <div style={{ minWidth: 180 }}>
-          <Select
-            labelHidden
-            label="Size chart"
-            name="sizeChartId"
-            options={options}
-            value={selectedId}
-            onChange={setSelectedId}
-          />
-        </div>
-        <Button submit size="slim">Save</Button>
-      </InlineStack>
+      <BlockStack gap="100">
+        <InlineStack gap="200" blockAlign="center" wrap={false}>
+          <div style={{ minWidth: 180 }}>
+            <Select
+              labelHidden
+              label="Size chart"
+              name="sizeChartId"
+              options={options}
+              value={selectedId}
+              onChange={setSelectedId}
+            />
+          </div>
+          <Button submit size="slim">Save</Button>
+        </InlineStack>
+        {!metafield?.value && inheritedFrom && (
+          <Text as="span" tone="subdued" variant="bodySm">
+            Inherited from "{inheritedFrom.title}"
+          </Text>
+        )}
+      </BlockStack>
     </Form>
   );
 }
@@ -151,7 +165,7 @@ export default function SizeChartsAdmin() {
 
   const rowMarkup = products.map(
     (
-      { id, title, status, totalInventory, productType, featuredImage, onlineStorePreviewUrl, metafield },
+      { id, title, status, totalInventory, productType, featuredImage, onlineStorePreviewUrl, metafield, inheritedFrom },
       index,
     ) => {
       const statusInfo = STATUS_BADGE[status] || { tone: undefined, label: status };
@@ -199,7 +213,7 @@ export default function SizeChartsAdmin() {
             <Text as="span" tone="subdued">{productType || "—"}</Text>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductChartCell id={id} metafield={metafield} sizeCharts={sizeCharts} />
+            <ProductChartCell id={id} metafield={metafield} inheritedFrom={inheritedFrom} sizeCharts={sizeCharts} />
           </IndexTable.Cell>
         </IndexTable.Row>
       );

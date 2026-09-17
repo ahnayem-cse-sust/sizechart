@@ -148,6 +148,9 @@ export function normalizeButtonDesign(data = {}, DEFAULTS) {
       : DEFAULTS.buttonSize,
     buttonBorderWidth: clampBorderWidth(data.buttonBorderWidth, DEFAULTS.buttonBorderWidth),
     buttonBorderColor: data.buttonBorderColor || DEFAULTS.buttonBorderColor,
+    buttonPaddingVertical: clampPadding(data.buttonPaddingVertical, DEFAULTS.buttonPaddingVertical),
+    buttonPaddingHorizontal: clampPadding(data.buttonPaddingHorizontal, DEFAULTS.buttonPaddingHorizontal),
+    buttonFontSize: clampFontSize(data.buttonFontSize, DEFAULTS.buttonFontSize),
     buttonShadow: BUTTON_SHADOWS.includes(data.buttonShadow)
       ? data.buttonShadow
       : DEFAULTS.buttonShadow,
@@ -170,4 +173,18 @@ function clampBorderWidth(value, fallback) {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
   return Math.min(6, Math.max(0, Math.round(n)));
+}
+
+// Generous but sane bounds — wide enough for a chunky pill button, narrow
+// enough that the button can't be dragged into looking broken.
+function clampPadding(value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(40, Math.max(0, Math.round(n)));
+}
+
+function clampFontSize(value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(28, Math.max(10, Math.round(n)));
 }

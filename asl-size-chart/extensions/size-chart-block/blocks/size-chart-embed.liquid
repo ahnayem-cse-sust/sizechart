@@ -93,6 +93,11 @@
           var position = vertical + '-' + horizontal;
 
           var sizeStyle = SIZE_STYLES[settings.buttonSize] || SIZE_STYLES.medium;
+          var paddingV = Number(settings.buttonPaddingVertical);
+          var paddingH = Number(settings.buttonPaddingHorizontal);
+          var padding = (isFinite(paddingV) ? paddingV : 10) + 'px ' + (isFinite(paddingH) ? paddingH : 16) + 'px';
+          var fontSizeNum = Number(settings.buttonFontSize);
+          var fontSize = (isFinite(fontSizeNum) ? fontSizeNum : 14) + 'px';
           // CSS border-radius shorthand order: top-left, top-right,
           // bottom-right, bottom-left — mirrors BUTTON_CORNERS in
           // app/services/utils/buttonDesign.js.
@@ -121,8 +126,8 @@
             'background:' + (settings.buttonColor || '#1a1a1a') + ';' +
             'color:' + (settings.buttonTextColor || '#fff') + ';' +
             'border-radius:' + radius + ';' +
-            'padding:' + sizeStyle.padding + ';' +
-            'font-size:' + sizeStyle.fontSize + ';' +
+            'padding:' + padding + ';' +
+            'font-size:' + fontSize + ';' +
             'box-shadow:' + shadow + ';' +
             'border:' + border + ';' +
             'flex-direction:' + (isVerticalText ? 'column' : 'row') + ';';

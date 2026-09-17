@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import {
   Page,
@@ -61,6 +61,9 @@ export async function action({ request }) {
     buttonSize: form.get("buttonSize"),
     buttonBorderWidth: form.get("buttonBorderWidth"),
     buttonBorderColor: form.get("buttonBorderColor"),
+    buttonPaddingVertical: form.get("buttonPaddingVertical"),
+    buttonPaddingHorizontal: form.get("buttonPaddingHorizontal"),
+    buttonFontSize: form.get("buttonFontSize"),
     buttonShadow: form.get("buttonShadow"),
     buttonIcon: form.get("buttonIcon"),
     showIcon: form.get("showIcon") === "true",
@@ -88,12 +91,66 @@ const FIELDS = [
   "buttonSize",
   "buttonBorderWidth",
   "buttonBorderColor",
+  "buttonPaddingVertical",
+  "buttonPaddingHorizontal",
+  "buttonFontSize",
   "buttonShadow",
   "buttonIcon",
   "showIcon",
   "showOnProductPage",
   "sizeSelectorMode",
 ];
+
+function ColorField({ label, value, onChange, disabled }) {
+  const inputRef = useRef(null);
+  const isValidHex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value || "");
+
+  return (
+    <TextField
+      label={label}
+      value={value}
+      onChange={onChange}
+      autoComplete="off"
+      disabled={disabled}
+      prefix={
+        <div style={{ position: "relative", width: 20, height: 20 }}>
+          <div
+            aria-hidden="true"
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: 4,
+              border: "1px solid var(--p-color-border, #c9cccf)",
+              background: isValidHex ? value : "#ffffff",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            ref={inputRef}
+            type="color"
+            aria-label={`Pick ${label.toLowerCase()}`}
+            value={isValidHex ? (value.length === 4
+              ? `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`
+              : value)
+              : "#000000"}
+            onChange={(event) => onChange(event.target.value)}
+            disabled={disabled}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              padding: 0,
+              border: "none",
+              opacity: 0,
+              cursor: disabled ? "default" : "pointer",
+            }}
+          />
+        </div>
+      }
+    />
+  );
+}
 
 function PreviewButton({
   label,
@@ -109,6 +166,9 @@ function PreviewButton({
   shapeBottomRight,
   shapeBottomLeft,
   size,
+  paddingVertical,
+  paddingHorizontal,
+  fontSize,
   borderWidth,
   borderColor,
   shadow,
@@ -132,8 +192,8 @@ function PreviewButton({
     background: color,
     color: textColor,
     borderRadius: cornerRadius,
-    padding: sizeStyle.padding,
-    fontSize: sizeStyle.fontSize,
+    padding: `${paddingVertical}px ${paddingHorizontal}px`,
+    fontSize: `${fontSize}px`,
     boxShadow: SHADOW_STYLES[shadow] ?? SHADOW_STYLES.soft,
     border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : "none",
   };
@@ -163,7 +223,7 @@ function PreviewButton({
   }
 
   return (
-    <Box position="relative" minHeight="160px" background="bg-surface-secondary" borderRadius="200">
+    <Box position="relative" minHeight="320px" background="bg-surface-secondary" borderRadius="200">
       <div style={style}>
         {showIcon && (
           <svg
@@ -217,6 +277,9 @@ export default function SettingsPage() {
   const [buttonSize, setButtonSize] = useState(settings.buttonSize);
   const [buttonBorderWidth, setButtonBorderWidth] = useState(settings.buttonBorderWidth);
   const [buttonBorderColor, setButtonBorderColor] = useState(settings.buttonBorderColor);
+  const [buttonPaddingVertical, setButtonPaddingVertical] = useState(settings.buttonPaddingVertical);
+  const [buttonPaddingHorizontal, setButtonPaddingHorizontal] = useState(settings.buttonPaddingHorizontal);
+  const [buttonFontSize, setButtonFontSize] = useState(settings.buttonFontSize);
   const [buttonShadow, setButtonShadow] = useState(settings.buttonShadow);
   const [buttonIcon, setButtonIcon] = useState(settings.buttonIcon);
   const [showIcon, setShowIcon] = useState(settings.showIcon);
@@ -248,6 +311,9 @@ export default function SettingsPage() {
     buttonSize,
     buttonBorderWidth,
     buttonBorderColor,
+    buttonPaddingVertical,
+    buttonPaddingHorizontal,
+    buttonFontSize,
     buttonShadow,
     buttonIcon,
     showIcon,
@@ -284,6 +350,9 @@ export default function SettingsPage() {
         buttonSize,
         buttonBorderWidth: String(buttonBorderWidth),
         buttonBorderColor,
+        buttonPaddingVertical: String(buttonPaddingVertical),
+        buttonPaddingHorizontal: String(buttonPaddingHorizontal),
+        buttonFontSize: String(buttonFontSize),
         buttonShadow,
         buttonIcon,
         showIcon: String(showIcon),
@@ -307,6 +376,9 @@ export default function SettingsPage() {
     buttonSize,
     buttonBorderWidth,
     buttonBorderColor,
+    buttonPaddingVertical,
+    buttonPaddingHorizontal,
+    buttonFontSize,
     buttonShadow,
     buttonIcon,
     showIcon,
@@ -330,6 +402,9 @@ export default function SettingsPage() {
     setButtonSize(settings.buttonSize);
     setButtonBorderWidth(settings.buttonBorderWidth);
     setButtonBorderColor(settings.buttonBorderColor);
+    setButtonPaddingVertical(settings.buttonPaddingVertical);
+    setButtonPaddingHorizontal(settings.buttonPaddingHorizontal);
+    setButtonFontSize(settings.buttonFontSize);
     setButtonShadow(settings.buttonShadow);
     setButtonIcon(settings.buttonIcon);
     setShowIcon(settings.showIcon);
@@ -424,39 +499,17 @@ export default function SettingsPage() {
                   </Text>
 
                   <FormLayout.Group>
-                    <TextField
+                    <ColorField
                       label="Button color"
                       value={buttonColor}
                       onChange={setButtonColor}
-                      autoComplete="off"
                       disabled={!showOnProductPage}
-                      prefix={
-                        <Box
-                          borderRadius="100"
-                          borderWidth="025"
-                          borderColor="border"
-                          minWidth="20px"
-                          minHeight="20px"
-                          background={buttonColor}
-                        />
-                      }
                     />
-                    <TextField
+                    <ColorField
                       label="Button text color"
                       value={buttonTextColor}
                       onChange={setButtonTextColor}
-                      autoComplete="off"
                       disabled={!showOnProductPage}
-                      prefix={
-                        <Box
-                          borderRadius="100"
-                          borderWidth="025"
-                          borderColor="border"
-                          minWidth="20px"
-                          minHeight="20px"
-                          background={buttonTextColor}
-                        />
-                      }
                     />
                   </FormLayout.Group>
 
@@ -600,22 +653,11 @@ export default function SettingsPage() {
                         disabled={!showOnProductPage}
                         output
                       />
-                      <TextField
+                      <ColorField
                         label="Border color"
                         value={buttonBorderColor}
                         onChange={setButtonBorderColor}
-                        autoComplete="off"
                         disabled={!showOnProductPage || buttonBorderWidth === 0}
-                        prefix={
-                          <Box
-                            borderRadius="100"
-                            borderWidth="025"
-                            borderColor="border"
-                            minWidth="20px"
-                            minHeight="20px"
-                            background={buttonBorderColor}
-                          />
-                        }
                       />
                     </FormLayout.Group>
                     <BlockStack gap="150">
@@ -635,6 +677,43 @@ export default function SettingsPage() {
                         ))}
                       </ButtonGroup>
                     </BlockStack>
+                  </BlockStack>
+
+                  <Divider />
+
+                  <BlockStack gap="200">
+                    <Text as="h3" variant="headingSm">
+                      Padding &amp; text size
+                    </Text>
+                    <FormLayout.Group>
+                      <RangeSlider
+                        label={`Vertical padding: ${buttonPaddingVertical}px`}
+                        min={0}
+                        max={40}
+                        value={buttonPaddingVertical}
+                        onChange={setButtonPaddingVertical}
+                        disabled={!showOnProductPage}
+                        output
+                      />
+                      <RangeSlider
+                        label={`Horizontal padding: ${buttonPaddingHorizontal}px`}
+                        min={0}
+                        max={40}
+                        value={buttonPaddingHorizontal}
+                        onChange={setButtonPaddingHorizontal}
+                        disabled={!showOnProductPage}
+                        output
+                      />
+                    </FormLayout.Group>
+                    <RangeSlider
+                      label={`Font size: ${buttonFontSize}px`}
+                      min={10}
+                      max={28}
+                      value={buttonFontSize}
+                      onChange={setButtonFontSize}
+                      disabled={!showOnProductPage}
+                      output
+                    />
                   </BlockStack>
 
                   <Divider />
@@ -734,57 +813,60 @@ export default function SettingsPage() {
         </Layout.Section>
 
         <Layout.Section variant="oneThird">
-          <Card>
-            <BlockStack gap="300">
-              <InlineStack align="space-between" blockAlign="center">
-                <Text as="h2" variant="headingMd">
-                  Status
+          <BlockStack gap="400">
+            <Card>
+              <BlockStack gap="300">
+                <InlineStack align="space-between" blockAlign="center">
+                  <Text as="h2" variant="headingMd">
+                    Status
+                  </Text>
+                  <Badge tone="success">Connected</Badge>
+                </InlineStack>
+                <Divider />
+                <Text as="p" tone="subdued" variant="bodySm">
+                  Assign a chart to a product from the Products tab, then turn
+                  on the app embed once in your theme editor:
                 </Text>
-                <Badge tone="success">Connected</Badge>
-              </InlineStack>
-              <Divider />
-              <Text as="p" tone="subdued" variant="bodySm">
-                Assign a chart to a product from the Products tab, then turn
-                on the app embed once in your theme editor:
-              </Text>
-              <Text as="p" tone="subdued" variant="bodySm">
-                Online Store → Themes → Customize → App embeds → enable
-                "Size Chart (Auto)".
-              </Text>
-              <Text as="p" tone="subdued" variant="bodySm">
-                After that, every setting above updates the storefront button
-                instantly — no need to touch the theme editor again.
-              </Text>
-            </BlockStack>
-          </Card>
-        </Layout.Section>
+                <Text as="p" tone="subdued" variant="bodySm">
+                  Online Store → Themes → Customize → App embeds → enable
+                  "Size Chart (Auto)".
+                </Text>
+                <Text as="p" tone="subdued" variant="bodySm">
+                  After that, every setting above updates the storefront button
+                  instantly — no need to touch the theme editor again.
+                </Text>
+              </BlockStack>
+            </Card>
 
-        <Layout.Section variant="oneThird">
-          <Card>
-            <BlockStack gap="200">
-              <Text as="h2" variant="headingMd">
-                Preview
-              </Text>
-              <PreviewButton
-                label={buttonLabel}
-                color={buttonColor}
-                textColor={buttonTextColor}
-                showIcon={showIcon}
-                icon={buttonIcon}
-                verticalPosition={buttonPositionVertical}
-                horizontalPosition={buttonPositionHorizontal}
-                textOrientation={buttonTextOrientation}
-                shapeTopLeft={buttonShapeTopLeft}
-                shapeTopRight={buttonShapeTopRight}
-                shapeBottomRight={buttonShapeBottomRight}
-                shapeBottomLeft={buttonShapeBottomLeft}
-                size={buttonSize}
-                borderWidth={buttonBorderWidth}
-                borderColor={buttonBorderColor}
-                shadow={buttonShadow}
-              />
-            </BlockStack>
-          </Card>
+            <Card>
+              <BlockStack gap="200">
+                <Text as="h2" variant="headingMd">
+                  Preview
+                </Text>
+                <PreviewButton
+                  label={buttonLabel}
+                  color={buttonColor}
+                  textColor={buttonTextColor}
+                  showIcon={showIcon}
+                  icon={buttonIcon}
+                  verticalPosition={buttonPositionVertical}
+                  horizontalPosition={buttonPositionHorizontal}
+                  textOrientation={buttonTextOrientation}
+                  shapeTopLeft={buttonShapeTopLeft}
+                  shapeTopRight={buttonShapeTopRight}
+                  shapeBottomRight={buttonShapeBottomRight}
+                  shapeBottomLeft={buttonShapeBottomLeft}
+                  size={buttonSize}
+                  paddingVertical={buttonPaddingVertical}
+                  paddingHorizontal={buttonPaddingHorizontal}
+                  fontSize={buttonFontSize}
+                  borderWidth={buttonBorderWidth}
+                  borderColor={buttonBorderColor}
+                  shadow={buttonShadow}
+                />
+              </BlockStack>
+            </Card>
+          </BlockStack>
         </Layout.Section>
       </Layout>
     </Page>
